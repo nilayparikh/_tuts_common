@@ -105,7 +105,7 @@ export function ConceptCard({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: isEmoji ? 22 : undefined,
+            fontSize: isEmoji ? "1.375rem" : undefined,
           }}
         >
           {isEmoji ? icon : <img src={icon} alt="" width={24} height={24} />}

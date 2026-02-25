@@ -142,7 +142,7 @@ const s: Record<string, React.CSSProperties> = {
   image: {
     width: 480,
     maxWidth: "100%",
-    borderRadius: "var(--tf-radius-2xl)",
+    borderRadius: "var(--tf-radius-xl)",
     border: "1px solid var(--tf-border-default)",
     boxShadow: "var(--tf-shadow-xl), var(--tf-shadow-glow)",
     flexShrink: 0,

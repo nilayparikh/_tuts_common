@@ -1,0 +1,26 @@
+# Ensure consistent line endings (LF) in CI and across platforms
+* text=auto eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+*.mp4 binary
+*.webm binary
+*.mp3 binary
+*.wav binary
+*.zip binary
+*.gz binary
+*.tar binary
+
+*.sh text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf

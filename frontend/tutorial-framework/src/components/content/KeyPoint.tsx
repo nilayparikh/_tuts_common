@@ -66,7 +66,7 @@ export function KeyPoint({
         lineHeight: "var(--tf-leading-relaxed)",
       }}
     >
-      <span style={{ fontSize: 16, flexShrink: 0, marginTop: 1 }}>
+      <span style={{ fontSize: "1rem", flexShrink: 0, marginTop: "0.0625rem" }}>
         {v.icon}
       </span>
       <div style={{ flex: 1 }}>
