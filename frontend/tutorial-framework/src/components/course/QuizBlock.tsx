@@ -262,7 +262,7 @@ export function QuizBlock({
         flexDirection: "column",
         gap: "var(--tf-space-6)",
         padding: "var(--tf-space-8)",
-        borderRadius: "var(--tf-radius-2xl)",
+        borderRadius: "var(--tf-radius-xl)",
         border: "1px solid var(--tf-border-subtle)",
         background: "var(--tf-bg-surface)",
       }}

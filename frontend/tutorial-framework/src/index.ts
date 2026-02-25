@@ -42,6 +42,18 @@ export {
   KeyPoint,
   SectionDivider,
   SectionHeading,
+  CalloutBox,
+  InfoBox,
+  NoteBox,
+  TipBox,
+  SuccessBox,
+  WarningBox,
+  DangerBox,
+  MermaidDiagram,
+  DescriptionBox,
+  PollBlock,
+  StepByStepGuide,
+  Paragraph,
 } from "./components/content";
 export type {
   HeroSectionProps,
@@ -56,6 +68,15 @@ export type {
   KeyPointVariant,
   SectionDividerProps,
   SectionHeadingProps,
+  CalloutBoxProps,
+  CalloutVariant,
+  MermaidDiagramProps,
+  DescriptionBoxProps,
+  PollBlockProps,
+  PollOption,
+  StepByStepGuideProps,
+  StepGuideStep,
+  ParagraphProps,
 } from "./components/content";
 
 // Embeds

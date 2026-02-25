@@ -87,7 +87,7 @@ export function LessonList({
             <span
               style={{
                 flexShrink: 0,
-                fontSize: 20,
+                fontSize: "1.25rem",
                 lineHeight: 1,
               }}
             >

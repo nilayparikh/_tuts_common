@@ -177,12 +177,12 @@ export function CourseSidebar({
                     ? "var(--tf-text-primary)"
                     : "var(--tf-text-secondary)",
                   background: isCurrent
-                    ? "rgba(239,68,68,0.12)"
+                    ? "var(--tf-color-primary-container)"
                     : "transparent",
                   borderLeft: isCurrent
-                    ? "3px solid var(--tf-color-danger)"
+                    ? "3px solid var(--tf-color-primary)"
                     : "3px solid transparent",
-                  transition: "background 0.15s ease, color 0.15s ease",
+                  transition: "background var(--tf-transition-fast), color var(--tf-transition-fast)",
                 }}
                 onMouseEnter={(e) => {
                   if (!isCurrent) {
@@ -214,16 +214,16 @@ export function CourseSidebar({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "0.6rem",
+                    fontSize: "var(--tf-text-xs)",
                     fontWeight: 700,
                     fontFamily: "var(--tf-font-mono)",
                     color: part.isCompleted
                       ? "var(--tf-color-success)"
                       : "var(--tf-text-muted)",
                     background: part.isCompleted
-                      ? "rgba(16,185,129,0.08)"
+                      ? "var(--tf-color-success-container)"
                       : "transparent",
-                    marginTop: 2,
+                    marginTop: "0.125rem",
                   }}
                 >
                   {part.isCompleted ? "✓" : i + 1}
@@ -253,7 +253,7 @@ export function CourseSidebar({
                       gap: "var(--tf-space-1)",
                     }}
                   >
-                    <span style={{ fontSize: "0.7rem" }}>{meta.icon}</span>
+                    <span style={{ fontSize: "var(--tf-text-xs)" }}>{meta.icon}</span>
                     <span>{meta.label}</span>
                     <span>·</span>
                     <span>{part.duration}</span>

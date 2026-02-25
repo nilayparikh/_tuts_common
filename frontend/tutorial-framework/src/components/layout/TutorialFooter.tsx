@@ -48,9 +48,9 @@ const s: Record<string, React.CSSProperties> = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: 12,
+    fontSize: "var(--tf-text-xs)",
     fontWeight: 700,
-    color: "#fff",
+    color: "var(--tf-text-inverse)",
     fontFamily: "var(--tf-font-mono)",
   },
   brandName: {

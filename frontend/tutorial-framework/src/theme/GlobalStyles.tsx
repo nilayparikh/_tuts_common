@@ -2,7 +2,7 @@ import React from "react";
 import { tokens } from "./tokens";
 
 /**
- * Inject CSS variables and base resets.
+ * Inject CSS variables and Material Design 3 base resets.
  * Include <TutorialGlobalStyles /> once at the root of your app
  * (e.g. inside _app.tsx or layout.tsx).
  */
@@ -20,41 +20,54 @@ function buildCSS(): string {
   const tr = tokens.transition;
 
   return `
-/* ─── LocalM Tutorial Framework: CSS Variables ─────────────────────────── */
+/* ─── LocalM Tutorial Framework: CSS Variables (Material Design 3) ──── */
 :root {
-  /* Backgrounds */
+  /* Surfaces */
   --tf-bg-base:       ${c.bgBase};
   --tf-bg-surface:    ${c.bgSurface};
   --tf-bg-elevated:   ${c.bgElevated};
   --tf-bg-overlay:    ${c.bgOverlay};
+  --tf-bg-highest:    ${c.bgHighest};
 
-  /* Borders */
+  /* Outline */
   --tf-border-subtle:  ${c.borderSubtle};
   --tf-border-default: ${c.borderDefault};
   --tf-border-strong:  ${c.borderStrong};
 
-  /* Text */
+  /* On-Surface Text */
   --tf-text-primary:   ${c.textPrimary};
   --tf-text-secondary: ${c.textSecondary};
   --tf-text-muted:     ${c.textMuted};
   --tf-text-inverse:   ${c.textInverse};
 
-  /* Brand */
-  --tf-color-primary:       ${c.primary};
-  --tf-color-primary-light: ${c.primaryLight};
-  --tf-color-primary-dark:  ${c.primaryDark};
-  --tf-color-primary-bg:    ${c.primaryBg};
+  /* Primary */
+  --tf-color-primary:             ${c.primary};
+  --tf-color-primary-light:       ${c.primaryLight};
+  --tf-color-primary-dark:        ${c.primaryDark};
+  --tf-color-primary-bg:          ${c.primaryBg};
+  --tf-color-primary-container:   ${c.primaryContainer};
+
+  /* Secondary */
+  --tf-color-secondary:           ${c.secondary};
+  --tf-color-secondary-light:     ${c.secondaryLight};
+  --tf-color-secondary-container: ${c.secondaryContainer};
+
+  /* Accent / Tertiary */
   --tf-color-accent:        ${c.accent};
   --tf-color-accent-light:  ${c.accentLight};
   --tf-color-accent-dark:   ${c.accentDark};
+  --tf-color-accent-container: ${c.accentContainer};
 
   /* Semantic */
-  --tf-color-success:     ${c.success};
-  --tf-color-success-bg:  ${c.successBg};
-  --tf-color-warning:     ${c.warning};
-  --tf-color-warning-bg:  ${c.warningBg};
-  --tf-color-danger:      ${c.danger};
-  --tf-color-danger-bg:   ${c.dangerBg};
+  --tf-color-success:           ${c.success};
+  --tf-color-success-bg:        ${c.successBg};
+  --tf-color-success-container: ${c.successContainer};
+  --tf-color-warning:           ${c.warning};
+  --tf-color-warning-bg:        ${c.warningBg};
+  --tf-color-warning-container: ${c.warningContainer};
+  --tf-color-danger:            ${c.danger};
+  --tf-color-danger-bg:         ${c.dangerBg};
+  --tf-color-danger-container:  ${c.dangerContainer};
 
   /* Code */
   --tf-code-bg:       ${c.codeBg};
@@ -64,7 +77,7 @@ function buildCSS(): string {
   --tf-code-comment:  ${c.codeComment};
   --tf-code-number:   ${c.codeNumber};
 
-  /* Typography */
+  /* Typography (Fluid) */
   --tf-font-display: ${ty.fontDisplay};
   --tf-font-body:    ${ty.fontBody};
   --tf-font-mono:    ${ty.fontMono};
@@ -89,10 +102,12 @@ function buildCSS(): string {
   --tf-leading-snug:    ${ty.lineSnug};
   --tf-leading-normal:  ${ty.lineNormal};
   --tf-leading-relaxed: ${ty.lineRelaxed};
+  --tf-leading-loose:   ${ty.lineLoose};
 
-  --tf-tracking-normal: ${ty.trackingNormal};
-  --tf-tracking-wide:   ${ty.trackingWide};
-  --tf-tracking-tight:  ${ty.trackingTight};
+  --tf-tracking-normal:  ${ty.trackingNormal};
+  --tf-tracking-wide:    ${ty.trackingWide};
+  --tf-tracking-tight:   ${ty.trackingTight};
+  --tf-tracking-tighter: ${ty.trackingTighter};
 
   /* Spacing */
   --tf-space-0:  0;
@@ -109,15 +124,21 @@ function buildCSS(): string {
   --tf-space-20: 5rem;
   --tf-space-24: 6rem;
 
-  /* Radius */
+  /* Radius (MD3) */
+  --tf-radius-xs:   ${r.xs};
   --tf-radius-sm:   ${r.sm};
   --tf-radius-md:   ${r.md};
   --tf-radius-lg:   ${r.lg};
   --tf-radius-xl:   ${r.xl};
-  --tf-radius-2xl:  ${r["2xl"]};
   --tf-radius-full: ${r.full};
 
-  /* Shadows */
+  /* Shadows (MD3 Elevation) */
+  --tf-shadow-level0: ${sh.level0};
+  --tf-shadow-level1: ${sh.level1};
+  --tf-shadow-level2: ${sh.level2};
+  --tf-shadow-level3: ${sh.level3};
+  --tf-shadow-level4: ${sh.level4};
+  --tf-shadow-level5: ${sh.level5};
   --tf-shadow-sm: ${sh.sm};
   --tf-shadow-md: ${sh.md};
   --tf-shadow-lg: ${sh.lg};
@@ -131,13 +152,14 @@ function buildCSS(): string {
   --tf-sidebar-width:  ${la.sidebarWidth};
   --tf-header-height:  ${la.headerHeight};
 
-  /* Transitions */
-  --tf-transition-fast:   ${tr.fast};
-  --tf-transition-normal: ${tr.normal};
-  --tf-transition-slow:   ${tr.slow};
+  /* Transitions (MD3 Motion) */
+  --tf-transition-fast:       ${tr.fast};
+  --tf-transition-normal:     ${tr.normal};
+  --tf-transition-slow:       ${tr.slow};
+  --tf-transition-emphasized: ${tr.emphasized};
 }
 
-/* ─── Base Reset ─────────────────────────────────────────────────────────── */
+/* ─── Base Reset (MD3 Dark) ──────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -145,9 +167,10 @@ function buildCSS(): string {
 }
 
 html {
-  font-size: 16px;
+  font-size: clamp(93.75%, 90% + 0.4vw, 106.25%);
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -159,8 +182,10 @@ body {
   letter-spacing: var(--tf-tracking-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "liga" 1, "calt" 1;
 }
 
+/* MD3 shape system */
 a {
   color: var(--tf-color-primary-light);
   text-decoration: none;
@@ -170,6 +195,8 @@ a {
 a:hover {
   color: var(--tf-color-primary);
   text-decoration: underline;
+  text-decoration-thickness: 0.0625em;
+  text-underline-offset: 0.2em;
 }
 
 img, video {
@@ -183,20 +210,21 @@ code, kbd, samp, pre {
 }
 
 code:not(pre code) {
-  background: var(--tf-code-bg);
+  background: var(--tf-bg-overlay);
   color: var(--tf-code-text);
-  padding: 0.125em 0.375em;
-  border-radius: var(--tf-radius-sm);
+  padding: 0.125em 0.4em;
+  border-radius: var(--tf-radius-xs);
   font-size: 0.875em;
   border: 1px solid var(--tf-border-subtle);
+  font-weight: 500;
 }
 
-/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
+/* ─── Scrollbar (slim, MD3-themed) ───────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 0.375rem;
+  height: 0.375rem;
 }
-::-webkit-scrollbar-track  { background: var(--tf-bg-base); }
+::-webkit-scrollbar-track  { background: transparent; }
 ::-webkit-scrollbar-thumb  {
   background: var(--tf-border-default);
   border-radius: var(--tf-radius-full);
@@ -205,15 +233,25 @@ code:not(pre code) {
 
 /* ─── Selection ──────────────────────────────────────────────────────────── */
 ::selection {
-  background: var(--tf-color-primary-bg);
+  background: var(--tf-color-primary-container);
   color: var(--tf-color-primary-light);
 }
 
-/* ─── Focus ring ─────────────────────────────────────────────────────────── */
+/* ─── Focus ring (MD3) ───────────────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--tf-color-primary);
-  outline-offset: 2px;
+  outline: 0.125rem solid var(--tf-color-primary);
+  outline-offset: 0.125rem;
   border-radius: var(--tf-radius-sm);
 }
+
+/* ─── Smooth heading anchors ─────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--tf-font-display);
+  scroll-margin-top: calc(var(--tf-header-height) + 1rem);
+}
+
+/* ─── Prose defaults ─────────────────────────────────────────────────────── */
+p { line-height: var(--tf-leading-relaxed); }
+strong { font-weight: var(--tf-font-semibold); color: var(--tf-text-primary); }
 `;
 }
