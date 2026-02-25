@@ -29,9 +29,9 @@ export function MermaidDiagram({
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [svg, setSvg] = React.useState<string>("");
   const [error, setError] = React.useState<string>("");
-  const idRef = React.useRef(
-    `mermaid-${Math.random().toString(36).slice(2, 9)}`,
-  );
+  // useId gives a stable id that matches between SSR and client
+  const reactId = React.useId();
+  const idRef = React.useRef(`mermaid-${reactId.replace(/:/g, "")}`);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -131,9 +131,13 @@ export function MermaidDiagram({
           alignItems: "center",
           minHeight: "8rem",
         }}
-        dangerouslySetInnerHTML={svg ? { __html: svg } : undefined}
       >
-        {!svg && (
+        {svg ? (
+          <div
+            dangerouslySetInnerHTML={{ __html: svg }}
+            style={{ width: "100%", display: "flex", justifyContent: "center" }}
+          />
+        ) : (
           <span
             style={{
               color: "var(--tf-text-muted)",

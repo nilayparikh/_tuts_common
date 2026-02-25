@@ -34,9 +34,13 @@ export function ShareButtons({
   label = "Share",
 }: ShareButtonsProps): React.ReactElement {
   const [copied, setCopied] = useState(false);
+  // Resolve URL client-side only to avoid SSR/hydration mismatch.
+  // Start with prop value (or empty) so server and first client render match.
+  const [pageUrl, setPageUrl] = useState(url ?? "");
+  React.useEffect(() => {
+    if (!url) setPageUrl(window.location.href);
+  }, [url]);
 
-  const pageUrl =
-    url ?? (typeof window !== "undefined" ? window.location.href : "");
   const encodedUrl = encodeURIComponent(pageUrl);
   const encodedTitle = encodeURIComponent(title);
   const encodedDesc = encodeURIComponent(description ?? title);
