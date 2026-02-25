@@ -182,7 +182,8 @@ export function CourseSidebar({
                   borderLeft: isCurrent
                     ? "3px solid var(--tf-color-primary)"
                     : "3px solid transparent",
-                  transition: "background var(--tf-transition-fast), color var(--tf-transition-fast)",
+                  transition:
+                    "background var(--tf-transition-fast), color var(--tf-transition-fast)",
                 }}
                 onMouseEnter={(e) => {
                   if (!isCurrent) {
@@ -253,7 +254,9 @@ export function CourseSidebar({
                       gap: "var(--tf-space-1)",
                     }}
                   >
-                    <span style={{ fontSize: "var(--tf-text-xs)" }}>{meta.icon}</span>
+                    <span style={{ fontSize: "var(--tf-text-xs)" }}>
+                      {meta.icon}
+                    </span>
                     <span>{meta.label}</span>
                     <span>·</span>
                     <span>{part.duration}</span>

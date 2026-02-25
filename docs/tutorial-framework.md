@@ -27,26 +27,26 @@ Uses **Material Design 3** dark theme with fluid typography and CSS custom prope
 
 All font sizes use `clamp()` for fluid scaling — **no fixed px values**.
 
-| Font Stack      | CSS Variable       | Usage                  |
-| --------------- | ------------------ | ---------------------- |
+| Font Stack       | CSS Variable                           | Usage                |
+| ---------------- | -------------------------------------- | -------------------- |
 | Inter (Variable) | `--tf-font-display` / `--tf-font-body` | Headlines, body text |
-| JetBrains Mono  | `--tf-font-mono`   | Code blocks, badges    |
-| Material Symbols | Google Fonts CDN  | Icons in components    |
+| JetBrains Mono   | `--tf-font-mono`                       | Code blocks, badges  |
+| Material Symbols | Google Fonts CDN                       | Icons in components  |
 
 **Fluid type scale** — sizes interpolate between mobile and desktop:
 
-| Token          | Range        | MD3 Role       |
-| -------------- | ------------ | -------------- |
-| `--tf-text-xs` | 11px → 12px  | Label Small    |
-| `--tf-text-sm` | 13px → 14px  | Label / Body S |
-| `--tf-text-md` | 15px → 16px  | Body Medium    |
-| `--tf-text-lg` | 17px → 18px  | Body Large     |
-| `--tf-text-xl` | 18px → 20px  | Title Small    |
-| `--tf-text-2xl`| 22px → 24px  | Title Medium   |
-| `--tf-text-3xl`| 26px → 30px  | Headline Small |
-| `--tf-text-4xl`| 32px → 36px  | Headline Med   |
-| `--tf-text-5xl`| 40px → 48px  | Display Small  |
-| `--tf-text-6xl`| 48px → 60px  | Display Medium |
+| Token           | Range       | MD3 Role       |
+| --------------- | ----------- | -------------- |
+| `--tf-text-xs`  | 11px → 12px | Label Small    |
+| `--tf-text-sm`  | 13px → 14px | Label / Body S |
+| `--tf-text-md`  | 15px → 16px | Body Medium    |
+| `--tf-text-lg`  | 17px → 18px | Body Large     |
+| `--tf-text-xl`  | 18px → 20px | Title Small    |
+| `--tf-text-2xl` | 22px → 24px | Title Medium   |
+| `--tf-text-3xl` | 26px → 30px | Headline Small |
+| `--tf-text-4xl` | 32px → 36px | Headline Med   |
+| `--tf-text-5xl` | 40px → 48px | Display Small  |
+| `--tf-text-6xl` | 48px → 60px | Display Medium |
 
 ### Design Tokens
 
@@ -54,57 +54,57 @@ All styling uses CSS custom properties prefixed `--tf-`. They are injected by `<
 
 #### Surface System (MD3)
 
-| Token                 | Default          | Purpose                         |
-| --------------------- | ---------------- | ------------------------------- |
-| `--tf-bg-base`        | `#09090b`        | Page background (Surface)       |
-| `--tf-bg-surface`     | `#111318`        | Card / section (Surface Container) |
-| `--tf-bg-elevated`    | `#1a1d25`        | Hover / elevated (Surface Container High) |
-| `--tf-bg-overlay`     | `#22252e`        | Overlays / dialogs              |
-| `--tf-bg-highest`     | `#2a2d37`        | Highest elevation surface       |
+| Token              | Default   | Purpose                                   |
+| ------------------ | --------- | ----------------------------------------- |
+| `--tf-bg-base`     | `#09090b` | Page background (Surface)                 |
+| `--tf-bg-surface`  | `#111318` | Card / section (Surface Container)        |
+| `--tf-bg-elevated` | `#1a1d25` | Hover / elevated (Surface Container High) |
+| `--tf-bg-overlay`  | `#22252e` | Overlays / dialogs                        |
+| `--tf-bg-highest`  | `#2a2d37` | Highest elevation surface                 |
 
 #### Color Roles
 
-| Token                          | Default          | Purpose                          |
-| ------------------------------ | ---------------- | -------------------------------- |
-| `--tf-color-primary`           | `#6366f1` (Indigo) | Primary interactions           |
-| `--tf-color-primary-container` | `rgba(99,102,241,0.12)` | Primary container fill    |
-| `--tf-color-secondary`         | `#14b8a6` (Teal)  | Secondary actions               |
+| Token                            | Default                 | Purpose                  |
+| -------------------------------- | ----------------------- | ------------------------ |
+| `--tf-color-primary`             | `#6366f1` (Indigo)      | Primary interactions     |
+| `--tf-color-primary-container`   | `rgba(99,102,241,0.12)` | Primary container fill   |
+| `--tf-color-secondary`           | `#14b8a6` (Teal)        | Secondary actions        |
 | `--tf-color-secondary-container` | `rgba(20,184,166,0.12)` | Secondary container fill |
-| `--tf-color-accent`            | `#f59e0b` (Amber)  | Tertiary / accent               |
-| `--tf-color-success`           | `#10b981` (Emerald) | Success states                 |
-| `--tf-color-warning`           | `#fbbf24` (Gold)    | Warning states                 |
-| `--tf-color-danger`            | `#ef4444` (Red)     | Error / danger states          |
+| `--tf-color-accent`              | `#f59e0b` (Amber)       | Tertiary / accent        |
+| `--tf-color-success`             | `#10b981` (Emerald)     | Success states           |
+| `--tf-color-warning`             | `#fbbf24` (Gold)        | Warning states           |
+| `--tf-color-danger`              | `#ef4444` (Red)         | Error / danger states    |
 
 #### Elevation (MD3 Shadow Levels)
 
-| Token                | Description                  |
-| -------------------- | ---------------------------- |
-| `--tf-shadow-level0` | No shadow                    |
-| `--tf-shadow-level1` | Subtle (cards)               |
-| `--tf-shadow-level2` | Moderate (dropdowns)         |
-| `--tf-shadow-level3` | Prominent (modals)           |
-| `--tf-shadow-level4` | High (sticky headers)        |
-| `--tf-shadow-level5` | Maximum (overlays)           |
-| `--tf-shadow-glow`   | Primary color glow effect    |
+| Token                | Description               |
+| -------------------- | ------------------------- |
+| `--tf-shadow-level0` | No shadow                 |
+| `--tf-shadow-level1` | Subtle (cards)            |
+| `--tf-shadow-level2` | Moderate (dropdowns)      |
+| `--tf-shadow-level3` | Prominent (modals)        |
+| `--tf-shadow-level4` | High (sticky headers)     |
+| `--tf-shadow-level5` | Maximum (overlays)        |
+| `--tf-shadow-glow`   | Primary color glow effect |
 
 #### Radius (MD3 Shape)
 
-| Token              | Value     | MD3 Role      |
-| ------------------ | --------- | ------------- |
-| `--tf-radius-xs`   | `0.25rem` | Extra Small   |
-| `--tf-radius-sm`   | `0.5rem`  | Small         |
-| `--tf-radius-md`   | `0.75rem` | Medium        |
-| `--tf-radius-lg`   | `1rem`    | Large         |
-| `--tf-radius-xl`   | `1.75rem` | Extra Large   |
-| `--tf-radius-full` | `9999px`  | Full (pill)   |
+| Token              | Value     | MD3 Role    |
+| ------------------ | --------- | ----------- |
+| `--tf-radius-xs`   | `0.25rem` | Extra Small |
+| `--tf-radius-sm`   | `0.5rem`  | Small       |
+| `--tf-radius-md`   | `0.75rem` | Medium      |
+| `--tf-radius-lg`   | `1rem`    | Large       |
+| `--tf-radius-xl`   | `1.75rem` | Extra Large |
+| `--tf-radius-full` | `9999px`  | Full (pill) |
 
 #### Motion (MD3 Easing)
 
-| Token                      | Value                               |
-| -------------------------- | ----------------------------------- |
-| `--tf-transition-fast`     | `150ms cubic-bezier(0.2, 0, 0, 1)` |
-| `--tf-transition-normal`   | `300ms cubic-bezier(0.2, 0, 0, 1)` |
-| `--tf-transition-slow`     | `500ms cubic-bezier(0.2, 0, 0, 1)` |
+| Token                        | Value                                   |
+| ---------------------------- | --------------------------------------- |
+| `--tf-transition-fast`       | `150ms cubic-bezier(0.2, 0, 0, 1)`      |
+| `--tf-transition-normal`     | `300ms cubic-bezier(0.2, 0, 0, 1)`      |
+| `--tf-transition-slow`       | `500ms cubic-bezier(0.2, 0, 0, 1)`      |
 | `--tf-transition-emphasized` | `500ms cubic-bezier(0.05, 0.7, 0.1, 1)` |
 
 ### Overriding Tokens
@@ -213,7 +213,7 @@ Client-side Mermaid.js diagram renderer. Loads mermaid@11 from CDN on demand.
     B --> C[Agent]`}
   caption="System architecture"
   alt="Architecture diagram"
-  theme="dark"      // "dark" | "default" | "forest" | "neutral"
+  theme="dark" // "dark" | "default" | "forest" | "neutral"
 />
 ```
 

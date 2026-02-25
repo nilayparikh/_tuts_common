@@ -37,11 +37,7 @@ function CheckCircleIcon(): React.ReactElement {
   );
 }
 
-function CircleOutlineIcon({
-  number,
-}: {
-  number: number;
-}): React.ReactElement {
+function CircleOutlineIcon({ number }: { number: number }): React.ReactElement {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24">
       <circle
@@ -249,8 +245,7 @@ export function StepByStepGuide({
                         ? "var(--tf-color-success)"
                         : "var(--tf-border-default)",
                       marginTop: "var(--tf-space-2)",
-                      transition:
-                        "background var(--tf-transition-fast)",
+                      transition: "background var(--tf-transition-fast)",
                     }}
                   />
                 )}
@@ -340,8 +335,7 @@ export function StepByStepGuide({
                       padding: "var(--tf-space-3) var(--tf-space-4)",
                       borderRadius: "var(--tf-radius-sm)",
                       background: "var(--tf-color-accent-container)",
-                      borderLeft:
-                        "0.1875rem solid var(--tf-color-accent)",
+                      borderLeft: "0.1875rem solid var(--tf-color-accent)",
                       fontSize: "var(--tf-text-xs)",
                       color: "var(--tf-color-accent-light)",
                       display: "flex",

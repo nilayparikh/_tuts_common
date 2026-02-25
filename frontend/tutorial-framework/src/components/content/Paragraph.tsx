@@ -33,8 +33,12 @@ export function Paragraph({
         fontSize: lead ? "var(--tf-text-lg)" : "var(--tf-text-md)",
         fontWeight: lead ? 400 : 400,
         color: muted ? "var(--tf-text-muted)" : "var(--tf-text-secondary)",
-        lineHeight: lead ? "var(--tf-leading-loose)" : "var(--tf-leading-relaxed)",
-        letterSpacing: lead ? "var(--tf-tracking-tight)" : "var(--tf-tracking-normal)",
+        lineHeight: lead
+          ? "var(--tf-leading-loose)"
+          : "var(--tf-leading-relaxed)",
+        letterSpacing: lead
+          ? "var(--tf-tracking-tight)"
+          : "var(--tf-tracking-normal)",
         textAlign: center ? "center" : undefined,
         maxWidth: "68ch",
       }}

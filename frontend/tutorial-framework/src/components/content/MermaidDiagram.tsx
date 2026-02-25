@@ -40,9 +40,9 @@ export function MermaidDiagram({
       try {
         // Dynamic import from CDN (no bundled mermaid)
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const mermaidModule: any = await (Function(
-          'return import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs")'
-        )());
+        const mermaidModule: any = await Function(
+          'return import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs")',
+        )();
         const mermaid = mermaidModule.default;
         mermaid.initialize({
           startOnLoad: false,
