@@ -36,6 +36,7 @@ export function LessonList({
 }: LessonListProps): React.ReactElement {
   return (
     <div
+      className="tf-lesson-list"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -44,12 +45,13 @@ export function LessonList({
     >
       {parts.map((part, i) => {
         const href = `${basePath}/${part.slug}/`;
-        const icon = TYPE_ICON[part.type] ?? "▶";
+        const icon = TYPE_ICON[part.type] ?? "\u25b6";
 
         return (
           <a
             key={part.slug}
             href={href}
+            className="tf-lesson-list__item"
             style={{
               display: "flex",
               alignItems: "center",
@@ -66,6 +68,7 @@ export function LessonList({
           >
             {/* Step number */}
             <span
+              className="tf-lesson-list__number"
               style={{
                 flexShrink: 0,
                 width: "2rem",
@@ -86,6 +89,7 @@ export function LessonList({
 
             {/* Type icon */}
             <span
+              className="tf-lesson-list__icon"
               style={{
                 flexShrink: 0,
                 fontSize: "1.25rem",

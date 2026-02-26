@@ -319,6 +319,12 @@ strong { font-weight: var(--tf-font-semibold); color: var(--tf-text-primary); }
   .tf-course-player-main {
     padding: var(--tf-space-6) var(--tf-space-4) !important;
   }
+
+  /* Lesson list: compact on tablets */
+  .tf-lesson-list__item {
+    gap: var(--tf-space-3) !important;
+    padding: var(--tf-space-3) var(--tf-space-4) !important;
+  }
 }
 
 @media (max-width: 640px) {
@@ -327,6 +333,14 @@ strong { font-weight: var(--tf-font-semibold); color: var(--tf-text-primary); }
 
   .tf-course-player-sidebar {
     max-height: 10rem !important;
+  }
+
+  /* Lesson list: hide step number & icon on small phones */
+  .tf-lesson-list__number { display: none !important; }
+  .tf-lesson-list__icon { display: none !important; }
+  .tf-lesson-list__item {
+    gap: var(--tf-space-2) !important;
+    padding: var(--tf-space-3) var(--tf-space-4) !important;
   }
 }
 `;

@@ -423,4 +423,4 @@ The framework supports these lesson types via `PartType`:
 
 ## Versioning
 
-The library is consumed via `file:` references (vendored copy), not via npm registry. There is no semver versioning — templates pin to a copy at a point in time and sync forward manually.
+The library is consumed via git submodule + `file:` references, not via npm registry. There is no semver versioning — tutorial repos pin to a submodule commit and sync forward manually using `sync-common.ps1`.

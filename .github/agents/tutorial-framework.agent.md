@@ -36,6 +36,7 @@ Help developers create beautiful, SEO-static tutorial websites by:
 ## Framework Component Reference
 
 > All components live in `@localm/tutorial-framework`. Always import from there — never write custom HTML equivalents.
+> Full prop details and token tables: `_common/docs/tutorial-framework.md`
 
 ### Layout Components
 
@@ -45,6 +46,7 @@ import {
   TutorialHeader,
   TutorialFooter,
   SidebarLayout,
+  ThemeSelector,
 } from "@localm/tutorial-framework";
 ```
 
@@ -54,6 +56,35 @@ import {
 | `TutorialHeader` | `siteName`                     | Add `navItems`, `githubUrl`, `youtubeUrl` as needed             |
 | `TutorialFooter` | `siteName`                     | Add `tagline`, social links                                     |
 | `SidebarLayout`  | `sidebar`, `children`          | For series with TOC                                             |
+| `ThemeSelector`  | —                              | Light/dark theme toggle                                         |
+
+### Course Components
+
+```tsx
+import {
+  CoursePlayerLayout,
+  CourseSidebar,
+  LessonHeader,
+  LessonList,
+  QuizBlock,
+  QABlock,
+  ArticleBlock,
+  PodcastEmbed,
+  SlideshowEmbed,
+} from "@localm/tutorial-framework";
+```
+
+| Component            | Key Props                                                            |
+| -------------------- | -------------------------------------------------------------------- |
+| `CoursePlayerLayout`  | `header`, `footer`, `sidebar`, `children`, `sidebarWidth`           |
+| `CourseSidebar`       | `courseTitle`, `parts`, `currentSlug`, `courseOverviewHref`          |
+| `LessonHeader`        | `title`, `type`, `duration`, `partNumber`, `totalParts`             |
+| `LessonList`          | `parts`, `currentSlug`                                              |
+| `QuizBlock`           | `questions`, `onComplete`                                           |
+| `QABlock`             | `questions`                                                         |
+| `ArticleBlock`        | `content`, `readingUrl`                                             |
+| `PodcastEmbed`        | `podcastUrl`, `title`, `caption`                                    |
+| `SlideshowEmbed`      | `slideshowUrl`, `title`, `caption`                                  |
 
 ### Content Components
 
@@ -61,14 +92,20 @@ import {
 import {
   HeroSection,
   SectionHeading,
+  SectionDivider,
   ConceptCard,
   ConceptGrid,
   StepCard,
   StepList,
   CodeBlock,
+  CodePreview,
   KeyPoint,
   TutorialNav,
-  SectionDivider,
+  Paragraph,
+  DescriptionBox,
+  StepByStepGuide,
+  VideoTranscript,
+  LabSettings,
 } from "@localm/tutorial-framework";
 ```
 
@@ -76,14 +113,56 @@ import {
 | ---------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `HeroSection`    | `headline` (supports `**bold**` for gradient), `eyebrow`, `subheading`, `primaryAction`, `secondaryAction`, `tags` |
 | `SectionHeading` | `title`, `eyebrow`, `subtitle`, `align`                                                                            |
+| `SectionDivider` | `variant` (default/gradient/dots), `label`                                                                         |
 | `ConceptCard`    | `title`, `description`, `icon` (emoji or URL), `variant`, `href`, `tag`                                            |
 | `ConceptGrid`    | `columns` (2/3/4), `children`                                                                                      |
 | `StepCard`       | `step`, `title`, `description`, `code`, `codeLanguage`, `note`, `completed`                                        |
 | `StepList`       | `children`                                                                                                         |
 | `CodeBlock`      | `code`, `language`, `filename`, `showCopy`, `showLineNumbers`, `highlightLines`                                    |
+| `CodePreview`    | `code`, `language`, `preview`                                                                                      |
 | `KeyPoint`       | `variant` (info/tip/warning/danger/success), `title`, `children`                                                   |
 | `TutorialNav`    | `prev`, `next` – both `{ label, href, description? }`                                                              |
-| `SectionDivider` | `variant` (default/gradient/dots), `label`                                                                         |
+| `Paragraph`      | `children` — styled body text                                                                                      |
+| `DescriptionBox` | `title`, `children` — styled description block                                                                     |
+| `StepByStepGuide`| `steps` — sequential instruction guide                                                                             |
+| `VideoTranscript`| `transcript` — collapsible video transcript                                                                        |
+| `LabSettings`    | `settings` — lab configuration display                                                                             |
+
+### Callout Aliases
+
+Typed convenience wrappers around `CalloutBox`:
+
+```tsx
+import {
+  CalloutBox,
+  InfoBox,
+  NoteBox,
+  TipBox,
+  SuccessBox,
+  WarningBox,
+  DangerBox,
+} from "@localm/tutorial-framework";
+```
+
+| Component    | Default variant | Use for                            |
+| ------------ | --------------- | ---------------------------------- |
+| `InfoBox`    | `info`          | Background context, explanations   |
+| `NoteBox`    | `note`          | Aside / additional context         |
+| `TipBox`     | `tip`           | Best-practice advice               |
+| `SuccessBox` | `success`       | What success looks like            |
+| `WarningBox` | `warning`       | Common mistakes, watch-outs        |
+| `DangerBox`  | `danger`        | Breaking changes, security issues  |
+
+### Diagram & Interactive Components
+
+```tsx
+import { MermaidDiagram, PollBlock } from "@localm/tutorial-framework";
+```
+
+| Component        | Key Props                                   |
+| ---------------- | ------------------------------------------- |
+| `MermaidDiagram` | `chart` — Mermaid syntax string             |
+| `PollBlock`      | `question`, `options`, `onVote`             |
 
 ### Embed Components
 
@@ -98,7 +177,7 @@ import {
 
 | Component         | Key Props                                                                                 |
 | ----------------- | ----------------------------------------------------------------------------------------- |
-| `YouTubeEmbed`    | `videoId` (ID or full URL), `title` (required for a11y), `lazyLoad`, `caption`, `startAt` |
+| `YouTubeEmbed`    | `videoId` (ID or full URL), `title` (required for a11y), `lazyLoad`, `caption`, `startAt`, `showShare`, `shareHashtags` |
 | `GitHubGistEmbed` | `gistId`, `file`, `caption`                                                               |
 | `TwitterEmbed`    | `tweetUrl`, `theme`, `caption`                                                            |
 | `LinkedInEmbed`   | `postUrl` (URL, URN, or embed URL), `caption`, `height`                                   |
@@ -124,7 +203,7 @@ import { ShareButtons } from "@localm/tutorial-framework";
 1. **No raw HTML replacements** — if a framework component exists, use it
 2. **Static export only** — all pages must work with `next build` + `output: 'export'`; no `getServerSideProps`
 3. **No client-only patterns that break SSR** — wrap browser-only code in `useEffect`
-4. **SEO metadata** — every page file defines `export const metadata: Metadata = { ... }` (Next.js App Router) or `<Head>` (Pages Router)
+4. **SEO metadata** — every page file defines `export const metadata: Metadata = { ... }`
 5. **CSS tokens only for theming** — override `--tf-*` vars in `globals.css`, never inline style overrides
 
 ## Consumer Pattern (MANDATORY)
@@ -132,14 +211,13 @@ import { ShareButtons } from "@localm/tutorial-framework";
 Every tutorial page follows this pattern:
 
 ```tsx
-// app/(tutorials)/my-tutorial/page.tsx
 import type { Metadata } from "next";
 import {
   TutorialLayout,
   HeroSection,
-  /* ... more components */
+  /* ... */
 } from "@localm/tutorial-framework";
-import { SITE_CONFIG } from "@/config/site"; // defines header/footer props
+import { SITE_CONFIG } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "My Tutorial | LocalM Tutorials",
@@ -154,7 +232,6 @@ export default function MyTutorialPage() {
       footer={SITE_CONFIG.footer}
       maxWidth="narrow"
     >
-      {/* Only fill in content props — NEVER wrap with custom containers */}
       <HeroSection headline="My Tutorial" /* ... */ />
     </TutorialLayout>
   );
@@ -165,8 +242,18 @@ export default function MyTutorialPage() {
 
 ## Workflow
 
-1. Read `Y:\.sources\localm-tuts\common\frontend\tutorial-framework\src\index.ts` to confirm available exports
-2. Read existing page files before editing to understand current structure
-3. Use `todo` tool for multi-step tasks
-4. Run `npm run build` in `_tuts/` to verify static export succeeds
-5. Check no TypeScript errors with the VS Code errors panel
+1. Read `_common/frontend/tutorial-framework/src/index.ts` to confirm available exports
+2. Read `_common/docs/tutorial-framework.md` for full component API and token reference
+3. Read existing page files before editing
+4. Use `todo` tool for multi-step tasks
+5. Run `npm run build` to verify static export succeeds
+
+## Editing the Framework (`_common`)
+
+1. Edit in `_common/frontend/tutorial-framework/src/components/<group>/`
+2. Export from group `index.ts` and from `src/index.ts`
+3. Update `_common/docs/tutorial-framework.md`
+4. Test locally — dev server picks up changes instantly
+5. Push `_common`, then `sync-common.ps1` in the tutorial repo
+
+> **Edit `_common` only for changes that benefit ALL tutorial sites.**

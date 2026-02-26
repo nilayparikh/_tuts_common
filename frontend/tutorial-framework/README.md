@@ -12,13 +12,16 @@ Shared React component library for **LocalM** tutorial static websites. Drop in 
 
 ## Installation
 
-```bash
-# From the _tuts project (monorepo workspace)
-npm install file:../../common/frontend/tutorial-framework
+The framework is consumed via a git submodule. In tutorial repos like `_tuts/`:
 
-# Or add to package.json
-"@localm/tutorial-framework": "file:../../common/frontend/tutorial-framework"
+```json
+// package.json
+"@localm/tutorial-framework": "file:./_common/frontend/tutorial-framework"
 ```
+
+Next.js is configured to transpile it from source — no separate build step needed in dev.
+
+See [`docs/README.md`](../../docs/README.md) for the full submodule setup guide.
 
 ## Quick Start
 
