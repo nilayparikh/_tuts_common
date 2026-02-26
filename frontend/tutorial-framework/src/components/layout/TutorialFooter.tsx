@@ -114,9 +114,7 @@ export function TutorialFooter({
           <span style={s.logoMark}>{initial}</span>
           <span style={s.brandName}>{siteName}</span>
         </a>
-        <span style={s.copyright}>
-          © {year}
-        </span>
+        <span style={s.copyright}>© {year}</span>
 
         {/* Links */}
         {links.length > 0 && (
