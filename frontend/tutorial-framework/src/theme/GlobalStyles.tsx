@@ -347,7 +347,7 @@ strong { font-weight: var(--tf-font-semibold); color: var(--tf-text-primary); }
 /* ─── AccordionList ──────────────────────────────────────────────────────── */
 details summary::-webkit-details-marker { display: none; }
 details summary::marker { display: none; content: ""; }
-details summary:hover { background: var(--tf-bg-elevated) !important; }
+details summary:hover { color: var(--tf-color-primary-light); }
 .tf-accordion-chevron {
   transition: transform var(--tf-transition-fast);
   flex-shrink: 0;

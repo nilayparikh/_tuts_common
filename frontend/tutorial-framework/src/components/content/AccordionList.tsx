@@ -53,9 +53,6 @@ export function AccordionList({
         display: "flex",
         flexDirection: "column",
         gap: "0",
-        borderRadius: "var(--tf-radius-xl)",
-        border: "1px solid var(--tf-border-default)",
-        overflow: "hidden",
       }}
     >
       {items.map((item, i) => {
@@ -83,8 +80,7 @@ export function AccordionList({
                 fontWeight: 600,
                 fontSize: "var(--tf-text-md)",
                 color: "var(--tf-text-primary)",
-                background: "var(--tf-bg-surface)",
-                transition: "background var(--tf-transition-fast)",
+                transition: "color var(--tf-transition-fast)",
                 listStyle: "none",
                 userSelect: "none",
               }}
@@ -118,7 +114,6 @@ export function AccordionList({
                 fontSize: "var(--tf-text-sm)",
                 color: "var(--tf-text-secondary)",
                 lineHeight: "var(--tf-leading-relaxed)",
-                background: "var(--tf-bg-surface)",
               }}
             >
               {item.content}

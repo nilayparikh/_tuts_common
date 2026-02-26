@@ -35,7 +35,7 @@ export function DescriptionBox({
     <section
       style={{
         padding: "var(--tf-space-6)",
-        borderRadius: "var(--tf-radius-xl)",
+        borderRadius: "var(--tf-radius-lg)",
         background: "var(--tf-bg-surface)",
         border: "1px solid var(--tf-border-subtle)",
         display: "flex",

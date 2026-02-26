@@ -33,8 +33,9 @@ export function StepCard({
         gridTemplateColumns: "3rem 1fr",
         gap: "var(--tf-space-5)",
         padding: "var(--tf-space-6)",
-        borderRadius: "var(--tf-radius-xl)",
+        borderRadius: "var(--tf-radius-lg)",
         border: `1px solid ${completed ? "var(--tf-color-success-border)" : "var(--tf-border-default)"}`,
+
         background: completed
           ? "var(--tf-color-success-container)"
           : "var(--tf-bg-surface)",

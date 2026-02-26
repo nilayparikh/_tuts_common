@@ -85,7 +85,7 @@ export function ConceptCard({
     padding: compact
       ? "var(--tf-space-4) var(--tf-space-5)"
       : "var(--tf-space-6)",
-    borderRadius: "var(--tf-radius-xl)",
+    borderRadius: "var(--tf-radius-lg)",
     border: `1px solid ${v.border}`,
     background: v.bg,
     backdropFilter: "blur(6px)",
@@ -253,7 +253,7 @@ export function ConceptGrid({
       style={{
         display: "grid",
         gridTemplateColumns: `repeat(${columns}, 1fr)`,
-        gap: "var(--tf-space-5)",
+        gap: "var(--tf-space-4)",
       }}
       className="tf-concept-grid"
     >
