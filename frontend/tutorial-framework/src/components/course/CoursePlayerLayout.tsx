@@ -48,15 +48,17 @@ export function CoursePlayerLayout({
 
       {/* Body: sidebar + main */}
       <div
+        className="tf-course-player-body"
         style={{
           flex: 1,
           display: "flex",
-          overflow: "hidden",
           position: "relative",
+          width: "100%",
         }}
       >
-        {/* Fixed-width sidebar */}
-        <div
+        {/* Sticky sidebar */}
+        <aside
+          className="tf-course-player-sidebar"
           style={{
             width: sidebarWidth,
             flexShrink: 0,
@@ -68,15 +70,18 @@ export function CoursePlayerLayout({
           }}
         >
           <CourseSidebar {...sidebar} />
-        </div>
+        </aside>
 
-        {/* Scrollable main content */}
+        {/* Main content — scrolls with the page */}
         <main
+          className="tf-course-player-main"
           style={{
             flex: 1,
-            overflowY: "auto",
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
             padding: "var(--tf-space-10) var(--tf-space-8)",
-            maxWidth: "var(--tf-content-width)",
           }}
         >
           {children}
