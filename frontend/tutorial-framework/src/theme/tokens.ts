@@ -159,7 +159,7 @@ export const tokens = {
     sm: "0.5rem", //  8 — MD3 Small
     md: "0.75rem", // 12 — MD3 Medium
     lg: "1rem", // 16 — MD3 Large
-    xl: "1.75rem", // 28 — MD3 Extra Large
+    xl: "0.75rem", // 12 — uniform with md for card surfaces
     full: "9999px", // Full
   },
 

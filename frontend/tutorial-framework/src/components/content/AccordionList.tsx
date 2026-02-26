@@ -74,7 +74,7 @@ export function AccordionList({
                 display: "flex",
                 alignItems: "center",
                 gap: "var(--tf-space-3)",
-                padding: "var(--tf-space-4) var(--tf-space-5)",
+                padding: "var(--tf-space-4) 0",
                 cursor: "pointer",
                 fontFamily: "var(--tf-font-display)",
                 fontWeight: 600,
@@ -110,7 +110,7 @@ export function AccordionList({
             <div
               style={{
                 padding:
-                  "0 var(--tf-space-5) var(--tf-space-5) calc(var(--tf-space-5) + 1.5rem + var(--tf-space-3))",
+                  "0 0 var(--tf-space-4) calc(1.5rem + var(--tf-space-3))",
                 fontSize: "var(--tf-text-sm)",
                 color: "var(--tf-text-secondary)",
                 lineHeight: "var(--tf-leading-relaxed)",
