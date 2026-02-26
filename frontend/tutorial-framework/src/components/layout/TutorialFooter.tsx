@@ -17,6 +17,8 @@ export interface TutorialFooterProps {
   twitterHandle?: string;
   linkedinUrl?: string;
   linkedinNewsletterUrl?: string;
+  /** Hide the FollowBar row in the footer (default: false) */
+  hideFollowBar?: boolean;
 }
 
 const s: Record<string, React.CSSProperties> = {
@@ -107,6 +109,7 @@ export function TutorialFooter({
   twitterHandle,
   linkedinUrl,
   linkedinNewsletterUrl,
+  hideFollowBar = false,
 }: TutorialFooterProps): React.ReactElement {
   const year = new Date().getFullYear();
   const initial = siteName.charAt(0).toUpperCase();
@@ -114,7 +117,7 @@ export function TutorialFooter({
   return (
     <footer style={s.footer}>
       {/* Follow bar row */}
-      {(twitterUrl || linkedinNewsletterUrl) && (
+      {!hideFollowBar && (twitterUrl || linkedinNewsletterUrl) && (
         <div
           style={{
             maxWidth: "var(--tf-content-width)",

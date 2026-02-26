@@ -343,5 +343,17 @@ strong { font-weight: var(--tf-font-semibold); color: var(--tf-text-primary); }
     padding: var(--tf-space-3) var(--tf-space-4) !important;
   }
 }
+
+/* ─── AccordionList ──────────────────────────────────────────────────────── */
+details summary::-webkit-details-marker { display: none; }
+details summary::marker { display: none; content: ""; }
+details summary:hover { background: var(--tf-bg-elevated) !important; }
+.tf-accordion-chevron {
+  transition: transform var(--tf-transition-fast);
+  flex-shrink: 0;
+}
+details[open] > summary .tf-accordion-chevron {
+  transform: rotate(180deg);
+}
 `;
 }

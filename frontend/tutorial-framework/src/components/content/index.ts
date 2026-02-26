@@ -62,3 +62,6 @@ export type { CodePreviewProps, CodePreviewSegment } from "./CodePreview";
 
 export { VideoTranscript } from "./VideoTranscript";
 export type { VideoTranscriptProps, TranscriptEntry } from "./VideoTranscript";
+
+export { AccordionList } from "./AccordionList";
+export type { AccordionListProps, AccordionItem } from "./AccordionList";

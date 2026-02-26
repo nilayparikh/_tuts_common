@@ -93,6 +93,7 @@ export {
   LabSettings,
   CodePreview,
   VideoTranscript,
+  AccordionList,
 } from "./components/content";
 export type {
   LabSettingsProps,
@@ -101,6 +102,8 @@ export type {
   CodePreviewSegment,
   VideoTranscriptProps,
   TranscriptEntry,
+  AccordionListProps,
+  AccordionItem,
 } from "./components/content";
 
 // Embeds
@@ -133,6 +136,7 @@ export {
   QABlock,
   LessonHeader,
   LessonList,
+  LessonSocialBar,
 } from "./components/course";
 export type {
   CourseSidebarProps,
@@ -153,4 +157,5 @@ export type {
   QAItem,
   LessonHeaderProps,
   LessonListProps,
+  LessonSocialBarProps,
 } from "./components/course";

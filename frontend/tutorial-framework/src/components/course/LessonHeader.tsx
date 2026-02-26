@@ -38,7 +38,6 @@ export function LessonHeader({
         flexDirection: "column",
         alignItems: "flex-start",
         gap: "var(--tf-space-4)",
-        marginBottom: "var(--tf-space-6)",
       }}
     >
       <PartTypeBadge type={type} duration={duration} />

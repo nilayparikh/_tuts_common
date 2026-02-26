@@ -27,3 +27,6 @@ export type { LessonHeaderProps } from "./LessonHeader";
 
 export { LessonList } from "./LessonList";
 export type { LessonListProps } from "./LessonList";
+
+export { LessonSocialBar } from "./LessonSocialBar";
+export type { LessonSocialBarProps } from "./LessonSocialBar";

@@ -12,12 +12,13 @@ Uses **Material Design 3** dark theme with fluid typography and CSS custom prope
 │   ├── layout/     → TutorialLayout, TutorialHeader, TutorialFooter, SidebarLayout
 │   ├── content/    → HeroSection, ConceptCard, StepCard, CodeBlock, KeyPoint,
 │   │                  CalloutBox (Info/Note/Tip/Success/Warning/Danger),
-│   │                  MermaidDiagram, DescriptionBox, PollBlock,
+│   │                  MermaidDiagram, DescriptionBox, PollBlock, AccordionList,
 │   │                  StepByStepGuide, Paragraph, SectionDivider, TutorialNav
 │   ├── course/     → CoursePlayerLayout, CourseSidebar, QuizBlock, QABlock,
-│   │                  LessonList, LessonHeader, ArticleBlock, PodcastEmbed
+│   │                  LessonList, LessonHeader, LessonSocialBar, ArticleBlock,
+│   │                  PodcastEmbed
 │   ├── embeds/     → YouTubeEmbed, GitHubGistEmbed, TwitterEmbed, LinkedInEmbed
-│   └── sharing/    → ShareButtons
+│   └── sharing/    → ShareButtons, FollowBar
 └── index.ts        → Single public entry point
 ```
 
@@ -344,12 +345,73 @@ Styled paragraph with variant support.
 
 Card grid for key concepts. Supports 6 color variants.
 
+| Prop          | Type    | Default     | Description                                                         |
+| ------------- | ------- | ----------- | ------------------------------------------------------------------- |
+| `title`       | string  | —           | Card title                                                          |
+| `description` | string  | —           | Card body text                                                      |
+| `icon`        | string  | —           | Emoji or image URL                                                  |
+| `variant`     | string  | `"default"` | `default` / `primary` / `accent` / `success` / `warning` / `danger` |
+| `href`        | string  | —           | Makes the card a clickable link                                     |
+| `tag`         | string  | —           | Category label above the title                                      |
+| `compact`     | boolean | `false`     | Icon + title on the same row, smaller padding                       |
+
 ```tsx
 <ConceptGrid columns={3}>
   <ConceptCard title="Concept 1" description="..." variant="primary" />
   <ConceptCard title="Concept 2" description="..." variant="accent" />
   <ConceptCard title="Concept 3" description="..." variant="success" />
-</ConceptGrid>
+</ConceptGrid>;
+
+{
+  /* Compact layout */
+}
+<ConceptCard compact icon="🔌" title="Title" description="Body text." />;
+```
+
+#### `AccordionList`
+
+Collapsible `<details>`/`<summary>` list styled with framework tokens. Each item
+shows a numbered badge, title, and expandable body text. Fully accessible.
+
+| Prop               | Type              | Default | Description                          |
+| ------------------ | ----------------- | ------- | ------------------------------------ |
+| `items`            | `AccordionItem[]` | —       | `{ title: string; content: string }` |
+| `defaultOpenFirst` | boolean           | `false` | Expand the first item on load        |
+
+```tsx
+<AccordionList
+  items={[
+    { title: "Step one", content: "Details about step one." },
+    { title: "Step two", content: "Details about step two." },
+  ]}
+  defaultOpenFirst
+/>
+```
+
+#### `LessonSocialBar`
+
+Compact single-row bar combining instructor capsule, follow buttons, and share icons.
+
+| Prop                    | Type     | Default | Description                         |
+| ----------------------- | -------- | ------- | ----------------------------------- |
+| `instructorName`        | string   | —       | Instructor name (capsule left side) |
+| `instructorImageSrc`    | string   | —       | Avatar image src                    |
+| `twitterUrl`            | string   | —       | X / Twitter profile URL             |
+| `twitterHandle`         | string   | —       | Display handle, e.g. `@nilayparikh` |
+| `linkedinNewsletterUrl` | string   | —       | LinkedIn newsletter subscribe URL   |
+| `youtubeSubscribeUrl`   | string   | —       | YouTube channel URL                 |
+| `shareTitle`            | string   | **req** | Title for share text                |
+| `shareDescription`      | string   | —       | Description for share text          |
+| `shareHashtags`         | string[] | `[]`    | Hashtags without `#`                |
+| `hideFollow`            | boolean  | `false` | Hide follow buttons (share-only)    |
+
+```tsx
+<LessonSocialBar
+  instructorName="Name"
+  instructorImageSrc="/brand/avatar.jpg"
+  twitterUrl="https://x.com/handle"
+  shareTitle="Page Title"
+/>
 ```
 
 #### `LessonHeader`

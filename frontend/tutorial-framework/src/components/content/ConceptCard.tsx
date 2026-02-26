@@ -21,6 +21,8 @@ export interface ConceptCardProps {
   href?: string;
   /** Optional tag / category label */
   tag?: string;
+  /** Compact layout — icon and title on the same row */
+  compact?: boolean;
 }
 
 const variantMap: Record<
@@ -72,14 +74,17 @@ export function ConceptCard({
   variant = "default",
   href,
   tag,
+  compact = false,
 }: ConceptCardProps): React.ReactElement {
   const v = variantMap[variant];
 
   const card: React.CSSProperties = {
     display: "flex",
     flexDirection: "column",
-    gap: "var(--tf-space-3)",
-    padding: "var(--tf-space-6)",
+    gap: compact ? "var(--tf-space-2)" : "var(--tf-space-3)",
+    padding: compact
+      ? "var(--tf-space-4) var(--tf-space-5)"
+      : "var(--tf-space-6)",
     borderRadius: "var(--tf-radius-xl)",
     border: `1px solid ${v.border}`,
     background: v.bg,
@@ -93,24 +98,92 @@ export function ConceptCard({
 
   const isEmoji = icon && !/^https?:\/\//.test(icon);
 
-  const content = (
-    <>
-      {icon && (
-        <div
-          style={{
-            width: "2.75rem",
-            height: "2.75rem",
-            borderRadius: "var(--tf-radius-lg)",
-            background: v.iconBg,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: isEmoji ? "var(--tf-text-xl)" : undefined,
-          }}
-        >
-          {isEmoji ? icon : <img src={icon} alt="" width={24} height={24} />}
-        </div>
+  const iconNode = icon ? (
+    <div
+      style={{
+        width: compact ? "2rem" : "2.75rem",
+        height: compact ? "2rem" : "2.75rem",
+        borderRadius: "var(--tf-radius-lg)",
+        background: v.iconBg,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: isEmoji
+          ? compact
+            ? "var(--tf-text-md)"
+            : "var(--tf-text-xl)"
+          : undefined,
+        flexShrink: 0,
+      }}
+    >
+      {isEmoji ? (
+        icon
+      ) : (
+        <img
+          src={icon}
+          alt=""
+          width={compact ? 16 : 24}
+          height={compact ? 16 : 24}
+        />
       )}
+    </div>
+  ) : null;
+
+  const content = compact ? (
+    <>
+      {/* Compact: icon + title in one row */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "var(--tf-space-3)",
+        }}
+      >
+        {iconNode}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {tag && (
+            <span
+              style={{
+                fontFamily: "var(--tf-font-mono)",
+                fontSize: "var(--tf-text-xs)",
+                fontWeight: 600,
+                color: v.tagColor,
+                letterSpacing: "var(--tf-tracking-wide)",
+                textTransform: "uppercase",
+                display: "block",
+                marginBottom: "var(--tf-space-1)",
+              }}
+            >
+              {tag}
+            </span>
+          )}
+          <h3
+            style={{
+              fontFamily: "var(--tf-font-display)",
+              fontWeight: 700,
+              fontSize: "var(--tf-text-md)",
+              color: "var(--tf-text-primary)",
+              lineHeight: "var(--tf-leading-snug)",
+            }}
+          >
+            {title}
+          </h3>
+        </div>
+      </div>
+      <p
+        style={{
+          fontSize: "var(--tf-text-sm)",
+          color: "var(--tf-text-secondary)",
+          lineHeight: "var(--tf-leading-relaxed)",
+          margin: 0,
+        }}
+      >
+        {description}
+      </p>
+    </>
+  ) : (
+    <>
+      {iconNode}
       <div>
         {tag && (
           <span

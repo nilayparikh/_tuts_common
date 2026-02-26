@@ -40,7 +40,6 @@ export function Paragraph({
           ? "var(--tf-tracking-tight)"
           : "var(--tf-tracking-normal)",
         textAlign: center ? "center" : undefined,
-        maxWidth: "68ch",
       }}
     >
       {children}
