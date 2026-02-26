@@ -1,4 +1,5 @@
 import React from "react";
+import { FollowBar } from "../sharing/FollowBar";
 
 export interface FooterLink {
   label: string;
@@ -13,7 +14,9 @@ export interface TutorialFooterProps {
   githubUrl?: string;
   youtubeUrl?: string;
   twitterUrl?: string;
+  twitterHandle?: string;
   linkedinUrl?: string;
+  linkedinNewsletterUrl?: string;
 }
 
 const s: Record<string, React.CSSProperties> = {
@@ -101,20 +104,41 @@ export function TutorialFooter({
   githubUrl,
   youtubeUrl,
   twitterUrl,
+  twitterHandle,
   linkedinUrl,
+  linkedinNewsletterUrl,
 }: TutorialFooterProps): React.ReactElement {
   const year = new Date().getFullYear();
   const initial = siteName.charAt(0).toUpperCase();
 
   return (
     <footer style={s.footer}>
+      {/* Follow bar row */}
+      {(twitterUrl || linkedinNewsletterUrl) && (
+        <div
+          style={{
+            maxWidth: "var(--tf-content-width)",
+            margin: "0 auto",
+            padding: "var(--tf-space-3) var(--tf-space-6) 0",
+          }}
+        >
+          <FollowBar
+            twitterUrl={twitterUrl}
+            twitterHandle={twitterHandle}
+            linkedinNewsletterUrl={linkedinNewsletterUrl}
+            compact={false}
+          />
+        </div>
+      )}
       <div style={s.inner}>
         {/* Brand + copyright */}
         <a href="/" style={s.brand}>
           <span style={s.logoMark}>{initial}</span>
           <span style={s.brandName}>{siteName}</span>
         </a>
-        <span style={s.copyright}>© {year}</span>
+        <span style={s.copyright}>
+          © {year} {siteName}. All rights reserved.
+        </span>
 
         {/* Links */}
         {links.length > 0 && (

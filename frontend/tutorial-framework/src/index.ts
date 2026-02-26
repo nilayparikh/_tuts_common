@@ -118,8 +118,8 @@ export type {
 } from "./components/embeds";
 
 // Sharing
-export { ShareButtons } from "./components/sharing";
-export type { ShareButtonsProps } from "./components/sharing";
+export { ShareButtons, FollowBar } from "./components/sharing";
+export type { ShareButtonsProps, FollowBarProps } from "./components/sharing";
 
 // Course
 export {
