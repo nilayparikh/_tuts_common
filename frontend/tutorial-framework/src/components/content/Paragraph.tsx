@@ -28,7 +28,7 @@ export function Paragraph({
   return (
     <p
       style={{
-        margin: 0,
+        margin: center ? "0 auto" : 0,
         fontFamily: "var(--tf-font-body)",
         fontSize: lead ? "var(--tf-text-lg)" : "var(--tf-text-md)",
         fontWeight: "var(--tf-font-normal)",
