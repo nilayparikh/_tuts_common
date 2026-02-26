@@ -18,7 +18,7 @@ export function SectionDivider({
           height: 1,
           background:
             "linear-gradient(90deg, transparent 0%, var(--tf-color-primary) 30%, var(--tf-color-accent) 70%, transparent 100%)",
-          margin: "var(--tf-space-12) 0",
+          margin: "var(--tf-space-6) 0",
           opacity: 0.4,
         }}
         aria-hidden="true"
@@ -34,7 +34,7 @@ export function SectionDivider({
           alignItems: "center",
           justifyContent: "center",
           gap: "var(--tf-space-3)",
-          margin: "var(--tf-space-12) 0",
+          margin: "var(--tf-space-6) 0",
         }}
         aria-hidden="true"
       >
@@ -63,7 +63,7 @@ export function SectionDivider({
           display: "flex",
           alignItems: "center",
           gap: "var(--tf-space-4)",
-          margin: "var(--tf-space-12) 0",
+          margin: "var(--tf-space-6) 0",
         }}
         role="separator"
         aria-label={label}
@@ -95,7 +95,7 @@ export function SectionDivider({
       style={{
         border: "none",
         borderTop: "1px solid var(--tf-border-subtle)",
-        margin: "var(--tf-space-12) 0",
+        margin: "var(--tf-space-6) 0",
       }}
     />
   );
@@ -119,7 +119,7 @@ export function SectionHeading({
   return (
     <div
       style={{
-        marginBottom: "var(--tf-space-10)",
+        marginBottom: "var(--tf-space-4)",
         textAlign: align,
       }}
     >

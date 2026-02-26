@@ -53,3 +53,15 @@ export type { StepByStepGuideProps, StepGuideStep } from "./StepByStepGuide";
 
 export { Paragraph } from "./Paragraph";
 export type { ParagraphProps } from "./Paragraph";
+
+export { LabSettings } from "./LabSettings";
+export type { LabSettingsProps, LabRequirement } from "./LabSettings";
+
+export { CodePreview } from "./CodePreview";
+export type { CodePreviewProps, CodePreviewSegment } from "./CodePreview";
+
+export { VideoTranscript } from "./VideoTranscript";
+export type {
+  VideoTranscriptProps,
+  TranscriptEntry,
+} from "./VideoTranscript";

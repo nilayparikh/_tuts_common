@@ -21,7 +21,7 @@ export interface HeroSectionProps {
 
 const s: Record<string, React.CSSProperties> = {
   hero: {
-    padding: "var(--tf-space-20) 0 var(--tf-space-16)",
+    padding: "var(--tf-space-12) 0 var(--tf-space-8)",
     position: "relative",
     overflow: "hidden",
   },
@@ -86,13 +86,13 @@ const s: Record<string, React.CSSProperties> = {
     lineHeight: "var(--tf-leading-relaxed)",
     color: "var(--tf-text-secondary)",
     maxWidth: "38rem",
-    marginBottom: "var(--tf-space-8)",
+    marginBottom: "var(--tf-space-5)",
   },
   actions: {
     display: "flex",
     flexWrap: "wrap" as const,
     gap: "var(--tf-space-3)",
-    marginBottom: "var(--tf-space-8)",
+    marginBottom: "var(--tf-space-5)",
   },
   btnPrimary: {
     display: "inline-flex",

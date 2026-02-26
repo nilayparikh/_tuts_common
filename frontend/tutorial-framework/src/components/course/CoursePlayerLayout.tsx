@@ -101,7 +101,7 @@ export function CoursePlayerLayout({
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: "var(--tf-space-10) var(--tf-space-8)",
+            padding: "var(--tf-space-6) var(--tf-space-8)",
           }}
         >
           {children}

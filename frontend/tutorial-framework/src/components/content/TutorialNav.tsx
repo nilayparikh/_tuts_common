@@ -31,8 +31,8 @@ export function TutorialNav({
         display: "flex",
         justifyContent: "space-between",
         gap: "var(--tf-space-4)",
-        marginTop: "var(--tf-space-16)",
-        paddingTop: "var(--tf-space-8)",
+        marginTop: "var(--tf-space-4)",
+        paddingTop: "var(--tf-space-6)",
         borderTop: "1px solid var(--tf-border-subtle)",
       }}
     >

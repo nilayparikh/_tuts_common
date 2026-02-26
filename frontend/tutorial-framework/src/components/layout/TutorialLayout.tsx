@@ -47,7 +47,13 @@ export function TutorialLayout({
           width: "100%",
           maxWidth: widthMap[maxWidth],
           margin: maxWidth !== "full" ? "0 auto" : undefined,
-          padding: maxWidth !== "full" ? "0 var(--tf-space-6)" : undefined,
+          padding:
+            maxWidth !== "full"
+              ? "var(--tf-space-8) var(--tf-space-6) var(--tf-space-12)"
+              : undefined,
+          display: "flex",
+          flexDirection: "column",
+          gap: "var(--tf-space-2)",
           ...mainStyle,
         }}
       >

@@ -88,6 +88,21 @@ export type {
   ParagraphProps,
 } from "./components/content";
 
+// Content — extended
+export {
+  LabSettings,
+  CodePreview,
+  VideoTranscript,
+} from "./components/content";
+export type {
+  LabSettingsProps,
+  LabRequirement,
+  CodePreviewProps,
+  CodePreviewSegment,
+  VideoTranscriptProps,
+  TranscriptEntry,
+} from "./components/content";
+
 // Embeds
 export {
   YouTubeEmbed,
