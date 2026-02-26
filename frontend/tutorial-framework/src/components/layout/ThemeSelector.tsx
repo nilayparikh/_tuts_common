@@ -94,7 +94,8 @@ export function ThemeSelector(): React.ReactElement {
             background: "var(--tf-glass-bg, var(--tf-bg-elevated))",
             backdropFilter: "blur(var(--tf-glass-blur, 12px))",
             WebkitBackdropFilter: "blur(var(--tf-glass-blur, 12px))",
-            border: "1px solid var(--tf-glass-border, var(--tf-border-default))",
+            border:
+              "1px solid var(--tf-glass-border, var(--tf-border-default))",
             borderRadius: "var(--tf-radius-lg)",
             boxShadow: "var(--tf-shadow-level3), var(--tf-glow-primary, none)",
             padding: "0.375rem",

@@ -99,14 +99,14 @@ Never use inline style for values that should be tokens.
 The framework provides multiple tiers of semantic tokens. Always choose the
 most specific tier available instead of hard-coding values.
 
-| Tier                     | Prefix / Example                    | When to use                        |
-| ------------------------ | ----------------------------------- | ---------------------------------- |
-| Base container           | `--tf-color-primary-container`      | Light fills, backgrounds           |
-| Container-high           | `--tf-color-primary-container-high` | Stronger fills, hover/active state |
-| Semantic border          | `--tf-color-primary-border`         | Outline / border colours           |
-| Brand                    | `--tf-brand-youtube`                | Third-party service colours        |
-| Decorative               | `--tf-decor-red`                    | Traffic-light dots, cosmetic only  |
-| Letter-spacing           | `--tf-tracking-wide` / `widest`     | Caps, badges, subtitles            |
+| Tier            | Prefix / Example                    | When to use                        |
+| --------------- | ----------------------------------- | ---------------------------------- |
+| Base container  | `--tf-color-primary-container`      | Light fills, backgrounds           |
+| Container-high  | `--tf-color-primary-container-high` | Stronger fills, hover/active state |
+| Semantic border | `--tf-color-primary-border`         | Outline / border colours           |
+| Brand           | `--tf-brand-youtube`                | Third-party service colours        |
+| Decorative      | `--tf-decor-red`                    | Traffic-light dots, cosmetic only  |
+| Letter-spacing  | `--tf-tracking-wide` / `widest`     | Caps, badges, subtitles            |
 
 **Never** append hex alpha to a CSS variable (e.g. `${color}44`). Instead,
 use the appropriate `*-border` or `*-container-high` token.
@@ -160,6 +160,7 @@ The framework provides two mutually exclusive page layouts.
 - Main: `flex: 1`, `min-width: 0`, scrolls with the page
 
 **Critical invariants:**
+
 - Header and Footer are **siblings of** the 2-col body (not children of it)
 - Footer `marginTop` must be `0` — the body's `flex: 1` handles vertical fill
 - On ≤ 768px: body stacks vertically, sidebar becomes `position: static` with max-height

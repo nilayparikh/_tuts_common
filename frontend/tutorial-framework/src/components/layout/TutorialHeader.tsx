@@ -28,7 +28,8 @@ const s: Record<string, React.CSSProperties> = {
     top: 0,
     zIndex: 100,
     height: "var(--tf-header-height)",
-    background: "var(--tf-glass-bg, color-mix(in srgb, var(--tf-bg-base) 85%, transparent))",
+    background:
+      "var(--tf-glass-bg, color-mix(in srgb, var(--tf-bg-base) 85%, transparent))",
     backdropFilter: "blur(var(--tf-glass-blur, 12px))",
     WebkitBackdropFilter: "blur(var(--tf-glass-blur, 12px))",
     borderBottom: "1px solid var(--tf-glass-border, var(--tf-border-subtle))",

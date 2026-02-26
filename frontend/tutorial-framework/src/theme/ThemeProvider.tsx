@@ -388,15 +388,9 @@ export function ThemeProvider({
     // ── Glass / frosted surface variables ──────────────────────────────
     // Semi-transparent surface for glass panels (sidebar, header, overlays)
     const surfaceRgb = hexToRgb(c.bgSurface);
-    root.style.setProperty(
-      "--tf-glass-bg",
-      `rgba(${surfaceRgb},0.72)`,
-    );
+    root.style.setProperty("--tf-glass-bg", `rgba(${surfaceRgb},0.72)`);
     root.style.setProperty("--tf-glass-blur", "20px");
-    root.style.setProperty(
-      "--tf-glass-border",
-      "rgba(255,255,255,0.06)",
-    );
+    root.style.setProperty("--tf-glass-border", "rgba(255,255,255,0.06)");
     root.style.setProperty(
       "--tf-glass-highlight",
       "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%)",
