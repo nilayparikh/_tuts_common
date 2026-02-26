@@ -111,7 +111,61 @@ most specific tier available instead of hard-coding values.
 **Never** append hex alpha to a CSS variable (e.g. `${color}44`). Instead,
 use the appropriate `*-border` or `*-container-high` token.
 
-### 6. Responsive Classes
+### 6. Layout Architecture
+
+The framework provides two mutually exclusive page layouts.
+**Never mix them or build custom wrappers.**
+
+#### Home / Tutorial Pages — `TutorialLayout` (1 column, centered)
+
+```
+┌─────────────────────────────────────────────┐
+│  TutorialHeader (full viewport width)       │
+├─────────────────────────────────────────────┤
+│          <main> (centered, max-width)       │
+│                                             │
+│             page content                    │
+│                                             │
+├─────────────────────────────────────────────┤
+│  TutorialFooter (full viewport width)       │
+└─────────────────────────────────────────────┘
+```
+
+- Outer wrapper: `flex-column`, `min-height: 100vh`
+- Header + Footer: always **full viewport width**
+- Main: centered via `max-width` + `margin: 0 auto`
+- `maxWidth` prop: `"content"` (wide) or `"narrow"` (reading)
+
+#### Course / Lesson Pages — `CoursePlayerLayout` (2 column, centered)
+
+```
+┌─────────────────────────────────────────────┐
+│  TutorialHeader (full viewport width)       │
+├─────────┬───────────────────────────────────┤
+│         │                                   │
+│ Sidebar │       <main> (flex: 1)            │
+│ (sticky,│                                   │
+│  fixed  │       lesson content              │
+│  width) │                                   │
+│         │                                   │
+├─────────┴───────────────────────────────────┤
+│  TutorialFooter (full viewport width)       │
+└─────────────────────────────────────────────┘
+```
+
+- Outer wrapper: `flex-column`, `min-height: 100vh`
+- Header + Footer: always **full viewport width** (outside the 2-col body)
+- Body: `display: flex`, centered via `max-width: var(--tf-course-max-width)` + `margin: 0 auto`, has `flex: 1` so footer is pushed to bottom
+- Sidebar: fixed width (`sidebarWidth` prop, default 384px), `position: sticky`, `height: calc(100vh - header)`, independent scroll
+- Main: `flex: 1`, `min-width: 0`, scrolls with the page
+
+**Critical invariants:**
+- Header and Footer are **siblings of** the 2-col body (not children of it)
+- Footer `marginTop` must be `0` — the body's `flex: 1` handles vertical fill
+- On ≤ 768px: body stacks vertically, sidebar becomes `position: static` with max-height
+- On ultra-wide: `--tf-course-max-width` (100rem) centers the body with equal gutters
+
+### 7. Responsive Classes
 
 Components use framework-provided CSS classes for responsive layout:
 
@@ -124,7 +178,7 @@ Components use framework-provided CSS classes for responsive layout:
 Site CSS (`globals.css`) must **not** override these with `!important`.
 If layout needs differ, add a new class to `GlobalStyles.tsx`.
 
-### 7. Content Updates
+### 8. Content Updates
 
 Content goes INSIDE component props. If you need to add new content:
 

@@ -11,8 +11,16 @@
  */
 
 // Theme
-export { palette, tokens, tokensToCSS, TutorialGlobalStyles } from "./theme";
-export type { Palette, Tokens } from "./theme";
+export {
+  palette,
+  tokens,
+  tokensToCSS,
+  TutorialGlobalStyles,
+  ThemeProvider,
+  useTheme,
+  THEMES,
+} from "./theme";
+export type { Palette, Tokens, ThemeDef, ThemeColors } from "./theme";
 
 // Layout
 export {
@@ -20,6 +28,7 @@ export {
   TutorialFooter,
   TutorialLayout,
   SidebarLayout,
+  ThemeSelector,
 } from "./components/layout";
 export type {
   TutorialHeaderProps,

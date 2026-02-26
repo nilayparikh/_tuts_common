@@ -173,10 +173,11 @@ function buildCSS(): string {
   --tf-shadow-glow-accent: ${sh.glowAccent};
 
   /* Layout */
-  --tf-content-width:  ${la.contentWidth};
-  --tf-narrow-width:   ${la.narrowWidth};
-  --tf-sidebar-width:  ${la.sidebarWidth};
-  --tf-header-height:  ${la.headerHeight};
+  --tf-content-width:    ${la.contentWidth};
+  --tf-narrow-width:     ${la.narrowWidth};
+  --tf-sidebar-width:    ${la.sidebarWidth};
+  --tf-header-height:    ${la.headerHeight};
+  --tf-course-max-width: ${la.courseMaxWidth};
 
   /* Transitions (MD3 Motion) */
   --tf-transition-fast:       ${tr.fast};
@@ -280,6 +281,22 @@ h1, h2, h3, h4, h5, h6 {
 p { line-height: var(--tf-leading-relaxed); }
 strong { font-weight: var(--tf-font-semibold); color: var(--tf-text-primary); }
 
+/* ─── Course player gutter bands ─────────────────────────────────────────── */
+/* On wide screens the centered body leaves gutters; subtly tint them. */
+.tf-course-player-wrap {
+  background: var(--tf-bg-base);
+}
+
+/* ─── Glass surface defaults ────────────────────────────────────────────── */
+/* ThemeProvider overrides these per-theme via :root inline styles */
+:root {
+  --tf-glass-bg: var(--tf-bg-surface);
+  --tf-glass-blur: 0px;
+  --tf-glass-border: rgba(255,255,255,0.04);
+  --tf-glass-highlight: none;
+  --tf-glow-primary: none;
+}
+
 /* ─── Responsive: framework-level breakpoints ────────────────────────────── */
 @media (max-width: 768px) {
   .tf-concept-grid { grid-template-columns: 1fr !important; }
@@ -287,7 +304,7 @@ strong { font-weight: var(--tf-font-semibold); color: var(--tf-text-primary); }
   .tf-sidebar-layout { grid-template-columns: 1fr !important; }
   .tf-step-card { grid-template-columns: 2.5rem 1fr !important; }
 
-  /* Course player: stack sidebar above content */
+  /* Course player: stack sidebar above content on small screens */
   .tf-course-player-body {
     flex-direction: column !important;
   }
@@ -297,6 +314,7 @@ strong { font-weight: var(--tf-font-semibold); color: var(--tf-text-primary); }
     height: auto !important;
     max-height: 14rem !important;
     border-bottom: 1px solid var(--tf-border-subtle);
+    border-right: none !important;
   }
   .tf-course-player-main {
     padding: var(--tf-space-6) var(--tf-space-4) !important;

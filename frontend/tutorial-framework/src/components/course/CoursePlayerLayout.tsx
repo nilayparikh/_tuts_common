@@ -18,22 +18,37 @@ export interface CoursePlayerLayoutProps {
   sidebar: CourseSidebarProps;
   /** Main lesson content */
   children: React.ReactNode;
-  /** Width of sidebar in px (default 260) */
+  /** Width of sidebar in px (default 384) */
   sidebarWidth?: number;
   /** Whether to show footer (default true) */
   showFooter?: boolean;
 }
 
+/**
+ * Course Player Layout — 2-column (sidebar + main), centered with gutters.
+ *
+ * Architecture:
+ *   flex-col wrapper (100vh)
+ *   ├── TutorialHeader   — full viewport width, sticky
+ *   ├── .tf-course-player-body  — flex row, centered via max-width + margin auto
+ *   │   ├── aside (sticky sidebar, fixed width, own scroll)
+ *   │   └── main  (flex:1, scrolls with page)
+ *   └── TutorialFooter   — full viewport width
+ *
+ * The body has flex:1 so that the footer is always pushed to the bottom when
+ * content is shorter than the viewport.
+ */
 export function CoursePlayerLayout({
   header,
   footer,
   sidebar,
   children,
-  sidebarWidth = 260,
+  sidebarWidth = 384,
   showFooter = true,
 }: CoursePlayerLayoutProps): React.ReactElement {
   return (
     <div
+      className="tf-course-player-wrap"
       style={{
         minHeight: "100vh",
         display: "flex",
@@ -43,20 +58,21 @@ export function CoursePlayerLayout({
         fontFamily: "var(--tf-font-body)",
       }}
     >
-      {/* Sticky header */}
+      {/* ── Header — full viewport width, sticky ────────────────────── */}
       <TutorialHeader {...header} />
 
-      {/* Body: sidebar + main */}
+      {/* ── Body — centered 2-col with max-width ────────────────────── */}
       <div
         className="tf-course-player-body"
         style={{
           flex: 1,
           display: "flex",
-          position: "relative",
           width: "100%",
+          maxWidth: "var(--tf-course-max-width)",
+          margin: "0 auto",
         }}
       >
-        {/* Sticky sidebar */}
+        {/* Sidebar — sticky to viewport, scrolls independently */}
         <aside
           className="tf-course-player-sidebar"
           style={{
@@ -67,12 +83,16 @@ export function CoursePlayerLayout({
             height: "calc(100vh - var(--tf-header-height))",
             overflowY: "auto",
             overflowX: "hidden",
+            borderRight: "1px solid var(--tf-border-subtle)",
+            background: "var(--tf-glass-bg, var(--tf-bg-surface))",
+            backdropFilter: "blur(var(--tf-glass-blur, 0px))",
+            WebkitBackdropFilter: "blur(var(--tf-glass-blur, 0px))",
           }}
         >
           <CourseSidebar {...sidebar} />
         </aside>
 
-        {/* Main content — scrolls with the page */}
+        {/* Main content — fills remaining width */}
         <main
           className="tf-course-player-main"
           style={{
@@ -88,6 +108,7 @@ export function CoursePlayerLayout({
         </main>
       </div>
 
+      {/* ── Footer — full viewport width ────────────────────────────── */}
       {showFooter && <TutorialFooter {...footer} />}
     </div>
   );

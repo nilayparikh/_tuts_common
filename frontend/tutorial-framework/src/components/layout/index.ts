@@ -4,3 +4,4 @@ export { TutorialFooter } from "./TutorialFooter";
 export type { TutorialFooterProps, FooterLink } from "./TutorialFooter";
 export { TutorialLayout, SidebarLayout } from "./TutorialLayout";
 export type { TutorialLayoutProps, SidebarLayoutProps } from "./TutorialLayout";
+export { ThemeSelector } from "./ThemeSelector";

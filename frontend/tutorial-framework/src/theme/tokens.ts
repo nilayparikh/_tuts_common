@@ -181,10 +181,11 @@ export const tokens = {
   },
 
   layout: {
-    contentWidth: "75rem", // 1200px in rem
-    narrowWidth: "48rem", // 768px in rem
-    sidebarWidth: "18rem", // 288px in rem
+    contentWidth: "90rem", // 1440px in rem (~20% wider)
+    narrowWidth: "58rem", // 928px in rem (~20% wider)
+    sidebarWidth: "24rem", // 384px in rem
     headerHeight: "4rem", // 64px in rem
+    courseMaxWidth: "100rem", // 1600px — max for centered 2-col player
   },
 
   transition: {

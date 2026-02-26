@@ -18,7 +18,7 @@ export interface TutorialFooterProps {
 
 const s: Record<string, React.CSSProperties> = {
   footer: {
-    marginTop: "var(--tf-space-24)",
+    marginTop: 0,
     borderTop: "1px solid var(--tf-border-subtle)",
     background: "var(--tf-bg-surface)",
   },

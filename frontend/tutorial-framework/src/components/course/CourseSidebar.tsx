@@ -36,17 +36,17 @@ export interface CourseSidebarProps {
   totalDuration?: string;
 }
 
-// ─── Icon + label per part type ────────────────────────────────────────────
+// ─── Material Symbol icon per part type ────────────────────────────────────
 
 const TYPE_META: Record<PartType, { icon: string; label: string }> = {
-  video: { icon: "▶", label: "Video" },
-  reading: { icon: "📖", label: "Reading" },
-  "video-code": { icon: "💻", label: "Video with Code Example" },
-  quiz: { icon: "📝", label: "Quiz" },
-  podcast: { icon: "🎙", label: "Podcast" },
-  slideshow: { icon: "📑", label: "Slides" },
-  article: { icon: "📰", label: "Article" },
-  lab: { icon: "🧪", label: "Lab" },
+  video: { icon: "play_circle", label: "Video" },
+  reading: { icon: "menu_book", label: "Reading" },
+  "video-code": { icon: "code", label: "Video with Code" },
+  quiz: { icon: "quiz", label: "Quiz" },
+  podcast: { icon: "podcasts", label: "Podcast" },
+  slideshow: { icon: "slideshow", label: "Slides" },
+  article: { icon: "article", label: "Article" },
+  lab: { icon: "science", label: "Lab" },
 };
 
 // ─── Component ─────────────────────────────────────────────────────────────
@@ -75,7 +75,7 @@ export function CourseSidebar({
       {/* Course title block */}
       <div
         style={{
-          padding: "var(--tf-space-5) var(--tf-space-4) var(--tf-space-4)",
+          padding: "var(--tf-space-6) var(--tf-space-5) var(--tf-space-5)",
           borderBottom: "1px solid var(--tf-border-subtle)",
           flexShrink: 0,
         }}
@@ -84,7 +84,7 @@ export function CourseSidebar({
           style={{
             fontFamily: "var(--tf-font-display)",
             fontWeight: 700,
-            fontSize: "var(--tf-text-sm)",
+            fontSize: "var(--tf-text-md)",
             color: "var(--tf-text-primary)",
             lineHeight: "var(--tf-leading-snug)",
             margin: 0,
@@ -93,13 +93,43 @@ export function CourseSidebar({
           {courseTitle}
         </p>
 
+        {/* Duration + count */}
+        <div
+          style={{
+            marginTop: "var(--tf-space-2)",
+            display: "flex",
+            alignItems: "center",
+            gap: "var(--tf-space-3)",
+            fontSize: "var(--tf-text-xs)",
+            color: "var(--tf-text-muted)",
+          }}
+        >
+          {totalDuration && (
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.25rem",
+              }}
+            >
+              <span
+                className="material-symbols-outlined"
+                style={{ fontSize: "14px" }}
+              >
+                schedule
+              </span>
+              {totalDuration}
+            </span>
+          )}
+        </div>
+
         {/* Progress bar */}
         <div
           style={{
             marginTop: "var(--tf-space-3)",
             display: "flex",
             alignItems: "center",
-            gap: "var(--tf-space-2)",
+            gap: "var(--tf-space-3)",
           }}
         >
           <div
@@ -133,18 +163,6 @@ export function CourseSidebar({
             {completedCount}/{parts.length}
           </span>
         </div>
-
-        {totalDuration && (
-          <p
-            style={{
-              margin: "var(--tf-space-2) 0 0",
-              fontSize: "var(--tf-text-xs)",
-              color: "var(--tf-text-muted)",
-            }}
-          >
-            {totalDuration} total
-          </p>
-        )}
       </div>
 
       {/* Parts list */}
@@ -171,7 +189,8 @@ export function CourseSidebar({
                   display: "flex",
                   alignItems: "flex-start",
                   gap: "var(--tf-space-3)",
-                  padding: "var(--tf-space-3) var(--tf-space-4)",
+                  padding:
+                    "var(--tf-space-3) var(--tf-space-5) var(--tf-space-3) var(--tf-space-4)",
                   textDecoration: "none",
                   color: isCurrent
                     ? "var(--tf-text-primary)"
@@ -202,16 +221,18 @@ export function CourseSidebar({
                   }
                 }}
               >
-                {/* Step number / completed check */}
+                {/* Step number badge */}
                 <span
                   style={{
                     flexShrink: 0,
-                    width: "1.25rem",
-                    height: "1.25rem",
+                    width: "1.5rem",
+                    height: "1.5rem",
                     borderRadius: "var(--tf-radius-full)",
                     border: part.isCompleted
                       ? "2px solid var(--tf-color-success)"
-                      : "2px solid var(--tf-border-default)",
+                      : isCurrent
+                        ? "2px solid var(--tf-color-primary)"
+                        : "2px solid var(--tf-border-default)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -220,14 +241,27 @@ export function CourseSidebar({
                     fontFamily: "var(--tf-font-mono)",
                     color: part.isCompleted
                       ? "var(--tf-color-success)"
-                      : "var(--tf-text-muted)",
+                      : isCurrent
+                        ? "var(--tf-color-primary-light)"
+                        : "var(--tf-text-muted)",
                     background: part.isCompleted
                       ? "var(--tf-color-success-container)"
-                      : "transparent",
-                    marginTop: "0.125rem",
+                      : isCurrent
+                        ? "var(--tf-color-primary-container)"
+                        : "transparent",
+                    marginTop: "0.0625rem",
                   }}
                 >
-                  {part.isCompleted ? "✓" : i + 1}
+                  {part.isCompleted ? (
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "14px" }}
+                    >
+                      check
+                    </span>
+                  ) : (
+                    i + 1
+                  )}
                 </span>
 
                 {/* Text block */}
@@ -251,15 +285,25 @@ export function CourseSidebar({
                       color: "var(--tf-text-muted)",
                       display: "flex",
                       alignItems: "center",
-                      gap: "var(--tf-space-1)",
+                      gap: "0.375rem",
                     }}
                   >
-                    <span style={{ fontSize: "var(--tf-text-xs)" }}>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{
+                        fontSize: "14px",
+                        color: isCurrent
+                          ? "var(--tf-color-primary-light)"
+                          : "var(--tf-text-muted)",
+                      }}
+                    >
                       {meta.icon}
                     </span>
                     <span>{meta.label}</span>
-                    <span>·</span>
-                    <span>{part.duration}</span>
+                    <span style={{ opacity: 0.4 }}>·</span>
+                    <span style={{ fontFamily: "var(--tf-font-mono)" }}>
+                      {part.duration}
+                    </span>
                   </p>
                 </div>
               </a>

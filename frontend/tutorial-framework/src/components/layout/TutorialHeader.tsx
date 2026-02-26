@@ -1,4 +1,6 @@
+"use client";
 import React from "react";
+import { ThemeSelector } from "./ThemeSelector";
 
 export interface NavItem {
   label: string;
@@ -26,10 +28,10 @@ const s: Record<string, React.CSSProperties> = {
     top: 0,
     zIndex: 100,
     height: "var(--tf-header-height)",
-    background: "color-mix(in srgb, var(--tf-bg-base) 85%, transparent)",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
-    borderBottom: "1px solid var(--tf-border-subtle)",
+    background: "var(--tf-glass-bg, color-mix(in srgb, var(--tf-bg-base) 85%, transparent))",
+    backdropFilter: "blur(var(--tf-glass-blur, 12px))",
+    WebkitBackdropFilter: "blur(var(--tf-glass-blur, 12px))",
+    borderBottom: "1px solid var(--tf-glass-border, var(--tf-border-subtle))",
     display: "flex",
     alignItems: "center",
   },
@@ -40,7 +42,7 @@ const s: Record<string, React.CSSProperties> = {
     padding: "0 var(--tf-space-6)",
     display: "flex",
     alignItems: "center",
-    gap: "var(--tf-space-8)",
+    gap: "var(--tf-space-6)",
   },
   brand: {
     display: "flex",
@@ -49,13 +51,7 @@ const s: Record<string, React.CSSProperties> = {
     textDecoration: "none",
     flexShrink: 0,
   },
-  logo: {
-    width: 28,
-    height: 28,
-    borderRadius: "var(--tf-radius-md)",
-    objectFit: "cover",
-  },
-  logoFallback: {
+  logoMark: {
     width: 28,
     height: 28,
     borderRadius: "var(--tf-radius-md)",
@@ -80,8 +76,9 @@ const s: Record<string, React.CSSProperties> = {
     display: "flex",
     alignItems: "center",
     gap: "var(--tf-space-1)",
-    flex: 1,
     listStyle: "none",
+    margin: 0,
+    padding: 0,
   },
   navLink: {
     padding: "0.35em 0.75em",
@@ -98,27 +95,29 @@ const s: Record<string, React.CSSProperties> = {
     color: "var(--tf-color-primary-light)",
     background: "var(--tf-color-primary-bg)",
   },
+  spacer: {
+    flex: 1,
+  },
   actions: {
     display: "flex",
     alignItems: "center",
-    gap: "var(--tf-space-3)",
-    marginLeft: "auto",
+    gap: "var(--tf-space-2)",
     flexShrink: 0,
   },
   iconBtn: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    width: 36,
-    height: 36,
+    width: 34,
+    height: 34,
     borderRadius: "var(--tf-radius-md)",
     background: "transparent",
     border: "1px solid var(--tf-border-default)",
-    color: "var(--tf-text-secondary)",
+    color: "var(--tf-text-muted)",
     cursor: "pointer",
     textDecoration: "none",
     transition:
-      "color var(--tf-transition-fast), border-color var(--tf-transition-fast)",
+      "color var(--tf-transition-fast), border-color var(--tf-transition-fast), background var(--tf-transition-fast)",
   },
 };
 
@@ -138,9 +137,18 @@ export function TutorialHeader({
         {/* Brand */}
         <a href="/" style={s.brand}>
           {logoUrl ? (
-            <img src={logoUrl} alt={siteName} style={s.logo} />
+            <img
+              src={logoUrl}
+              alt={siteName}
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: "var(--tf-radius-md)",
+                objectFit: "cover",
+              }}
+            />
           ) : (
-            <span style={s.logoFallback}>{initial}</span>
+            <span style={s.logoMark}>{initial}</span>
           )}
           <span style={s.siteName}>{siteName}</span>
         </a>
@@ -170,8 +178,14 @@ export function TutorialHeader({
           </nav>
         )}
 
-        {/* External actions */}
+        {/* Spacer */}
+        <div style={s.spacer} />
+
+        {/* Actions */}
         <div style={s.actions}>
+          {/* Theme selector */}
+          <ThemeSelector />
+
           {youtubeUrl && (
             <a
               href={youtubeUrl}
@@ -180,10 +194,20 @@ export function TutorialHeader({
               style={s.iconBtn}
               aria-label="YouTube channel"
               title="YouTube"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "var(--tf-text-primary)";
+                e.currentTarget.style.borderColor = "var(--tf-border-strong)";
+                e.currentTarget.style.background = "var(--tf-bg-elevated)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "var(--tf-text-muted)";
+                e.currentTarget.style.borderColor = "var(--tf-border-default)";
+                e.currentTarget.style.background = "transparent";
+              }}
             >
               <svg
-                width="16"
-                height="16"
+                width="15"
+                height="15"
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
@@ -199,10 +223,20 @@ export function TutorialHeader({
               style={s.iconBtn}
               aria-label="GitHub repository"
               title="GitHub"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "var(--tf-text-primary)";
+                e.currentTarget.style.borderColor = "var(--tf-border-strong)";
+                e.currentTarget.style.background = "var(--tf-bg-elevated)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "var(--tf-text-muted)";
+                e.currentTarget.style.borderColor = "var(--tf-border-default)";
+                e.currentTarget.style.background = "transparent";
+              }}
             >
               <svg
-                width="16"
-                height="16"
+                width="15"
+                height="15"
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
