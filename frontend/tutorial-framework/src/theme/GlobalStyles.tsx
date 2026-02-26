@@ -286,11 +286,30 @@ strong { font-weight: var(--tf-font-semibold); color: var(--tf-text-primary); }
   .tf-hero-inner { grid-template-columns: 1fr !important; }
   .tf-sidebar-layout { grid-template-columns: 1fr !important; }
   .tf-step-card { grid-template-columns: 2.5rem 1fr !important; }
+
+  /* Course player: stack sidebar above content */
+  .tf-course-player-body {
+    flex-direction: column !important;
+  }
+  .tf-course-player-sidebar {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 14rem !important;
+    border-bottom: 1px solid var(--tf-border-subtle);
+  }
+  .tf-course-player-main {
+    padding: var(--tf-space-6) var(--tf-space-4) !important;
+  }
 }
 
 @media (max-width: 640px) {
   .tf-hero-actions { flex-direction: column; align-items: stretch; }
   .tf-nav-buttons { flex-direction: column; }
+
+  .tf-course-player-sidebar {
+    max-height: 10rem !important;
+  }
 }
 `;
 }

@@ -32,6 +32,7 @@ export function LessonHeader({
       style={{
         display: "flex",
         flexDirection: "column",
+        alignItems: "flex-start",
         gap: "var(--tf-space-3)",
         marginBottom: "var(--tf-space-8)",
       }}

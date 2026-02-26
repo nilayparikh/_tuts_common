@@ -189,6 +189,9 @@ export function HeroSection({
               style={{
                 ...s.subheading,
                 textAlign: hasImage ? "left" : "center",
+                ...(hasImage
+                  ? {}
+                  : { marginLeft: "auto", marginRight: "auto" }),
               }}
             >
               {subheading}
@@ -224,7 +227,12 @@ export function HeroSection({
           )}
 
           {tags.length > 0 && (
-            <div style={s.tags}>
+            <div
+              style={{
+                ...s.tags,
+                ...(hasImage ? {} : { justifyContent: "center" }),
+              }}
+            >
               {tags.map((tag) => (
                 <span key={tag} style={s.tag}>
                   {tag}
