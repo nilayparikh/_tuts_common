@@ -30,20 +30,23 @@ export function StepCard({
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "48px 1fr",
+        gridTemplateColumns: "3rem 1fr",
         gap: "var(--tf-space-5)",
         padding: "var(--tf-space-6)",
         borderRadius: "var(--tf-radius-xl)",
-        border: `1px solid ${completed ? "rgba(16,185,129,0.35)" : "var(--tf-border-default)"}`,
-        background: completed ? "rgba(6,78,59,0.15)" : "var(--tf-bg-surface)",
+        border: `1px solid ${completed ? "var(--tf-color-success-border)" : "var(--tf-border-default)"}`,
+        background: completed
+          ? "var(--tf-color-success-container)"
+          : "var(--tf-bg-surface)",
         transition: "border-color var(--tf-transition-normal)",
       }}
+      className="tf-step-card"
     >
       {/* Step circle */}
       <div
         style={{
-          width: 48,
-          height: 48,
+          width: "3rem",
+          height: "3rem",
           borderRadius: "var(--tf-radius-full)",
           border: `2px solid ${completed ? "var(--tf-color-success)" : "var(--tf-color-primary)"}`,
           display: "flex",
@@ -56,7 +59,7 @@ export function StepCard({
             ? "var(--tf-color-success)"
             : "var(--tf-color-primary-light)",
           background: completed
-            ? "rgba(16,185,129,0.1)"
+            ? "var(--tf-color-success-container)"
             : "var(--tf-color-primary-bg)",
           flexShrink: 0,
         }}
@@ -125,7 +128,7 @@ export function StepCard({
                   fontFamily: "var(--tf-font-mono)",
                   fontSize: "var(--tf-text-xs)",
                   color: "var(--tf-text-muted)",
-                  letterSpacing: "0.04em",
+                  letterSpacing: "var(--tf-tracking-wide)",
                 }}
               >
                 {codeLanguage}
@@ -152,8 +155,8 @@ export function StepCard({
             style={{
               padding: "var(--tf-space-3) var(--tf-space-4)",
               borderRadius: "var(--tf-radius-md)",
-              background: "rgba(245,158,11,0.08)",
-              border: "1px solid rgba(245,158,11,0.25)",
+              background: "var(--tf-color-accent-container)",
+              border: "1px solid var(--tf-color-accent-border)",
               fontSize: "var(--tf-text-xs)",
               color: "var(--tf-color-accent-light)",
               display: "flex",

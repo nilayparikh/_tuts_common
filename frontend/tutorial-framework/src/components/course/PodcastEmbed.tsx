@@ -85,14 +85,15 @@ export function PodcastEmbed({
         ) : (
           <div
             style={{
-              width: 72,
-              height: 72,
+              width: "4.5rem",
+              height: "4.5rem",
               borderRadius: "var(--tf-radius-lg)",
-              background: "linear-gradient(135deg, #1DB954 0%, #191414 100%)",
+              background:
+                "linear-gradient(135deg, var(--tf-brand-spotify) 0%, var(--tf-bg-base) 100%)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 28,
+              fontSize: "var(--tf-text-2xl)",
               flexShrink: 0,
             }}
           >
@@ -219,7 +220,7 @@ export function PodcastEmbed({
               style={{
                 fontSize: "var(--tf-text-xs)",
                 fontWeight: 600,
-                color: "#1DB954",
+                color: "var(--tf-brand-spotify)",
                 textDecoration: "none",
               }}
             >
@@ -234,7 +235,7 @@ export function PodcastEmbed({
               style={{
                 fontSize: "var(--tf-text-xs)",
                 fontWeight: 600,
-                color: "#FC3C44",
+                color: "var(--tf-brand-apple)",
                 textDecoration: "none",
               }}
             >

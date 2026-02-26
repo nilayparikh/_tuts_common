@@ -31,7 +31,7 @@ export function Paragraph({
         margin: 0,
         fontFamily: "var(--tf-font-body)",
         fontSize: lead ? "var(--tf-text-lg)" : "var(--tf-text-md)",
-        fontWeight: lead ? 400 : 400,
+        fontWeight: "var(--tf-font-normal)",
         color: muted ? "var(--tf-text-muted)" : "var(--tf-text-secondary)",
         lineHeight: lead
           ? "var(--tf-leading-loose)"

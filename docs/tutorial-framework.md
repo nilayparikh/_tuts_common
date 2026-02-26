@@ -75,6 +75,56 @@ All styling uses CSS custom properties prefixed `--tf-`. They are injected by `<
 | `--tf-color-warning`             | `#fbbf24` (Gold)        | Warning states           |
 | `--tf-color-danger`              | `#ef4444` (Red)         | Error / danger states    |
 
+#### Container-High (Stronger Fills)
+
+Used for card backgrounds, hover states, and visual emphasis.
+
+| Token                                 | Default                 | Purpose                  |
+| ------------------------------------- | ----------------------- | ------------------------ |
+| `--tf-color-primary-container-high`   | `rgba(99,102,241,0.18)` | Primary highlight fill   |
+| `--tf-color-secondary-container-high` | `rgba(20,184,166,0.15)` | Secondary highlight fill |
+| `--tf-color-accent-container-high`    | `rgba(245,158,11,0.15)` | Accent highlight fill    |
+| `--tf-color-success-container-high`   | `rgba(16,185,129,0.15)` | Success highlight fill   |
+| `--tf-color-warning-container-high`   | `rgba(251,191,36,0.15)` | Warning highlight fill   |
+| `--tf-color-danger-container-high`    | `rgba(239,68,68,0.12)`  | Danger highlight fill    |
+
+#### Semantic Borders
+
+Border colors per semantic role (~35% opacity for visible outlines).
+
+| Token                         | Default                 | Purpose           |
+| ----------------------------- | ----------------------- | ----------------- |
+| `--tf-color-primary-border`   | `rgba(99,102,241,0.35)` | Primary outline   |
+| `--tf-color-secondary-border` | `rgba(20,184,166,0.35)` | Secondary outline |
+| `--tf-color-accent-border`    | `rgba(245,158,11,0.35)` | Accent outline    |
+| `--tf-color-success-border`   | `rgba(16,185,129,0.35)` | Success outline   |
+| `--tf-color-warning-border`   | `rgba(251,191,36,0.35)` | Warning outline   |
+| `--tf-color-danger-border`    | `rgba(239,68,68,0.35)`  | Danger outline    |
+
+#### Brand Colors (Third-Party Services)
+
+| Token                 | Default   | Purpose         |
+| --------------------- | --------- | --------------- |
+| `--tf-brand-youtube`  | `#ff0000` | YouTube embeds  |
+| `--tf-brand-spotify`  | `#1DB954` | Spotify embeds  |
+| `--tf-brand-apple`    | `#FC3C44` | Apple Podcasts  |
+| `--tf-brand-linkedin` | `#0a66c2` | LinkedIn embeds |
+
+#### Decorative Colors
+
+| Token               | Default   | Purpose                             |
+| ------------------- | --------- | ----------------------------------- |
+| `--tf-decor-red`    | `#ff5f57` | CodeBlock traffic-light dot (close) |
+| `--tf-decor-yellow` | `#febc2e` | CodeBlock traffic-light dot (min)   |
+| `--tf-decor-green`  | `#28c840` | CodeBlock traffic-light dot (max)   |
+
+#### Letter Spacing
+
+| Token                  | Value    | Purpose                          |
+| ---------------------- | -------- | -------------------------------- |
+| `--tf-tracking-wide`   | `0.06em` | Button labels, small caps        |
+| `--tf-tracking-widest` | `0.08em` | Hero subtitles, section dividers |
+
 #### Elevation (MD3 Shadow Levels)
 
 | Token                | Description               |
@@ -116,6 +166,38 @@ All styling uses CSS custom properties prefixed `--tf-`. They are injected by `<
   --tf-font-display: "Outfit", sans-serif;
 }
 ```
+
+### Responsive Layout Classes
+
+The framework injects responsive CSS via `<TutorialGlobalStyles />`. Components
+add these class names so they collapse gracefully on mobile — **no `!important`
+hacks in site CSS are needed**.
+
+| Class                | Breakpoint | Behaviour                         |
+| -------------------- | ---------- | --------------------------------- |
+| `.tf-concept-grid`   | ≤ 768px    | Grid columns → `1fr`              |
+| `.tf-hero-inner`     | ≤ 768px    | Padding reduced to `--tf-space-6` |
+| `.tf-sidebar-layout` | ≤ 768px    | Sidebar + content → single col    |
+| `.tf-step-card`      | ≤ 768px    | Step grid → stacked               |
+| `.tf-hero-actions`   | ≤ 640px    | Hero buttons → vertical stack     |
+| `.tf-nav-buttons`    | ≤ 640px    | Prev/Next buttons → full width    |
+
+### Strict Styling Rules
+
+Every colour, spacing, radius, shadow, and motion value in the framework
+**must** reference a `--tf-*` token. This ensures visual consistency across
+all sites.
+
+| ❌ Forbidden                        | ✅ Use Instead                                 |
+| ----------------------------------- | ---------------------------------------------- |
+| `rgba(99,102,241,0.12)`             | `var(--tf-color-primary-container)`            |
+| `"#fff"` / `"#000"`                 | `var(--tf-text-inverse)` / `var(--tf-bg-base)` |
+| `borderRadius: 9999`                | `var(--tf-radius-full)`                        |
+| `letterSpacing: "0.06em"`           | `var(--tf-tracking-wide)`                      |
+| `transition: "all 0.15s ease"`      | `var(--tf-transition-fast)`                    |
+| `fontSize: 18` / `width: 32`        | `var(--tf-text-lg)` / `2rem`                   |
+| `${color}44` (hex alpha on CSS var) | Explicit `borderColor` field with token        |
+| `padding: "2px 8px"`                | Token-relative values (`0.125rem 0.5rem`)      |
 
 ## Component Reference
 

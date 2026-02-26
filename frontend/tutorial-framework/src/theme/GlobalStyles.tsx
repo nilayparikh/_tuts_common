@@ -69,6 +69,33 @@ function buildCSS(): string {
   --tf-color-danger-bg:         ${c.dangerBg};
   --tf-color-danger-container:  ${c.dangerContainer};
 
+  /* Semantic borders */
+  --tf-color-primary-border:   ${c.primaryBorder};
+  --tf-color-secondary-border: ${c.secondaryBorder};
+  --tf-color-accent-border:    ${c.accentBorder};
+  --tf-color-success-border:   ${c.successBorder};
+  --tf-color-warning-border:   ${c.warningBorder};
+  --tf-color-danger-border:    ${c.dangerBorder};
+
+  /* Container High (stronger tint) */
+  --tf-color-primary-container-high:   ${c.primaryContainerHigh};
+  --tf-color-secondary-container-high: ${c.secondaryContainerHigh};
+  --tf-color-accent-container-high:    ${c.accentContainerHigh};
+  --tf-color-success-container-high:   ${c.successContainerHigh};
+  --tf-color-warning-container-high:   ${c.warningContainerHigh};
+  --tf-color-danger-container-high:    ${c.dangerContainerHigh};
+
+  /* Brand */
+  --tf-brand-youtube:  ${c.brandYouTube};
+  --tf-brand-spotify:  ${c.brandSpotify};
+  --tf-brand-apple:    ${c.brandApple};
+  --tf-brand-linkedin: ${c.brandLinkedIn};
+
+  /* Decorative */
+  --tf-decor-red:    ${c.decorRed};
+  --tf-decor-yellow: ${c.decorYellow};
+  --tf-decor-green:  ${c.decorGreen};
+
   /* Code */
   --tf-code-bg:       ${c.codeBg};
   --tf-code-text:     ${c.codeText};
@@ -107,8 +134,7 @@ function buildCSS(): string {
   --tf-tracking-normal:  ${ty.trackingNormal};
   --tf-tracking-wide:    ${ty.trackingWide};
   --tf-tracking-tight:   ${ty.trackingTight};
-  --tf-tracking-tighter: ${ty.trackingTighter};
-
+  --tf-tracking-tighter: ${ty.trackingTighter};  --tf-tracking-widest:   ${ty.trackingWidest};
   /* Spacing */
   --tf-space-0:  0;
   --tf-space-1:  0.25rem;
@@ -253,5 +279,18 @@ h1, h2, h3, h4, h5, h6 {
 /* ─── Prose defaults ─────────────────────────────────────────────────────── */
 p { line-height: var(--tf-leading-relaxed); }
 strong { font-weight: var(--tf-font-semibold); color: var(--tf-text-primary); }
+
+/* ─── Responsive: framework-level breakpoints ────────────────────────────── */
+@media (max-width: 768px) {
+  .tf-concept-grid { grid-template-columns: 1fr !important; }
+  .tf-hero-inner { grid-template-columns: 1fr !important; }
+  .tf-sidebar-layout { grid-template-columns: 1fr !important; }
+  .tf-step-card { grid-template-columns: 2.5rem 1fr !important; }
+}
+
+@media (max-width: 640px) {
+  .tf-hero-actions { flex-direction: column; align-items: stretch; }
+  .tf-nav-buttons { flex-direction: column; }
+}
 `;
 }

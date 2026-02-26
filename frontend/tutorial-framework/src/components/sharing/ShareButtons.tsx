@@ -136,7 +136,7 @@ export function ShareButtons({
           fontSize: "var(--tf-text-xs)",
           fontWeight: 600,
           color: "var(--tf-text-muted)",
-          letterSpacing: "0.06em",
+          letterSpacing: "var(--tf-tracking-wide)",
           textTransform: "uppercase",
         }}
       >
@@ -163,7 +163,7 @@ export function ShareButtons({
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "var(--tf-space-2)",
-                padding: "0.45em 0.9em",
+                padding: "var(--tf-space-2) var(--tf-space-3)",
                 borderRadius: "var(--tf-radius-lg)",
                 background: "var(--tf-bg-elevated)",
                 border: "1px solid var(--tf-border-default)",
@@ -198,12 +198,12 @@ export function ShareButtons({
               display: "inline-flex",
               alignItems: "center",
               gap: "var(--tf-space-2)",
-              padding: "0.45em 0.9em",
+              padding: "var(--tf-space-2) var(--tf-space-3)",
               borderRadius: "var(--tf-radius-lg)",
               background: copied
-                ? "rgba(16,185,129,0.1)"
+                ? "var(--tf-color-success-container)"
                 : "var(--tf-bg-elevated)",
-              border: `1px solid ${copied ? "rgba(16,185,129,0.4)" : "var(--tf-border-default)"}`,
+              border: `1px solid ${copied ? "var(--tf-color-success-border)" : "var(--tf-border-default)"}`,
               color: copied
                 ? "var(--tf-color-success)"
                 : "var(--tf-text-secondary)",

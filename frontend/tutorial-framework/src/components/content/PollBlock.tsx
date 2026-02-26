@@ -162,9 +162,9 @@ export function PollBlock({
                     bottom: 0,
                     width: `${percentage}%`,
                     background: isSelected
-                      ? "rgba(99,102,241,0.15)"
-                      : "rgba(202,211,230,0.05)",
-                    transition: "width 0.6s cubic-bezier(0.2, 0, 0, 1)",
+                      ? "var(--tf-color-primary-container-high)"
+                      : "var(--tf-bg-elevated)",
+                    transition: "width var(--tf-transition-slow)",
                   }}
                 />
               )}

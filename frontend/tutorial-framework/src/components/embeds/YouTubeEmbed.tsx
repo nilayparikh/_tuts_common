@@ -53,7 +53,7 @@ export function YouTubeEmbed({
           borderRadius: "var(--tf-radius-xl)",
           overflow: "hidden",
           border: "1px solid var(--tf-border-default)",
-          background: "#000",
+          background: "var(--tf-bg-base)",
           boxShadow: "var(--tf-shadow-lg)",
         }}
       >
@@ -97,10 +97,10 @@ export function YouTubeEmbed({
             >
               <div
                 style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: "50%",
-                  background: "rgba(255,0,0,0.9)",
+                  width: "4.5rem",
+                  height: "4.5rem",
+                  borderRadius: "var(--tf-radius-full)",
+                  background: "var(--tf-brand-youtube)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

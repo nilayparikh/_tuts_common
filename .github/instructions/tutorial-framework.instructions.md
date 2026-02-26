@@ -94,7 +94,37 @@ Override tutorial framework tokens in `app/globals.css`:
 
 Never use inline style for values that should be tokens.
 
-### 5. Content Updates
+### 5. Token Tiers
+
+The framework provides multiple tiers of semantic tokens. Always choose the
+most specific tier available instead of hard-coding values.
+
+| Tier                     | Prefix / Example                    | When to use                        |
+| ------------------------ | ----------------------------------- | ---------------------------------- |
+| Base container           | `--tf-color-primary-container`      | Light fills, backgrounds           |
+| Container-high           | `--tf-color-primary-container-high` | Stronger fills, hover/active state |
+| Semantic border          | `--tf-color-primary-border`         | Outline / border colours           |
+| Brand                    | `--tf-brand-youtube`                | Third-party service colours        |
+| Decorative               | `--tf-decor-red`                    | Traffic-light dots, cosmetic only  |
+| Letter-spacing           | `--tf-tracking-wide` / `widest`     | Caps, badges, subtitles            |
+
+**Never** append hex alpha to a CSS variable (e.g. `${color}44`). Instead,
+use the appropriate `*-border` or `*-container-high` token.
+
+### 6. Responsive Classes
+
+Components use framework-provided CSS classes for responsive layout:
+
+- `.tf-concept-grid` — collapses at ≤ 768px
+- `.tf-sidebar-layout` — collapses at ≤ 768px
+- `.tf-step-card` — collapses at ≤ 768px
+- `.tf-hero-actions` — stacks at ≤ 640px
+- `.tf-nav-buttons` — stacks at ≤ 640px
+
+Site CSS (`globals.css`) must **not** override these with `!important`.
+If layout needs differ, add a new class to `GlobalStyles.tsx`.
+
+### 7. Content Updates
 
 Content goes INSIDE component props. If you need to add new content:
 

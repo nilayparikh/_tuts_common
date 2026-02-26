@@ -105,8 +105,8 @@ export function CourseSidebar({
           <div
             style={{
               flex: 1,
-              height: 4,
-              borderRadius: 9999,
+              height: "0.25rem",
+              borderRadius: "var(--tf-radius-full)",
               background: "var(--tf-bg-elevated)",
               overflow: "hidden",
             }}
@@ -117,7 +117,7 @@ export function CourseSidebar({
                 width: `${(completedCount / parts.length) * 100}%`,
                 background:
                   "linear-gradient(90deg, var(--tf-color-primary) 0%, var(--tf-color-accent) 100%)",
-                borderRadius: 9999,
+                borderRadius: "var(--tf-radius-full)",
                 transition: "width 0.4s ease",
               }}
             />
@@ -206,9 +206,9 @@ export function CourseSidebar({
                 <span
                   style={{
                     flexShrink: 0,
-                    width: 20,
-                    height: 20,
-                    borderRadius: "50%",
+                    width: "1.25rem",
+                    height: "1.25rem",
+                    borderRadius: "var(--tf-radius-full)",
                     border: part.isCompleted
                       ? "2px solid var(--tf-color-success)"
                       : "2px solid var(--tf-border-default)",

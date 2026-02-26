@@ -76,7 +76,7 @@ export function SectionDivider({
             fontFamily: "var(--tf-font-mono)",
             fontSize: "var(--tf-text-xs)",
             color: "var(--tf-text-muted)",
-            letterSpacing: "0.08em",
+            letterSpacing: "var(--tf-tracking-widest)",
             textTransform: "uppercase",
             flexShrink: 0,
           }}
@@ -130,7 +130,7 @@ export function SectionHeading({
             fontFamily: "var(--tf-font-mono)",
             fontSize: "var(--tf-text-xs)",
             fontWeight: 600,
-            letterSpacing: "0.1em",
+            letterSpacing: "var(--tf-tracking-widest)",
             textTransform: "uppercase",
             color: "var(--tf-color-primary-light)",
             marginBottom: "var(--tf-space-3)",
@@ -158,7 +158,7 @@ export function SectionHeading({
             fontSize: "var(--tf-text-lg)",
             color: "var(--tf-text-secondary)",
             lineHeight: "var(--tf-leading-relaxed)",
-            maxWidth: align === "center" ? 640 : undefined,
+            maxWidth: align === "center" ? "40rem" : undefined,
             margin: align === "center" ? "0 auto" : undefined,
           }}
         >

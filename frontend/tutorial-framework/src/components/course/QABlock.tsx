@@ -87,19 +87,19 @@ function QACard({
         <span
           style={{
             flexShrink: 0,
-            width: 24,
-            height: 24,
-            borderRadius: "50%",
-            background: "rgba(99,102,241,0.15)",
-            border: "1px solid rgba(99,102,241,0.3)",
+            width: "1.5rem",
+            height: "1.5rem",
+            borderRadius: "var(--tf-radius-full)",
+            background: "var(--tf-color-primary-container-high)",
+            border: "1px solid var(--tf-color-primary-border)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: "0.65rem",
+            fontSize: "var(--tf-text-xs)",
             fontWeight: 700,
             fontFamily: "var(--tf-font-mono)",
             color: "var(--tf-color-primary-light)",
-            marginTop: 2,
+            marginTop: "0.125rem",
           }}
         >
           Q
@@ -120,7 +120,7 @@ function QACard({
       {/* Answer */}
       <div
         style={{
-          paddingLeft: "calc(24px + var(--tf-space-3))",
+          paddingLeft: "calc(1.5rem + var(--tf-space-3))",
           display: "flex",
           alignItems: "flex-start",
           gap: "var(--tf-space-3)",

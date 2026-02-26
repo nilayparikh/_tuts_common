@@ -54,18 +54,18 @@ function QuizQuestionItem({
         border: `1px solid ${
           disabled
             ? isCorrect
-              ? "rgba(16,185,129,0.4)"
+              ? "var(--tf-color-success-border)"
               : isWrong
-                ? "rgba(239,68,68,0.4)"
+                ? "var(--tf-color-danger-border)"
                 : "var(--tf-border-default)"
             : "var(--tf-border-default)"
         }`,
         borderRadius: "var(--tf-radius-xl)",
         background: disabled
           ? isCorrect
-            ? "rgba(16,185,129,0.06)"
+            ? "var(--tf-color-success-container)"
             : isWrong
-              ? "rgba(239,68,68,0.06)"
+              ? "var(--tf-color-danger-container)"
               : "var(--tf-bg-surface)"
           : "var(--tf-bg-surface)",
         display: "flex",
@@ -113,17 +113,17 @@ function QuizQuestionItem({
 
           if (disabled) {
             if (isCorrectOpt) {
-              optBg = "rgba(16,185,129,0.12)";
-              optBorder = "rgba(16,185,129,0.5)";
+              optBg = "var(--tf-color-success-container)";
+              optBorder = "var(--tf-color-success-border)";
               optColor = "var(--tf-color-success)";
             } else if (isSelected && !isCorrectOpt) {
-              optBg = "rgba(239,68,68,0.12)";
-              optBorder = "rgba(239,68,68,0.5)";
+              optBg = "var(--tf-color-danger-container)";
+              optBorder = "var(--tf-color-danger-border)";
               optColor = "var(--tf-color-danger)";
             }
           } else if (isSelected) {
-            optBg = "rgba(99,102,241,0.12)";
-            optBorder = "rgba(99,102,241,0.5)";
+            optBg = "var(--tf-color-primary-container)";
+            optBorder = "var(--tf-color-primary-border)";
             optColor = "var(--tf-color-primary-light)";
           }
 
@@ -145,7 +145,7 @@ function QuizQuestionItem({
                 textAlign: "left",
                 fontFamily: "var(--tf-font-body)",
                 fontSize: "var(--tf-text-sm)",
-                transition: "all 0.15s ease",
+                transition: "all var(--tf-transition-fast)",
                 width: "100%",
               }}
             >
@@ -153,9 +153,9 @@ function QuizQuestionItem({
               <span
                 style={{
                   flexShrink: 0,
-                  width: 16,
-                  height: 16,
-                  borderRadius: "50%",
+                  width: "1rem",
+                  height: "1rem",
+                  borderRadius: "var(--tf-radius-full)",
                   border: `2px solid ${optBorder}`,
                   background:
                     isSelected || (disabled && isCorrectOpt)
@@ -167,10 +167,24 @@ function QuizQuestionItem({
                 }}
               >
                 {disabled && isCorrectOpt && (
-                  <span style={{ fontSize: "0.5rem", color: "#fff" }}>✓</span>
+                  <span
+                    style={{
+                      fontSize: "var(--tf-text-xs)",
+                      color: "var(--tf-text-inverse)",
+                    }}
+                  >
+                    ✓
+                  </span>
                 )}
                 {disabled && isSelected && !isCorrectOpt && (
-                  <span style={{ fontSize: "0.5rem", color: "#fff" }}>✗</span>
+                  <span
+                    style={{
+                      fontSize: "var(--tf-text-xs)",
+                      color: "var(--tf-text-inverse)",
+                    }}
+                  >
+                    ✗
+                  </span>
                 )}
               </span>
               <span style={{ fontWeight: isSelected ? 600 : 400 }}>
@@ -277,7 +291,7 @@ export function QuizBlock({
             marginBottom: "var(--tf-space-2)",
           }}
         >
-          <span style={{ fontSize: 24 }}>📝</span>
+          <span style={{ fontSize: "var(--tf-text-2xl)" }}>📝</span>
           <h2
             style={{
               margin: 0,
@@ -296,7 +310,7 @@ export function QuizBlock({
               fontSize: "var(--tf-text-xs)",
               color: "var(--tf-text-muted)",
               background: "var(--tf-bg-elevated)",
-              padding: "2px 8px",
+              padding: "var(--tf-space-0) var(--tf-space-2)",
               borderRadius: "var(--tf-radius-full)",
               border: "1px solid var(--tf-border-subtle)",
             }}
@@ -347,15 +361,17 @@ export function QuizBlock({
             padding: "var(--tf-space-5) var(--tf-space-6)",
             borderRadius: "var(--tf-radius-xl)",
             background: passed
-              ? "rgba(16,185,129,0.10)"
-              : "rgba(239,68,68,0.10)",
-            border: `1px solid ${passed ? "rgba(16,185,129,0.35)" : "rgba(239,68,68,0.35)"}`,
+              ? "var(--tf-color-success-container)"
+              : "var(--tf-color-danger-container)",
+            border: `1px solid ${passed ? "var(--tf-color-success-border)" : "var(--tf-color-danger-border)"}`,
             display: "flex",
             alignItems: "center",
             gap: "var(--tf-space-4)",
           }}
         >
-          <span style={{ fontSize: 32 }}>{passed ? "🏆" : "🔄"}</span>
+          <span style={{ fontSize: "var(--tf-text-3xl)" }}>
+            {passed ? "🏆" : "🔄"}
+          </span>
           <div>
             <p
               style={{
@@ -400,13 +416,15 @@ export function QuizBlock({
               background: allAnswered
                 ? "var(--tf-color-primary)"
                 : "var(--tf-bg-elevated)",
-              color: allAnswered ? "#fff" : "var(--tf-text-muted)",
+              color: allAnswered
+                ? "var(--tf-text-inverse)"
+                : "var(--tf-text-muted)",
               border: "none",
               fontFamily: "var(--tf-font-body)",
               fontWeight: 600,
               fontSize: "var(--tf-text-sm)",
               cursor: allAnswered ? "pointer" : "not-allowed",
-              transition: "background 0.15s ease",
+              transition: "background var(--tf-transition-fast)",
             }}
           >
             Submit answers

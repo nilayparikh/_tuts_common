@@ -60,16 +60,17 @@ export function LessonList({
               background: "var(--tf-bg-surface)",
               textDecoration: "none",
               color: "inherit",
-              transition: "border-color 0.15s, background 0.15s",
+              transition:
+                "border-color var(--tf-transition-fast), background var(--tf-transition-fast)",
             }}
           >
             {/* Step number */}
             <span
               style={{
                 flexShrink: 0,
-                width: 32,
-                height: 32,
-                borderRadius: "50%",
+                width: "2rem",
+                height: "2rem",
+                borderRadius: "var(--tf-radius-full)",
                 border: "1px solid var(--tf-border-default)",
                 display: "flex",
                 alignItems: "center",
@@ -110,7 +111,7 @@ export function LessonList({
                 (part as CoursePart & { description?: string }).description && (
                   <p
                     style={{
-                      margin: "2px 0 0",
+                      margin: "var(--tf-space-0) 0 0",
                       fontSize: "var(--tf-text-xs)",
                       color: "var(--tf-text-muted)",
                       whiteSpace: "nowrap",

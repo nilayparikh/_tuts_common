@@ -34,33 +34,33 @@ const variantMap: Record<
     tagColor: "var(--tf-text-muted)",
   },
   primary: {
-    border: "rgba(99,102,241,0.4)",
-    bg: "rgba(30,27,75,0.4)",
+    border: "var(--tf-color-primary-border)",
+    bg: "var(--tf-color-primary-container)",
     iconBg: "var(--tf-color-primary-bg)",
     tagColor: "var(--tf-color-primary-light)",
   },
   accent: {
-    border: "rgba(245,158,11,0.4)",
-    bg: "rgba(61,46,10,0.3)",
-    iconBg: "rgba(61,46,10,0.6)",
+    border: "var(--tf-color-accent-border)",
+    bg: "var(--tf-color-accent-container)",
+    iconBg: "var(--tf-color-accent-container-high)",
     tagColor: "var(--tf-color-accent-light)",
   },
   success: {
-    border: "rgba(16,185,129,0.4)",
-    bg: "rgba(6,78,59,0.2)",
-    iconBg: "rgba(6,78,59,0.4)",
+    border: "var(--tf-color-success-border)",
+    bg: "var(--tf-color-success-container)",
+    iconBg: "var(--tf-color-success-container-high)",
     tagColor: "var(--tf-color-success)",
   },
   warning: {
-    border: "rgba(245,158,11,0.4)",
-    bg: "rgba(61,46,10,0.2)",
-    iconBg: "rgba(61,46,10,0.4)",
+    border: "var(--tf-color-warning-border)",
+    bg: "var(--tf-color-warning-container)",
+    iconBg: "var(--tf-color-warning-container-high)",
     tagColor: "var(--tf-color-warning)",
   },
   danger: {
-    border: "rgba(239,68,68,0.4)",
-    bg: "rgba(59,15,15,0.2)",
-    iconBg: "rgba(59,15,15,0.4)",
+    border: "var(--tf-color-danger-border)",
+    bg: "var(--tf-color-danger-container)",
+    iconBg: "var(--tf-color-danger-container-high)",
     tagColor: "var(--tf-color-danger)",
   },
 };
@@ -98,14 +98,14 @@ export function ConceptCard({
       {icon && (
         <div
           style={{
-            width: 44,
-            height: 44,
+            width: "2.75rem",
+            height: "2.75rem",
             borderRadius: "var(--tf-radius-lg)",
             background: v.iconBg,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: isEmoji ? "1.375rem" : undefined,
+            fontSize: isEmoji ? "var(--tf-text-xl)" : undefined,
           }}
         >
           {isEmoji ? icon : <img src={icon} alt="" width={24} height={24} />}
@@ -119,7 +119,7 @@ export function ConceptCard({
               fontSize: "var(--tf-text-xs)",
               fontWeight: 600,
               color: v.tagColor,
-              letterSpacing: "0.06em",
+              letterSpacing: "var(--tf-tracking-wide)",
               textTransform: "uppercase",
               display: "block",
               marginBottom: "var(--tf-space-1)",
@@ -182,6 +182,7 @@ export function ConceptGrid({
         gridTemplateColumns: `repeat(${columns}, 1fr)`,
         gap: "var(--tf-space-5)",
       }}
+      className="tf-concept-grid"
     >
       {children}
     </div>

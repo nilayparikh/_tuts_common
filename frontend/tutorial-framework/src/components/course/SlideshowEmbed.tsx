@@ -33,11 +33,23 @@ const PROVIDER_META: Record<
   SlideshowProvider,
   { label: string; icon: string; color: string }
 > = {
-  "google-slides": { label: "Google Slides", icon: "📊", color: "#34A853" },
-  slideshare: { label: "SlideShare", icon: "📑", color: "#00A0DC" },
-  speakerdeck: { label: "Speaker Deck", icon: "🎤", color: "#009AD0" },
-  canva: { label: "Canva", icon: "🎨", color: "#8B3DFF" },
-  figma: { label: "Figma Slides", icon: "🔷", color: "#F24E1E" },
+  "google-slides": {
+    label: "Google Slides",
+    icon: "📊",
+    color: "var(--tf-color-success)",
+  },
+  slideshare: {
+    label: "SlideShare",
+    icon: "📑",
+    color: "var(--tf-color-secondary)",
+  },
+  speakerdeck: {
+    label: "Speaker Deck",
+    icon: "🎤",
+    color: "var(--tf-color-secondary)",
+  },
+  canva: { label: "Canva", icon: "🎨", color: "var(--tf-color-primary-light)" },
+  figma: { label: "Figma Slides", icon: "🔷", color: "var(--tf-color-danger)" },
   generic: { label: "Slideshow", icon: "📑", color: "var(--tf-text-muted)" },
 };
 
@@ -78,7 +90,7 @@ export function SlideshowEmbed({
           borderBottom: "1px solid var(--tf-border-subtle)",
         }}
       >
-        <span style={{ fontSize: 18 }}>{meta.icon}</span>
+        <span style={{ fontSize: "var(--tf-text-lg)" }}>{meta.icon}</span>
         <span
           style={{
             flex: 1,
@@ -103,7 +115,7 @@ export function SlideshowEmbed({
           {slideCount && <span>{slideCount} slides</span>}
           <span
             style={{
-              padding: "2px 8px",
+              padding: "var(--tf-space-0) var(--tf-space-2)",
               borderRadius: "var(--tf-radius-full)",
               background: "var(--tf-bg-elevated)",
               border: "1px solid var(--tf-border-subtle)",

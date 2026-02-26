@@ -62,6 +62,28 @@ export const tokens = {
     dangerBg: "#3b0f0f",
     dangerContainer: "rgba(239,68,68,0.08)",
 
+    // Semantic borders (MD3 outline per role — ~35 % opacity)
+    primaryBorder: "rgba(99,102,241,0.35)",
+    secondaryBorder: "rgba(20,184,166,0.35)",
+    accentBorder: "rgba(245,158,11,0.35)",
+    successBorder: "rgba(16,185,129,0.35)",
+    warningBorder: "rgba(251,191,36,0.35)",
+    dangerBorder: "rgba(239,68,68,0.35)",
+
+    // Stronger containers (MD3 Container High — ~18 % opacity)
+    primaryContainerHigh: "rgba(99,102,241,0.18)",
+    secondaryContainerHigh: "rgba(20,184,166,0.18)",
+    accentContainerHigh: "rgba(245,158,11,0.14)",
+    successContainerHigh: "rgba(16,185,129,0.15)",
+    warningContainerHigh: "rgba(251,191,36,0.14)",
+    dangerContainerHigh: "rgba(239,68,68,0.12)",
+
+    // Brand (third-party service colors)
+    brandYouTube: "#ff0000",
+    brandSpotify: "#1DB954",
+    brandApple: "#FC3C44",
+    brandLinkedIn: "#0a66c2",
+
     // Code
     codeBg: palette.background.overlay,
     codeText: "#e2e8f0",
@@ -69,6 +91,11 @@ export const tokens = {
     codeString: palette.success[400],
     codeComment: palette.text.muted,
     codeNumber: palette.accent[400],
+
+    // Decorative (traffic-light dots)
+    decorRed: "#ff5f57",
+    decorYellow: "#febc2e",
+    decorGreen: "#28c840",
   },
 
   typography: {
@@ -108,6 +135,7 @@ export const tokens = {
     trackingWide: "0.025em",
     trackingTight: "-0.015em",
     trackingTighter: "-0.025em",
+    trackingWidest: "0.08em",
   },
 
   spacing: {

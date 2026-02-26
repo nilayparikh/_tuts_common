@@ -14,55 +14,69 @@ export interface PartTypeBadgeProps {
 
 const META: Record<
   PartType,
-  { icon: string; label: string; bg: string; color: string }
+  {
+    icon: string;
+    label: string;
+    bg: string;
+    color: string;
+    borderColor: string;
+  }
 > = {
   video: {
     icon: "▶",
     label: "Video",
-    bg: "rgba(239,68,68,0.1)",
-    color: "#f87171",
+    bg: "var(--tf-color-danger-container)",
+    color: "var(--tf-color-danger)",
+    borderColor: "var(--tf-color-danger-border)",
   },
   reading: {
     icon: "📖",
     label: "Reading",
-    bg: "rgba(99,102,241,0.1)",
+    bg: "var(--tf-color-primary-container)",
     color: "var(--tf-color-primary-light)",
+    borderColor: "var(--tf-color-primary-border)",
   },
   "video-code": {
     icon: "💻",
     label: "Video with Code",
-    bg: "rgba(245,158,11,0.1)",
+    bg: "var(--tf-color-accent-container)",
     color: "var(--tf-color-accent-light)",
+    borderColor: "var(--tf-color-accent-border)",
   },
   quiz: {
     icon: "📝",
     label: "Graded · Quiz",
-    bg: "rgba(16,185,129,0.1)",
+    bg: "var(--tf-color-success-container)",
     color: "var(--tf-color-success)",
+    borderColor: "var(--tf-color-success-border)",
   },
   podcast: {
     icon: "🎙",
     label: "Podcast",
-    bg: "rgba(29,185,84,0.1)",
-    color: "#1DB954",
+    bg: "var(--tf-color-success-container)",
+    color: "var(--tf-brand-spotify)",
+    borderColor: "var(--tf-color-success-border)",
   },
   slideshow: {
     icon: "📑",
     label: "Slides",
-    bg: "rgba(139,61,255,0.1)",
-    color: "#a78bfa",
+    bg: "var(--tf-color-primary-container)",
+    color: "var(--tf-color-primary-light)",
+    borderColor: "var(--tf-color-primary-border)",
   },
   article: {
     icon: "📰",
     label: "Article",
-    bg: "rgba(14,165,233,0.1)",
-    color: "#38bdf8",
+    bg: "var(--tf-color-secondary-container)",
+    color: "var(--tf-color-secondary-light)",
+    borderColor: "var(--tf-color-secondary-border)",
   },
   lab: {
     icon: "🧪",
     label: "Lab",
-    bg: "rgba(245,158,11,0.1)",
+    bg: "var(--tf-color-accent-container)",
     color: "var(--tf-color-accent)",
+    borderColor: "var(--tf-color-accent-border)",
   },
 };
 
@@ -81,11 +95,13 @@ export function PartTypeBadge({
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: isSm ? "0.25rem" : "0.375rem",
-        padding: isSm ? "2px 8px" : "4px 12px",
-        borderRadius: 9999,
+        gap: isSm ? "var(--tf-space-1)" : "var(--tf-space-2)",
+        padding: isSm
+          ? "var(--tf-space-0) var(--tf-space-2)"
+          : "var(--tf-space-1) var(--tf-space-3)",
+        borderRadius: "var(--tf-radius-full)",
         background: m.bg,
-        border: `1px solid ${m.color}44`,
+        border: `1px solid ${m.borderColor}`,
         fontFamily: "var(--tf-font-mono)",
         fontSize: isSm ? "var(--tf-text-xs)" : "var(--tf-text-sm)",
         fontWeight: 600,
@@ -93,7 +109,7 @@ export function PartTypeBadge({
         whiteSpace: "nowrap",
       }}
     >
-      <span style={{ fontSize: isSm ? "0.65rem" : "0.75rem" }}>{m.icon}</span>
+      <span style={{ fontSize: "var(--tf-text-xs)" }}>{m.icon}</span>
       <span>{m.label}</span>
       {duration && (
         <>

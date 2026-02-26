@@ -63,9 +63,9 @@ export function CodeBlock({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "0.5em var(--tf-space-4)",
+            padding: "var(--tf-space-2) var(--tf-space-4)",
             borderBottom: "1px solid var(--tf-border-subtle)",
-            background: "rgba(255,255,255,0.02)",
+            background: "var(--tf-bg-overlay)",
           }}
         >
           <div
@@ -76,14 +76,18 @@ export function CodeBlock({
             }}
           >
             {/* Traffic lights decoration */}
-            <div style={{ display: "flex", gap: 6 }}>
-              {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
+            <div style={{ display: "flex", gap: "var(--tf-space-1)" }}>
+              {[
+                "var(--tf-decor-red)",
+                "var(--tf-decor-yellow)",
+                "var(--tf-decor-green)",
+              ].map((c) => (
                 <div
                   key={c}
                   style={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: "50%",
+                    width: "0.75rem",
+                    height: "0.75rem",
+                    borderRadius: "var(--tf-radius-full)",
                     background: c,
                     opacity: 0.7,
                   }}
@@ -107,7 +111,7 @@ export function CodeBlock({
                   fontFamily: "var(--tf-font-mono)",
                   fontSize: "var(--tf-text-xs)",
                   color: "var(--tf-text-muted)",
-                  letterSpacing: "0.04em",
+                  letterSpacing: "var(--tf-tracking-wide)",
                 }}
               >
                 {language}
@@ -122,10 +126,12 @@ export function CodeBlock({
                 display: "flex",
                 alignItems: "center",
                 gap: "var(--tf-space-1)",
-                padding: "0.25em 0.6em",
+                padding: "var(--tf-space-1) var(--tf-space-2)",
                 borderRadius: "var(--tf-radius-md)",
-                background: copied ? "rgba(16,185,129,0.15)" : "transparent",
-                border: `1px solid ${copied ? "rgba(16,185,129,0.4)" : "var(--tf-border-subtle)"}`,
+                background: copied
+                  ? "var(--tf-color-success-container-high)"
+                  : "transparent",
+                border: `1px solid ${copied ? "var(--tf-color-success-border)" : "var(--tf-border-subtle)"}`,
                 color: copied
                   ? "var(--tf-color-success)"
                   : "var(--tf-text-muted)",
@@ -194,7 +200,7 @@ export function CodeBlock({
                       key={i}
                       style={{
                         background: isHighlighted
-                          ? "rgba(99,102,241,0.12)"
+                          ? "var(--tf-color-primary-container)"
                           : "transparent",
                       }}
                     >

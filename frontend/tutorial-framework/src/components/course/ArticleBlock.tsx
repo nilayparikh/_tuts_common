@@ -134,9 +134,9 @@ export function ArticleBlock({
                 ) : (
                   <div
                     style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: "50%",
+                      width: "2rem",
+                      height: "2rem",
+                      borderRadius: "var(--tf-radius-full)",
                       background:
                         "linear-gradient(135deg, var(--tf-color-primary) 0%, var(--tf-color-accent) 100%)",
                       display: "flex",
@@ -144,7 +144,7 @@ export function ArticleBlock({
                       justifyContent: "center",
                       fontWeight: 700,
                       fontSize: "var(--tf-text-sm)",
-                      color: "#fff",
+                      color: "var(--tf-text-inverse)",
                     }}
                   >
                     {author.name.charAt(0).toUpperCase()}
@@ -207,7 +207,7 @@ export function ArticleBlock({
               borderRadius: "var(--tf-radius-xl)",
               border: "1px solid var(--tf-border-subtle)",
               objectFit: "cover",
-              maxHeight: 420,
+              maxHeight: "26rem",
             }}
           />
         </figure>
