@@ -58,8 +58,6 @@ export function CourseSidebar({
   basePath,
   totalDuration,
 }: CourseSidebarProps): React.ReactElement {
-  const completedCount = parts.filter((p) => p.isCompleted).length;
-
   return (
     <nav
       aria-label="Course navigation"
@@ -80,18 +78,27 @@ export function CourseSidebar({
           flexShrink: 0,
         }}
       >
-        <p
+        <a
+          href={`${basePath}/`}
           style={{
-            fontFamily: "var(--tf-font-display)",
-            fontWeight: 700,
-            fontSize: "var(--tf-text-md)",
-            color: "var(--tf-text-primary)",
-            lineHeight: "var(--tf-leading-snug)",
-            margin: 0,
+            textDecoration: "none",
+            color: "inherit",
+            display: "block",
           }}
         >
-          {courseTitle}
-        </p>
+          <p
+            style={{
+              fontFamily: "var(--tf-font-display)",
+              fontWeight: 700,
+              fontSize: "var(--tf-text-md)",
+              color: "var(--tf-text-primary)",
+              lineHeight: "var(--tf-leading-snug)",
+              margin: 0,
+            }}
+          >
+            {courseTitle}
+          </p>
+        </a>
 
         {/* Duration + count */}
         <div
@@ -121,47 +128,7 @@ export function CourseSidebar({
               {totalDuration}
             </span>
           )}
-        </div>
-
-        {/* Progress bar */}
-        <div
-          style={{
-            marginTop: "var(--tf-space-3)",
-            display: "flex",
-            alignItems: "center",
-            gap: "var(--tf-space-3)",
-          }}
-        >
-          <div
-            style={{
-              flex: 1,
-              height: "0.25rem",
-              borderRadius: "var(--tf-radius-full)",
-              background: "var(--tf-bg-elevated)",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                height: "100%",
-                width: `${(completedCount / parts.length) * 100}%`,
-                background:
-                  "linear-gradient(90deg, var(--tf-color-primary) 0%, var(--tf-color-accent) 100%)",
-                borderRadius: "var(--tf-radius-full)",
-                transition: "width 0.4s ease",
-              }}
-            />
-          </div>
-          <span
-            style={{
-              fontFamily: "var(--tf-font-mono)",
-              fontSize: "var(--tf-text-xs)",
-              color: "var(--tf-text-muted)",
-              flexShrink: 0,
-            }}
-          >
-            {completedCount}/{parts.length}
-          </span>
+          <span>{parts.length} lessons</span>
         </div>
       </div>
 
@@ -228,40 +195,25 @@ export function CourseSidebar({
                     width: "1.5rem",
                     height: "1.5rem",
                     borderRadius: "var(--tf-radius-full)",
-                    border: part.isCompleted
-                      ? "2px solid var(--tf-color-success)"
-                      : isCurrent
-                        ? "2px solid var(--tf-color-primary)"
-                        : "2px solid var(--tf-border-default)",
+                    border: isCurrent
+                      ? "2px solid var(--tf-color-primary)"
+                      : "2px solid var(--tf-border-default)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: "var(--tf-text-xs)",
                     fontWeight: 700,
                     fontFamily: "var(--tf-font-mono)",
-                    color: part.isCompleted
-                      ? "var(--tf-color-success)"
-                      : isCurrent
-                        ? "var(--tf-color-primary-light)"
-                        : "var(--tf-text-muted)",
-                    background: part.isCompleted
-                      ? "var(--tf-color-success-container)"
-                      : isCurrent
-                        ? "var(--tf-color-primary-container)"
-                        : "transparent",
+                    color: isCurrent
+                      ? "var(--tf-color-primary-light)"
+                      : "var(--tf-text-muted)",
+                    background: isCurrent
+                      ? "var(--tf-color-primary-container)"
+                      : "transparent",
                     marginTop: "0.0625rem",
                   }}
                 >
-                  {part.isCompleted ? (
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ fontSize: "14px" }}
-                    >
-                      check
-                    </span>
-                  ) : (
-                    i + 1
-                  )}
+                  {i + 1}
                 </span>
 
                 {/* Text block */}

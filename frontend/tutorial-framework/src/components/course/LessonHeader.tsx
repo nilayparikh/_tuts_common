@@ -13,6 +13,10 @@ export interface LessonHeaderProps {
   title: string;
   /** Lesson description / subtitle */
   description?: string;
+  /** Optional lesson number (e.g. 5 of 16) */
+  lessonNumber?: number;
+  /** Optional total lesson count */
+  totalLessons?: number;
 }
 
 // ─── Component ─────────────────────────────────────────────────────────────
@@ -33,8 +37,8 @@ export function LessonHeader({
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-start",
-        gap: "var(--tf-space-3)",
-        marginBottom: "var(--tf-space-8)",
+        gap: "var(--tf-space-4)",
+        marginBottom: "var(--tf-space-6)",
       }}
     >
       <PartTypeBadge type={type} duration={duration} />
@@ -44,10 +48,11 @@ export function LessonHeader({
           margin: 0,
           fontFamily: "var(--tf-font-display)",
           fontWeight: 800,
-          fontSize: "var(--tf-text-3xl)",
+          fontSize: "clamp(1.5rem, 4vw, var(--tf-text-3xl))",
           color: "var(--tf-text-primary)",
           lineHeight: "var(--tf-leading-snug)",
           letterSpacing: "var(--tf-tracking-tight)",
+          maxWidth: "40ch",
         }}
       >
         {title}
@@ -57,7 +62,7 @@ export function LessonHeader({
         <p
           style={{
             margin: 0,
-            fontSize: "var(--tf-text-lg)",
+            fontSize: "var(--tf-text-md)",
             color: "var(--tf-text-secondary)",
             lineHeight: "var(--tf-leading-relaxed)",
             maxWidth: "60ch",
