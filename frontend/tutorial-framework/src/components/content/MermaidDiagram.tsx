@@ -135,7 +135,11 @@ export function MermaidDiagram({
         {svg ? (
           <div
             dangerouslySetInnerHTML={{ __html: svg }}
-            style={{ minWidth: "fit-content", display: "flex", justifyContent: "center" }}
+            style={{
+              minWidth: "fit-content",
+              display: "flex",
+              justifyContent: "center",
+            }}
           />
         ) : (
           <span

@@ -74,17 +74,17 @@ import {
 } from "@localm/tutorial-framework";
 ```
 
-| Component            | Key Props                                                            |
-| -------------------- | -------------------------------------------------------------------- |
-| `CoursePlayerLayout`  | `header`, `footer`, `sidebar`, `children`, `sidebarWidth`           |
-| `CourseSidebar`       | `courseTitle`, `parts`, `currentSlug`, `courseOverviewHref`          |
-| `LessonHeader`        | `title`, `type`, `duration`, `partNumber`, `totalParts`             |
-| `LessonList`          | `parts`, `currentSlug`                                              |
-| `QuizBlock`           | `questions`, `onComplete`                                           |
-| `QABlock`             | `questions`                                                         |
-| `ArticleBlock`        | `content`, `readingUrl`                                             |
-| `PodcastEmbed`        | `podcastUrl`, `title`, `caption`                                    |
-| `SlideshowEmbed`      | `slideshowUrl`, `title`, `caption`                                  |
+| Component            | Key Props                                                   |
+| -------------------- | ----------------------------------------------------------- |
+| `CoursePlayerLayout` | `header`, `footer`, `sidebar`, `children`, `sidebarWidth`   |
+| `CourseSidebar`      | `courseTitle`, `parts`, `currentSlug`, `courseOverviewHref` |
+| `LessonHeader`       | `title`, `type`, `duration`, `partNumber`, `totalParts`     |
+| `LessonList`         | `parts`, `currentSlug`                                      |
+| `QuizBlock`          | `questions`, `onComplete`                                   |
+| `QABlock`            | `questions`                                                 |
+| `ArticleBlock`       | `content`, `readingUrl`                                     |
+| `PodcastEmbed`       | `podcastUrl`, `title`, `caption`                            |
+| `SlideshowEmbed`     | `slideshowUrl`, `title`, `caption`                          |
 
 ### Content Components
 
@@ -109,24 +109,24 @@ import {
 } from "@localm/tutorial-framework";
 ```
 
-| Component        | Key Props                                                                                                          |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `HeroSection`    | `headline` (supports `**bold**` for gradient), `eyebrow`, `subheading`, `primaryAction`, `secondaryAction`, `tags` |
-| `SectionHeading` | `title`, `eyebrow`, `subtitle`, `align`                                                                            |
-| `SectionDivider` | `variant` (default/gradient/dots), `label`                                                                         |
-| `ConceptCard`    | `title`, `description`, `icon` (emoji or URL), `variant`, `href`, `tag`                                            |
-| `ConceptGrid`    | `columns` (2/3/4), `children`                                                                                      |
-| `StepCard`       | `step`, `title`, `description`, `code`, `codeLanguage`, `note`, `completed`                                        |
-| `StepList`       | `children`                                                                                                         |
-| `CodeBlock`      | `code`, `language`, `filename`, `showCopy`, `showLineNumbers`, `highlightLines`                                    |
-| `CodePreview`    | `code`, `language`, `preview`                                                                                      |
-| `KeyPoint`       | `variant` (info/tip/warning/danger/success), `title`, `children`                                                   |
-| `TutorialNav`    | `prev`, `next` – both `{ label, href, description? }`                                                              |
-| `Paragraph`      | `children` — styled body text                                                                                      |
-| `DescriptionBox` | `title`, `children` — styled description block                                                                     |
-| `StepByStepGuide`| `steps` — sequential instruction guide                                                                             |
-| `VideoTranscript`| `transcript` — collapsible video transcript                                                                        |
-| `LabSettings`    | `settings` — lab configuration display                                                                             |
+| Component         | Key Props                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `HeroSection`     | `headline` (supports `**bold**` for gradient), `eyebrow`, `subheading`, `primaryAction`, `secondaryAction`, `tags` |
+| `SectionHeading`  | `title`, `eyebrow`, `subtitle`, `align`                                                                            |
+| `SectionDivider`  | `variant` (default/gradient/dots), `label`                                                                         |
+| `ConceptCard`     | `title`, `description`, `icon` (emoji or URL), `variant`, `href`, `tag`                                            |
+| `ConceptGrid`     | `columns` (2/3/4), `children`                                                                                      |
+| `StepCard`        | `step`, `title`, `description`, `code`, `codeLanguage`, `note`, `completed`                                        |
+| `StepList`        | `children`                                                                                                         |
+| `CodeBlock`       | `code`, `language`, `filename`, `showCopy`, `showLineNumbers`, `highlightLines`                                    |
+| `CodePreview`     | `code`, `language`, `preview`                                                                                      |
+| `KeyPoint`        | `variant` (info/tip/warning/danger/success), `title`, `children`                                                   |
+| `TutorialNav`     | `prev`, `next` – both `{ label, href, description? }`                                                              |
+| `Paragraph`       | `children` — styled body text                                                                                      |
+| `DescriptionBox`  | `title`, `children` — styled description block                                                                     |
+| `StepByStepGuide` | `steps` — sequential instruction guide                                                                             |
+| `VideoTranscript` | `transcript` — collapsible video transcript                                                                        |
+| `LabSettings`     | `settings` — lab configuration display                                                                             |
 
 ### Callout Aliases
 
@@ -144,14 +144,14 @@ import {
 } from "@localm/tutorial-framework";
 ```
 
-| Component    | Default variant | Use for                            |
-| ------------ | --------------- | ---------------------------------- |
-| `InfoBox`    | `info`          | Background context, explanations   |
-| `NoteBox`    | `note`          | Aside / additional context         |
-| `TipBox`     | `tip`           | Best-practice advice               |
-| `SuccessBox` | `success`       | What success looks like            |
-| `WarningBox` | `warning`       | Common mistakes, watch-outs        |
-| `DangerBox`  | `danger`        | Breaking changes, security issues  |
+| Component    | Default variant | Use for                           |
+| ------------ | --------------- | --------------------------------- |
+| `InfoBox`    | `info`          | Background context, explanations  |
+| `NoteBox`    | `note`          | Aside / additional context        |
+| `TipBox`     | `tip`           | Best-practice advice              |
+| `SuccessBox` | `success`       | What success looks like           |
+| `WarningBox` | `warning`       | Common mistakes, watch-outs       |
+| `DangerBox`  | `danger`        | Breaking changes, security issues |
 
 ### Diagram & Interactive Components
 
@@ -159,10 +159,10 @@ import {
 import { MermaidDiagram, PollBlock } from "@localm/tutorial-framework";
 ```
 
-| Component        | Key Props                                   |
-| ---------------- | ------------------------------------------- |
-| `MermaidDiagram` | `chart` — Mermaid syntax string             |
-| `PollBlock`      | `question`, `options`, `onVote`             |
+| Component        | Key Props                       |
+| ---------------- | ------------------------------- |
+| `MermaidDiagram` | `chart` — Mermaid syntax string |
+| `PollBlock`      | `question`, `options`, `onVote` |
 
 ### Embed Components
 
@@ -175,12 +175,12 @@ import {
 } from "@localm/tutorial-framework";
 ```
 
-| Component         | Key Props                                                                                 |
-| ----------------- | ----------------------------------------------------------------------------------------- |
+| Component         | Key Props                                                                                                               |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | `YouTubeEmbed`    | `videoId` (ID or full URL), `title` (required for a11y), `lazyLoad`, `caption`, `startAt`, `showShare`, `shareHashtags` |
-| `GitHubGistEmbed` | `gistId`, `file`, `caption`                                                               |
-| `TwitterEmbed`    | `tweetUrl`, `theme`, `caption`                                                            |
-| `LinkedInEmbed`   | `postUrl` (URL, URN, or embed URL), `caption`, `height`                                   |
+| `GitHubGistEmbed` | `gistId`, `file`, `caption`                                                                                             |
+| `TwitterEmbed`    | `tweetUrl`, `theme`, `caption`                                                                                          |
+| `LinkedInEmbed`   | `postUrl` (URL, URN, or embed URL), `caption`, `height`                                                                 |
 
 ### Sharing Component
 

@@ -89,11 +89,13 @@ Never use inline style for values that should be tokens.
 Two mutually exclusive page layouts — **never mix them or build custom wrappers**.
 
 **`TutorialLayout`** (1-column, centered) — for standalone tutorial / home pages:
+
 - Header + Footer: full viewport width
 - Main: centered via `max-width` + `margin: 0 auto`
 - `maxWidth` prop: `"content"` (wide) or `"narrow"` (reading)
 
 **`CoursePlayerLayout`** (2-column, sidebar) — for course lesson pages:
+
 - Header + Footer: full viewport width, siblings of the 2-col body
 - Body: `display: flex`, centered via `max-width: var(--tf-course-max-width)`
 - Sidebar: fixed width, `position: sticky`, independent scroll
@@ -104,6 +106,7 @@ Two mutually exclusive page layouts — **never mix them or build custom wrapper
 ### 7. Responsive Classes
 
 Framework classes handle responsive layout:
+
 - `.tf-concept-grid`, `.tf-sidebar-layout`, `.tf-step-card` — collapse at ≤ 768px
 - `.tf-hero-actions`, `.tf-nav-buttons` — stack at ≤ 640px
 
