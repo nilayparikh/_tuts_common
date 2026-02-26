@@ -62,7 +62,7 @@ export const THEMES: ThemeDef[] = [
       borderDefault: "rgba(20,30,70,0.12)",
       borderStrong: "rgba(20,30,70,0.22)",
       textPrimary: "#111827",
-      textSecondary: "#374151",   // neutral dark-gray — readable on white
+      textSecondary: "#374151", // neutral dark-gray — readable on white
       textMuted: "#6b7280",
       primary: "#4f46e5",
       primaryLight: "#6366f1",
@@ -90,7 +90,7 @@ export const THEMES: ThemeDef[] = [
       borderDefault: "rgba(155,165,210,0.15)",
       borderStrong: "rgba(155,165,210,0.28)",
       textPrimary: "#eaecf5",
-      textSecondary: "#a8afc4",   // neutral light-gray
+      textSecondary: "#a8afc4", // neutral light-gray
       textMuted: "#666e8a",
       primary: "#7c7fff",
       primaryLight: "#a5a7ff",
@@ -118,7 +118,7 @@ export const THEMES: ThemeDef[] = [
       borderDefault: "rgba(96,180,255,0.16)",
       borderStrong: "rgba(96,180,255,0.30)",
       textPrimary: "#e4f0ff",
-      textSecondary: "#9eafc0",   // desaturated blue-gray — no longer bright blue
+      textSecondary: "#9eafc0", // desaturated blue-gray — no longer bright blue
       textMuted: "#607585",
       primary: "#38a1ff",
       primaryLight: "#6db9ff",
@@ -146,7 +146,7 @@ export const THEMES: ThemeDef[] = [
       borderDefault: "rgba(200,210,235,0.16)",
       borderStrong: "rgba(200,210,235,0.28)",
       textPrimary: "#eceff4",
-      textSecondary: "#b0b8cc",   // neutral cool-gray
+      textSecondary: "#b0b8cc", // neutral cool-gray
       textMuted: "#6e7a94",
       primary: "#88c0d0",
       primaryLight: "#a3d4e2",
@@ -174,7 +174,7 @@ export const THEMES: ThemeDef[] = [
       borderDefault: "rgba(255,140,60,0.18)",
       borderStrong: "rgba(255,140,60,0.32)",
       textPrimary: "#f5ede8",
-      textSecondary: "#b0a098",   // warm neutral gray — not orange
+      textSecondary: "#b0a098", // warm neutral gray — not orange
       textMuted: "#806858",
       primary: "#ff7b2e",
       primaryLight: "#ff9f5e",
@@ -202,7 +202,7 @@ export const THEMES: ThemeDef[] = [
       borderDefault: "rgba(248,248,242,0.14)",
       borderStrong: "rgba(248,248,242,0.26)",
       textPrimary: "#fcfcf0",
-      textSecondary: "#c8c8bc",   // near-neutral warm gray
+      textSecondary: "#c8c8bc", // near-neutral warm gray
       textMuted: "#888878",
       primary: "#a9dc76",
       primaryLight: "#c4ec98",
