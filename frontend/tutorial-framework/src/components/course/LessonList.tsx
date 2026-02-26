@@ -92,6 +92,8 @@ export function LessonList({
               className="tf-lesson-list__icon"
               style={{
                 flexShrink: 0,
+                width: "1.5rem",
+                textAlign: "center" as const,
                 fontSize: "1.25rem",
                 lineHeight: 1,
               }}
