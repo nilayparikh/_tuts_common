@@ -61,7 +61,4 @@ export { CodePreview } from "./CodePreview";
 export type { CodePreviewProps, CodePreviewSegment } from "./CodePreview";
 
 export { VideoTranscript } from "./VideoTranscript";
-export type {
-  VideoTranscriptProps,
-  TranscriptEntry,
-} from "./VideoTranscript";
+export type { VideoTranscriptProps, TranscriptEntry } from "./VideoTranscript";

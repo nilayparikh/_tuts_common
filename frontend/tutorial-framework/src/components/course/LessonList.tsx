@@ -95,7 +95,7 @@ export function LessonList({
               {icon}
             </span>
 
-            {/* Title + description */}
+            {/* Title + badge + description */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <p
                 style={{
@@ -107,6 +107,13 @@ export function LessonList({
               >
                 {part.title}
               </p>
+              <div style={{ marginTop: "var(--tf-space-1)" }}>
+                <PartTypeBadge
+                  type={part.type}
+                  duration={part.duration}
+                  size="sm"
+                />
+              </div>
               {"description" in part &&
                 (part as CoursePart & { description?: string }).description && (
                   <p
@@ -125,22 +132,6 @@ export function LessonList({
                     }
                   </p>
                 )}
-            </div>
-
-            {/* Type badge + duration */}
-            <div
-              style={{
-                flexShrink: 0,
-                display: "flex",
-                alignItems: "center",
-                gap: "var(--tf-space-2)",
-              }}
-            >
-              <PartTypeBadge
-                type={part.type}
-                duration={part.duration}
-                size="sm"
-              />
             </div>
 
             {/* Arrow */}

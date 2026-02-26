@@ -58,20 +58,22 @@ function MiniCodeBlock({
         >
           {/* Traffic lights */}
           <div style={{ display: "flex", gap: "var(--tf-space-1)" }}>
-            {["var(--tf-decor-red)", "var(--tf-decor-yellow)", "var(--tf-decor-green)"].map(
-              (c) => (
-                <div
-                  key={c}
-                  style={{
-                    width: "0.625rem",
-                    height: "0.625rem",
-                    borderRadius: "var(--tf-radius-full)",
-                    background: c,
-                    opacity: 0.7,
-                  }}
-                />
-              ),
-            )}
+            {[
+              "var(--tf-decor-red)",
+              "var(--tf-decor-yellow)",
+              "var(--tf-decor-green)",
+            ].map((c) => (
+              <div
+                key={c}
+                style={{
+                  width: "0.625rem",
+                  height: "0.625rem",
+                  borderRadius: "var(--tf-radius-full)",
+                  background: c,
+                  opacity: 0.7,
+                }}
+              />
+            ))}
           </div>
           <span
             style={{
