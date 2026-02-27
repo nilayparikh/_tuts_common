@@ -22,6 +22,7 @@ const TYPE_ICON: Record<PartType, string> = {
   slideshow: "📑",
   article: "📰",
   lab: "🧪",
+  code: "🖥️",
 };
 
 // ─── Component ─────────────────────────────────────────────────────────────

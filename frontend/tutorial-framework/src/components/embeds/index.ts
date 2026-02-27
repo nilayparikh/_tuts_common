@@ -9,3 +9,9 @@ export type { TwitterEmbedProps } from "./TwitterEmbed";
 
 export { LinkedInEmbed } from "./LinkedInEmbed";
 export type { LinkedInEmbedProps } from "./LinkedInEmbed";
+
+export { NotebookEmbed } from "./NotebookEmbed";
+export type { NotebookEmbedProps } from "./NotebookEmbed";
+
+export { GistCodeOutput } from "./GistCodeOutput";
+export type { GistCodeOutputProps } from "./GistCodeOutput";

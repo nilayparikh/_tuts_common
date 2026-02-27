@@ -78,6 +78,13 @@ const META: Record<
     color: "var(--tf-color-accent)",
     borderColor: "var(--tf-color-accent-border)",
   },
+  code: {
+    icon: "🖥️",
+    label: "Code",
+    bg: "var(--tf-color-secondary-container)",
+    color: "var(--tf-color-secondary-light)",
+    borderColor: "var(--tf-color-secondary-border)",
+  },
 };
 
 // ─── Component ─────────────────────────────────────────────────────────────

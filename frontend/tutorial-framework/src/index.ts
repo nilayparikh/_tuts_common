@@ -112,12 +112,16 @@ export {
   GitHubGistEmbed,
   TwitterEmbed,
   LinkedInEmbed,
+  NotebookEmbed,
+  GistCodeOutput,
 } from "./components/embeds";
 export type {
   YouTubeEmbedProps,
   GitHubGistEmbedProps,
   TwitterEmbedProps,
   LinkedInEmbedProps,
+  NotebookEmbedProps,
+  GistCodeOutputProps,
 } from "./components/embeds";
 
 // Sharing

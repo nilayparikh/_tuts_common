@@ -11,7 +11,8 @@ export type PartType =
   | "podcast"
   | "slideshow"
   | "article"
-  | "lab";
+  | "lab"
+  | "code";
 
 export interface CoursePart {
   slug: string;
@@ -47,6 +48,7 @@ const TYPE_META: Record<PartType, { icon: string; label: string }> = {
   slideshow: { icon: "slideshow", label: "Slides" },
   article: { icon: "article", label: "Article" },
   lab: { icon: "science", label: "Lab" },
+  code: { icon: "code_blocks", label: "Code" },
 };
 
 // ─── Component ─────────────────────────────────────────────────────────────
