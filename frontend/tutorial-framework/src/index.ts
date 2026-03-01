@@ -128,6 +128,38 @@ export type {
 export { ShareButtons, FollowBar } from "./components/sharing";
 export type { ShareButtonsProps, FollowBarProps } from "./components/sharing";
 
+// Presentation (Spectacle slide components — peer dep: spectacle)
+export {
+  PresentationShell,
+  SlideDrawer,
+  SlideFooter,
+  SlideNavButtons,
+  DarkSlide,
+  SurfaceSlide,
+  TitleSlide,
+  SlideSectionDivider,
+  ContentSlide,
+  DiagramSlide,
+  BulletList,
+  InfoCard,
+  ComparisonTable,
+  SlideCodeBlock,
+  GradientDivider,
+  StatRow,
+  MathBlock,
+  DiagramBox,
+  FlowNode,
+  Arrow,
+  TwoColumn,
+  Timeline,
+} from "./components/presentation";
+export type {
+  PresentationConfig,
+  DeckEntry,
+  SlideBaseProps,
+  BulletItem,
+} from "./components/presentation";
+
 // Course
 export {
   CourseSidebar,
