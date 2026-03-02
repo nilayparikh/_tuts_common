@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * PresentationShell — full-page wrapper that provides:
  *   • Collapsible left-hand lesson navigation drawer (two-level: lessons + slides)

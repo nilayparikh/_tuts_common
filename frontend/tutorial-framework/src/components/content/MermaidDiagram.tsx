@@ -14,6 +14,15 @@ export interface MermaidDiagramProps {
   theme?: "dark" | "default" | "forest" | "neutral";
 }
 
+// ─── Spacing config ────────────────────────────────────────────────────────
+
+/**
+ * Default Mermaid configuration for better spacing and readability.
+ * Applied automatically to charts that don't have their own %%{init:...}%%
+ */
+const MERMAID_SPACING_CONFIG =
+  "%%{init: {'flowchart': {'nodeSpacing': 30, 'rankSpacing': 40, 'padding': 15}, 'sequence': {'actorMargin': 50, 'messageMargin': 35}, 'gantt': {'barHeight': 20, 'barGap': 4}}}%%\n";
+
 // ─── Component ─────────────────────────────────────────────────────────────
 
 /**
@@ -32,6 +41,11 @@ export function MermaidDiagram({
   // useId gives a stable id that matches between SSR and client
   const reactId = React.useId();
   const idRef = React.useRef(`mermaid-${reactId.replace(/:/g, "")}`);
+
+  // Prepend spacing config if chart doesn't have its own init directive
+  const enhancedChart = chart.trimStart().startsWith("%%{")
+    ? chart
+    : MERMAID_SPACING_CONFIG + chart;
 
   React.useEffect(() => {
     let cancelled = false;
@@ -69,7 +83,10 @@ export function MermaidDiagram({
               : {},
         });
 
-        const { svg: rendered } = await mermaid.render(idRef.current, chart);
+        const { svg: rendered } = await mermaid.render(
+          idRef.current,
+          enhancedChart,
+        );
 
         if (!cancelled) {
           setSvg(rendered);
@@ -88,7 +105,7 @@ export function MermaidDiagram({
     return () => {
       cancelled = true;
     };
-  }, [chart, theme]);
+  }, [enhancedChart, theme]);
 
   if (error) {
     return (

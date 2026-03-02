@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * SlideBase — Theme-aware Spectacle slide wrappers.
  *

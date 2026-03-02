@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * SlideDiagram — Visual components for architecture / flow diagrams.
  *

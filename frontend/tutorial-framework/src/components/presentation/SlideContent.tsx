@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * SlideContent — Presentation-ready content blocks.
  *
@@ -462,6 +464,13 @@ interface MermaidDiagramProps {
 let mermaidCounter = 0;
 
 /**
+ * Default Mermaid configuration for better spacing and readability.
+ * Applied automatically to charts that don't have their own %%{init:...}%%
+ */
+const MERMAID_SPACING_CONFIG =
+  "%%{init: {'flowchart': {'nodeSpacing': 30, 'rankSpacing': 40, 'padding': 15}, 'sequence': {'actorMargin': 50, 'messageMargin': 35}, 'gantt': {'barHeight': 20, 'barGap': 4}}}%%\n";
+
+/**
  * Renders a Mermaid diagram using the global mermaid instance (loaded via CDN).
  * Automatically applies the dark theme matching --tf-* CSS vars.
  */
@@ -472,6 +481,11 @@ export function MermaidDiagram({
 }: MermaidDiagramProps) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [id] = React.useState(() => `mermaid-${++mermaidCounter}`);
+
+  // Prepend spacing config if chart doesn't have its own init directive
+  const enhancedChart = chart.trimStart().startsWith("%%{")
+    ? chart
+    : MERMAID_SPACING_CONFIG + chart;
 
   React.useEffect(() => {
     if (!ref.current) return;
@@ -486,7 +500,7 @@ export function MermaidDiagram({
         if (m?.render && ref.current) {
           clearInterval(interval);
           try {
-            const { svg } = await m.render(id, chart);
+            const { svg } = await m.render(id, enhancedChart);
             ref.current.innerHTML = svg;
           } catch (e) {
             ref.current.textContent = chart;
@@ -501,14 +515,14 @@ export function MermaidDiagram({
     // Mermaid is already loaded
     (async () => {
       try {
-        const { svg } = await mermaid.render(id, chart);
+        const { svg } = await mermaid.render(id, enhancedChart);
         if (ref.current) ref.current.innerHTML = svg;
       } catch {
         if (ref.current) ref.current.textContent = chart;
       }
     })();
     return;
-  }, [chart, id]);
+  }, [enhancedChart, id]);
 
   return (
     <Box style={{ width: "100%", maxWidth, margin: "0 auto" }}>
