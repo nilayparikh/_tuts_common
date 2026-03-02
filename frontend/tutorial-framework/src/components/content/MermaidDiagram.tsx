@@ -28,6 +28,7 @@ const MERMAID_SPACING_CONFIG =
 /**
  * Renders a Mermaid.js diagram using client-side rendering.
  * Loads mermaid from CDN on first use (lazy, no bundled dep).
+ * Includes a "Full size" button that opens the diagram in a modal dialog.
  */
 export function MermaidDiagram({
   chart,
@@ -38,6 +39,7 @@ export function MermaidDiagram({
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [svg, setSvg] = React.useState<string>("");
   const [error, setError] = React.useState<string>("");
+  const [isOpen, setIsOpen] = React.useState(false);
   // useId gives a stable id that matches between SSR and client
   const reactId = React.useId();
   const idRef = React.useRef(`mermaid-${reactId.replace(/:/g, "")}`);
@@ -107,6 +109,16 @@ export function MermaidDiagram({
     };
   }, [enhancedChart, theme]);
 
+  // Close dialog on Escape key
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isOpen]);
+
   if (error) {
     return (
       <div
@@ -125,62 +137,184 @@ export function MermaidDiagram({
   }
 
   return (
-    <figure
-      style={{
-        margin: "0",
-        display: "flex",
-        flexDirection: "column",
-        gap: "var(--tf-space-3)",
-      }}
-    >
-      <div
-        ref={containerRef}
-        role="img"
-        aria-label={alt ?? "Mermaid diagram"}
+    <>
+      <figure
         style={{
-          padding: "var(--tf-space-6)",
-          borderRadius: "var(--tf-radius-md)",
-          background: "var(--tf-bg-elevated)",
-          border: "1px solid var(--tf-border-subtle)",
-          overflow: "auto",
+          margin: "0",
           display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "8rem",
+          flexDirection: "column",
+          gap: "var(--tf-space-3)",
         }}
       >
-        {svg ? (
-          <div
-            dangerouslySetInnerHTML={{ __html: svg }}
-            style={{
-              minWidth: "fit-content",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          />
-        ) : (
-          <span
-            style={{
-              color: "var(--tf-text-muted)",
-              fontSize: "var(--tf-text-sm)",
-            }}
-          >
-            Loading diagram…
-          </span>
-        )}
-      </div>
-      {caption && (
-        <figcaption
+        <div
+          ref={containerRef}
+          role="img"
+          aria-label={alt ?? "Mermaid diagram"}
           style={{
-            textAlign: "center",
-            fontSize: "var(--tf-text-xs)",
-            color: "var(--tf-text-muted)",
-            fontStyle: "italic",
+            position: "relative",
+            padding: "var(--tf-space-6)",
+            borderRadius: "var(--tf-radius-md)",
+            background: "var(--tf-bg-elevated)",
+            border: "1px solid var(--tf-border-subtle)",
+            overflow: "auto",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "8rem",
           }}
         >
-          {caption}
-        </figcaption>
+          {svg ? (
+            <>
+              <div
+                dangerouslySetInnerHTML={{ __html: svg }}
+                style={{
+                  minWidth: "fit-content",
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              />
+              <button
+                onClick={() => setIsOpen(true)}
+                title="Open full size"
+                aria-label="Open diagram in full size"
+                style={{
+                  position: "absolute",
+                  top: "var(--tf-space-2)",
+                  right: "var(--tf-space-2)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.25rem",
+                  padding: "0.25rem 0.5rem",
+                  background: "var(--tf-bg-surface)",
+                  border: "1px solid var(--tf-border-subtle)",
+                  borderRadius: "var(--tf-radius-sm)",
+                  color: "var(--tf-text-muted)",
+                  fontSize: "var(--tf-text-xs)",
+                  cursor: "pointer",
+                  opacity: 0.75,
+                  transition: "opacity 0.15s",
+                  lineHeight: 1,
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.opacity = "1";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.opacity = "0.75";
+                }}
+              >
+                ⤢ Full size
+              </button>
+            </>
+          ) : (
+            <span
+              style={{
+                color: "var(--tf-text-muted)",
+                fontSize: "var(--tf-text-sm)",
+              }}
+            >
+              Loading diagram…
+            </span>
+          )}
+        </div>
+        {caption && (
+          <figcaption
+            style={{
+              textAlign: "center",
+              fontSize: "var(--tf-text-xs)",
+              color: "var(--tf-text-muted)",
+              fontStyle: "italic",
+            }}
+          >
+            {caption}
+          </figcaption>
+        )}
+      </figure>
+
+      {/* ── Full-size dialog ─────────────────────────────────────────── */}
+      {isOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={alt ?? "Diagram full view"}
+          onClick={() => setIsOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(0, 0, 0, 0.88)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "var(--tf-space-6)",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "relative",
+              maxWidth: "92vw",
+              maxHeight: "90vh",
+              overflow: "auto",
+              background: "var(--tf-bg-elevated)",
+              borderRadius: "var(--tf-radius-lg)",
+              border: "1px solid var(--tf-border-subtle)",
+              padding: "3rem 2rem 2rem",
+            }}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setIsOpen(false)}
+              title="Close"
+              aria-label="Close full size view"
+              style={{
+                position: "absolute",
+                top: "0.75rem",
+                right: "0.75rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "2rem",
+                height: "2rem",
+                background: "var(--tf-bg-surface)",
+                border: "1px solid var(--tf-border-subtle)",
+                borderRadius: "var(--tf-radius-sm)",
+                color: "var(--tf-text-muted)",
+                fontSize: "var(--tf-text-sm)",
+                cursor: "pointer",
+                lineHeight: 1,
+              }}
+            >
+              ✕
+            </button>
+
+            {/* SVG */}
+            <div
+              dangerouslySetInnerHTML={{ __html: svg }}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                minWidth: "fit-content",
+              }}
+            />
+
+            {/* Caption */}
+            {caption && (
+              <p
+                style={{
+                  textAlign: "center",
+                  marginTop: "var(--tf-space-4)",
+                  marginBottom: 0,
+                  fontSize: "var(--tf-text-sm)",
+                  color: "var(--tf-text-muted)",
+                  fontStyle: "italic",
+                }}
+              >
+                {caption}
+              </p>
+            )}
+          </div>
+        </div>
       )}
-    </figure>
+    </>
   );
 }
