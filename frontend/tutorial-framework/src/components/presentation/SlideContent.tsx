@@ -386,6 +386,7 @@ export function MathBlock({ tex, display = true, color }: MathBlockProps) {
   const ref = React.useRef<HTMLSpanElement>(null);
 
   React.useEffect(() => {
+    let cleanup: (() => void) | undefined;
     if (ref.current && typeof window !== "undefined") {
       let katex = (window as unknown as Record<string, unknown>).katex as
         | {
@@ -412,7 +413,6 @@ export function MathBlock({ tex, display = true, color }: MathBlockProps) {
 
       if (katex?.render) {
         renderKatex();
-        return;
       } else {
         // Wait for KaTeX to load if it's deferred
         let attempt = 0;
@@ -428,9 +428,10 @@ export function MathBlock({ tex, display = true, color }: MathBlockProps) {
             clearInterval(interval);
           }
         }, 100);
-        return () => clearInterval(interval);
+        cleanup = () => clearInterval(interval);
       }
     }
+    return cleanup;
   }, [tex, display]);
 
   return (
