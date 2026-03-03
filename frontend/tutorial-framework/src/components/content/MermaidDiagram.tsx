@@ -252,13 +252,16 @@ export function MermaidDiagram({
             onClick={(e) => e.stopPropagation()}
             style={{
               position: "relative",
-              maxWidth: "92vw",
-              maxHeight: "90vh",
+              width: "85vw",
+              minHeight: "80vh",
+              maxHeight: "92vh",
               overflow: "auto",
               background: "var(--tf-bg-elevated)",
               borderRadius: "var(--tf-radius-lg)",
               border: "1px solid var(--tf-border-subtle)",
               padding: "3rem 2rem 2rem",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
             {/* Close button */}
@@ -293,6 +296,8 @@ export function MermaidDiagram({
               style={{
                 display: "flex",
                 justifyContent: "center",
+                alignItems: "center",
+                flex: 1,
                 minWidth: "fit-content",
               }}
             />

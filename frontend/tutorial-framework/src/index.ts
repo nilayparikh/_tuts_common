@@ -94,6 +94,8 @@ export {
   CodePreview,
   VideoTranscript,
   AccordionList,
+  LessonObjectives,
+  GitHubRepoCard,
 } from "./components/content";
 export type {
   LabSettingsProps,
@@ -104,6 +106,8 @@ export type {
   TranscriptEntry,
   AccordionListProps,
   AccordionItem,
+  LessonObjectivesProps,
+  GitHubRepoCardProps,
 } from "./components/content";
 
 // Embeds

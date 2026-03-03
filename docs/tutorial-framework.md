@@ -13,7 +13,8 @@ Uses **Material Design 3** dark theme with fluid typography and CSS custom prope
 │   ├── content/    → HeroSection, ConceptCard, StepCard, CodeBlock, KeyPoint,
 │   │                  CalloutBox (Info/Note/Tip/Success/Warning/Danger),
 │   │                  MermaidDiagram, DescriptionBox, PollBlock, AccordionList,
-│   │                  StepByStepGuide, Paragraph, SectionDivider, TutorialNav
+│   │                  StepByStepGuide, Paragraph, SectionDivider, TutorialNav,
+│   │                  LessonObjectives, GitHubRepoCard
 │   ├── course/     → CoursePlayerLayout, CourseSidebar, QuizBlock, QABlock,
 │   │                  LessonList, LessonHeader, LessonSocialBar, ArticleBlock,
 │   │                  PodcastEmbed
@@ -388,9 +389,59 @@ shows a numbered badge, title, and expandable body text. Fully accessible.
 />
 ```
 
-#### `LessonSocialBar`
+#### `LessonObjectives`
 
-Compact single-row bar combining instructor capsule, follow buttons, and share icons.
+Displays a lesson's learning objectives as a clean card with a target icon header,
+item-count badge, and checkmark bullets. Use this instead of manual numbered lists.
+It is a **Server Component** (no interactivity needed).
+
+| Prop         | Type       | Default                 | Description            |
+| ------------ | ---------- | ----------------------- | ---------------------- |
+| `objectives` | `string[]` | **required**            | One objective per item |
+| `title`      | `string`   | `"Learning Objectives"` | Card header label      |
+
+```tsx
+<LessonObjectives
+  objectives={[
+    "Clone the examples repository",
+    "Configure all three model providers",
+    "Run the smoke-test script",
+  ]}
+/>
+// With a custom title (e.g. for video-code sidebar):
+<LessonObjectives objectives={part.objectives} title="Instructions" />
+```
+
+#### `GitHubRepoCard`
+
+A branded anchor card linking to a GitHub repository or folder. Replaces the
+generic "External Resource" `InfoBox`. **Client Component** — uses `onMouseEnter`
+/ `onMouseLeave` for the hover lift effect.
+
+| Prop          | Type     | Default               | Description                                          |
+| ------------- | -------- | --------------------- | ---------------------------------------------------- |
+| `url`         | `string` | **required**          | Full GitHub URL (repo root, tree path, or file path) |
+| `title`       | `string` | path after github.com | Human-readable label; falls back to URL path         |
+| `description` | `string` | —                     | One or two sentences shown under the title           |
+
+```tsx
+// Source code for a lesson
+<GitHubRepoCard
+  url="https://github.com/nilayparikh/tuts-agentic-ai-examples/tree/main/a2a/lessons/05"
+  description="Complete source code for this lesson."
+/>
+
+// External reading resource
+<GitHubRepoCard
+  url={part.readingUrl}
+  description="This lesson links to an external resource."
+/>
+```
+
+> **Note:** Because `GitHubRepoCard` is a `"use client"` component it can safely
+> be imported in both Server Components and Client Components in Next.js App Router.
+
+#### `LessonSocialBar`
 
 | Prop                    | Type     | Default | Description                         |
 | ----------------------- | -------- | ------- | ----------------------------------- |

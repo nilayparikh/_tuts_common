@@ -39,23 +39,25 @@ function CheckCircleIcon(): React.ReactElement {
 
 function CircleOutlineIcon({ number }: { number: number }): React.ReactElement {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24">
+    <svg width="26" height="26" viewBox="0 0 26 26">
+      {/* Filled background for better contrast */}
+      <circle cx="13" cy="13" r="13" fill="rgba(99,102,241,0.18)" />
       <circle
-        cx="12"
-        cy="12"
-        r="10"
+        cx="13"
+        cy="13"
+        r="11"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.5"
       />
       <text
-        x="12"
-        y="12"
+        x="13"
+        y="13"
         textAnchor="middle"
         dominantBaseline="central"
         fill="currentColor"
-        fontSize="11"
-        fontWeight="600"
+        fontSize="10.5"
+        fontWeight="700"
         fontFamily="var(--tf-font-mono)"
       >
         {number}
@@ -277,16 +279,18 @@ export function StepByStepGuide({
                   {step.title}
                 </h4>
 
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "var(--tf-text-sm)",
-                    color: "var(--tf-text-secondary)",
-                    lineHeight: "var(--tf-leading-relaxed)",
-                  }}
-                >
-                  {step.description}
-                </p>
+                {step.description && (
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "var(--tf-text-sm)",
+                      color: "var(--tf-text-secondary)",
+                      lineHeight: "var(--tf-leading-relaxed)",
+                    }}
+                  >
+                    {step.description}
+                  </p>
+                )}
 
                 {/* Code */}
                 {step.code && (

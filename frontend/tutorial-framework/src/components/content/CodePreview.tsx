@@ -1,4 +1,7 @@
+"use client";
 import React from "react";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -88,19 +91,26 @@ function MiniCodeBlock({
       )}
 
       {/* Code */}
-      <pre
-        style={{
+      <SyntaxHighlighter
+        language={language ?? "text"}
+        style={atomOneDark}
+        customStyle={{
           margin: 0,
           padding: "var(--tf-space-4)",
+          background: "transparent",
           fontFamily: "var(--tf-font-mono)",
           fontSize: "var(--tf-text-sm)",
           lineHeight: "var(--tf-leading-relaxed)",
-          color: "var(--tf-code-text)",
           overflowX: "auto",
         }}
+        codeTagProps={{
+          style: {
+            fontFamily: "var(--tf-font-mono)",
+          },
+        }}
       >
-        <code>{code}</code>
-      </pre>
+        {code}
+      </SyntaxHighlighter>
     </div>
   );
 }
