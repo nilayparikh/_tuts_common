@@ -65,3 +65,9 @@ export type { VideoTranscriptProps, TranscriptEntry } from "./VideoTranscript";
 
 export { AccordionList } from "./AccordionList";
 export type { AccordionListProps, AccordionItem } from "./AccordionList";
+
+export { LessonObjectives } from "./LessonObjectives";
+export type { LessonObjectivesProps } from "./LessonObjectives";
+
+export { GitHubRepoCard } from "./GitHubRepoCard";
+export type { GitHubRepoCardProps } from "./GitHubRepoCard";

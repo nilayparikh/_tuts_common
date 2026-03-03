@@ -112,6 +112,37 @@ Framework classes handle responsive layout:
 
 Site CSS must **not** override these with `!important`.
 
+### 8. Client Components (`"use client"`)
+
+Next.js App Router renders all components as Server Components by default.
+Any framework component that uses `useState`, `useEffect`, or JS event handlers
+(`onClick`, `onMouseEnter`, etc.) **must** have `"use client"` as its **first line**.
+
+| Component        | Reason for "use client"                            |
+| ---------------- | -------------------------------------------------- |
+| `GitHubRepoCard` | `onMouseEnter`/`onMouseLeave` hover lift           |
+| `MermaidDiagram` | `useEffect` to load mermaid.js from CDN            |
+| `PollBlock`      | vote state (`useState`)                            |
+| `QuizBlock`      | quiz state (`useState`)                            |
+| `QABlock`        | accordion expand state                             |
+| `CodePreview`    | tab selection state                                |
+
+**Never** add `onMouseEnter`/`onMouseLeave` or other JS event handlers to a
+component that does not already declare `"use client"`. Use pure CSS hover (`:hover`
+via a className) or add the directive to the component file.
+
+### 9. Lesson Content Components
+
+Use these components instead of inline JSX for standard lesson blocks:
+
+| Use case                     | Component           | Notes                                      |
+| ---------------------------- | ------------------- | ------------------------------------------ |
+| Learning objectives list     | `LessonObjectives`  | Server Component; `title` prop optional    |
+| GitHub repo / external link  | `GitHubRepoCard`    | Client Component; replaces `InfoBox` + `SuccessBox` for links |
+| Section dividers             | `SectionDivider`    | `label` prop for section name              |
+
+
+
 ## Verification Checklist
 
 - [ ] `npm run build` succeeds
