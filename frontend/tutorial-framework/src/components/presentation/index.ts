@@ -17,6 +17,13 @@ export {
   type PresentationConfig,
   type DeckEntry,
 } from "./PresentationShell";
+export {
+  PresentationLayout,
+  PresentationControlPanel,
+  type PresentationDeck,
+  type PresentationSlide,
+  type PresentationBranding,
+} from "./PresentationControlEngine";
 export { SlideDrawer } from "./SlideDrawer";
 export { SlideFooter } from "./SlideFooter";
 export { SlideNavButtons } from "./SlideNavButtons";
