@@ -42,6 +42,7 @@ export interface PresentationBranding {
   twitterUrl?: string;
   twitterHandle?: string;
   linkedinHandle?: string;
+  youtubeHandle?: string;
   copyright?: string;
   /** URL to promote in footer with typing animation, e.g. "tuts.localm.dev/a2a" */
   siteUrl?: string;
@@ -469,7 +470,7 @@ const ENGINE_CSS = `
   /* ── Footer ────────────────────────── */
   .pe-footer {
     display: grid;
-    grid-template-columns: auto 1fr auto auto;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     align-items: center;
     padding: 0 24px;
     height: 52px;
@@ -478,20 +479,22 @@ const ENGINE_CSS = `
     border-top: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
     flex-shrink: 0;
     z-index: 20;
-    gap: 20px;
+    gap: 12px;
   }
   .pe-footer-left {
     display: flex;
     align-items: center;
     gap: 10px;
     min-width: 0;
+    justify-content: flex-start;
   }
   .pe-footer-center {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
     justify-content: center;
     min-width: 0;
+    flex-wrap: nowrap;
   }
   .pe-footer-logo {
     height: 24px;
@@ -511,6 +514,7 @@ const ENGINE_CSS = `
     gap: 14px;
     justify-content: flex-end;
     white-space: nowrap;
+    min-width: 0;
   }
   .pe-footer-instructor {
     color: var(--tf-text-secondary, #bfc5d4);
@@ -561,6 +565,12 @@ const ENGINE_CSS = `
   }
 
   /* ── Footer URL Promotion ───────────── */
+  .pe-footer-url-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
   .pe-footer-url {
     display: flex;
     align-items: center;
@@ -569,8 +579,6 @@ const ENGINE_CSS = `
     font-size: 13px;
     white-space: nowrap;
     color: var(--tf-text-muted, #8892a8);
-    min-width: 320px;
-    width: 320px;
     overflow: hidden;
   }
   .pe-footer-url-static {
@@ -1157,13 +1165,14 @@ export function PresentationLayout({
     branding?.brandLabel != null && !brandLogoSrc.includes("og-image-template");
   const instructorName = branding?.instructorName;
   const githubUrl = branding?.githubUrl;
-  const youtubeUrl = branding?.youtubeUrl;
   const linkedinUrl = branding?.linkedinUrl;
   const twitterUrl = branding?.twitterUrl;
   const twitterHandle = branding?.twitterHandle;
   const linkedinHandle = branding?.linkedinHandle;
   const copyrightText =
     branding?.copyright ?? `\u00A9 ${new Date().getFullYear()} ${brandLabel}`;
+  const youtubeUrl = branding?.youtubeUrl;
+  const youtubeHandle = branding?.youtubeHandle;
   const siteUrl = branding?.siteUrl;
   const siteUrlPhrases = branding?.siteUrlPhrases ?? [];
   const rootRef = useRef<HTMLDivElement>(null);
@@ -1370,7 +1379,9 @@ export function PresentationLayout({
                   <span className="pe-header-nav-prev" title={prevSlide.title}>
                     {prevSlide.title}
                   </span>
-                  <span className="pe-header-nav-dot" aria-hidden="true">•</span>
+                  <span className="pe-header-nav-dot" aria-hidden="true">
+                    •
+                  </span>
                 </>
               ) : null}
               <span
@@ -1381,7 +1392,9 @@ export function PresentationLayout({
               </span>
               {nextSlide ? (
                 <>
-                  <span className="pe-header-nav-dot" aria-hidden="true">•</span>
+                  <span className="pe-header-nav-dot" aria-hidden="true">
+                    •
+                  </span>
                   <span className="pe-header-nav-next" title={nextSlide.title}>
                     {nextSlide.title}
                   </span>
@@ -1502,12 +1515,22 @@ export function PresentationLayout({
           </div>
           <div className="pe-footer-center">
             {instructorName ? (
-              <span className="pe-footer-instructor">
-                Instructor: {instructorName}
-              </span>
+              <span className="pe-footer-instructor">{instructorName}</span>
             ) : null}
-            {instructorName && (twitterUrl || linkedinUrl) ? (
+            {instructorName && (youtubeUrl || twitterUrl || linkedinUrl) ? (
               <span className="pe-footer-divider" aria-hidden="true" />
+            ) : null}
+            {youtubeUrl ? (
+              <a
+                className="pe-footer-social-link"
+                href={youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+              >
+                {Icons.youtube}
+                {youtubeHandle ? <span>{youtubeHandle}</span> : null}
+              </a>
             ) : null}
             {twitterUrl ? (
               <a
@@ -1520,9 +1543,6 @@ export function PresentationLayout({
                 {Icons.twitter}
                 {twitterHandle ? <span>{twitterHandle}</span> : null}
               </a>
-            ) : null}
-            {twitterUrl && linkedinUrl ? (
-              <span className="pe-footer-divider" aria-hidden="true" />
             ) : null}
             {linkedinUrl ? (
               <a
@@ -1537,17 +1557,11 @@ export function PresentationLayout({
               </a>
             ) : null}
           </div>
-          {siteUrl ? (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-end",
-              }}
-            >
+          <div className="pe-footer-url-wrap">
+            {siteUrl ? (
               <TypingPromotion url={siteUrl} phrases={siteUrlPhrases} />
-            </div>
-          ) : null}
+            ) : null}
+          </div>
           <div className="pe-footer-right">
             <span className="pe-footer-copy">{copyrightText}</span>
           </div>
