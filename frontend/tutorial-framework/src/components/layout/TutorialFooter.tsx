@@ -1,5 +1,6 @@
 import React from "react";
 import { FollowBar } from "../sharing/FollowBar";
+import { BrandLockup } from "./BrandLockup";
 
 export interface FooterLink {
   label: string;
@@ -10,6 +11,8 @@ export interface FooterLink {
 export interface TutorialFooterProps {
   siteName: string;
   logoUrl?: string;
+  /** Optional icon URL for brand mark rendering */
+  logoIconUrl?: string;
   tagline?: string;
   links?: FooterLink[];
   githubUrl?: string;
@@ -32,44 +35,40 @@ const s: Record<string, React.CSSProperties> = {
     maxWidth: "var(--tf-content-width)",
     margin: "0 auto",
     padding: "var(--tf-space-4) var(--tf-space-6)",
+    display: "grid",
+    gridTemplateColumns: "1fr auto 1fr",
+    alignItems: "center",
+    gap: "var(--tf-space-4)",
+  },
+  /* Left column: copyright + nav links */
+  left: {
     display: "flex",
     alignItems: "center",
     gap: "var(--tf-space-4)",
     flexWrap: "wrap" as const,
+    justifyContent: "flex-start",
   },
-  brand: {
-    display: "flex",
-    alignItems: "center",
-    gap: "var(--tf-space-1)",
-    textDecoration: "none",
-    flexShrink: 0,
-  },
-  logoMark: {
-    width: 18,
-    height: 18,
-    borderRadius: "var(--tf-radius-sm)",
-    background:
-      "linear-gradient(135deg, var(--tf-color-primary) 0%, var(--tf-color-accent) 100%)",
+  /* Center column: brand lockup */
+  center: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "10px",
-    fontWeight: 700,
-    color: "var(--tf-text-inverse)",
-    fontFamily: "var(--tf-font-mono)",
   },
-  brandName: {
-    fontWeight: 600,
-    fontSize: "var(--tf-text-xs)",
-    color: "var(--tf-text-secondary)",
-    fontFamily: "var(--tf-font-display)",
+  brandLink: {
+    textDecoration: "none",
+    display: "inline-flex",
+  },
+  /* Right column: social icons */
+  right: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: "var(--tf-space-1)",
   },
   copyright: {
     fontSize: "var(--tf-text-xs)",
     color: "var(--tf-text-muted)",
-  },
-  spacer: {
-    flex: 1,
+    whiteSpace: "nowrap" as const,
   },
   links: {
     display: "flex",
@@ -82,11 +81,6 @@ const s: Record<string, React.CSSProperties> = {
     color: "var(--tf-text-muted)",
     textDecoration: "none",
     transition: "color var(--tf-transition-fast)",
-  },
-  socials: {
-    display: "flex",
-    gap: "var(--tf-space-1)",
-    alignItems: "center",
   },
   socialBtn: {
     display: "flex",
@@ -103,7 +97,7 @@ const s: Record<string, React.CSSProperties> = {
 
 export function TutorialFooter({
   siteName,
-  logoUrl,
+  logoIconUrl,
   links = [],
   githubUrl,
   youtubeUrl,
@@ -114,7 +108,6 @@ export function TutorialFooter({
   hideFollowBar = false,
 }: TutorialFooterProps): React.ReactElement {
   const year = new Date().getFullYear();
-  const initial = siteName.charAt(0).toUpperCase();
 
   return (
     <footer style={s.footer}>
@@ -136,55 +129,43 @@ export function TutorialFooter({
         </div>
       )}
       <div style={s.inner}>
-        {/* Brand + copyright */}
-        <a href="/" style={s.brand}>
-          {logoUrl ? (
-            <img
-              src={logoUrl}
-              alt={siteName}
-              style={{
-                width: 132,
-                height: 30,
-                borderRadius: 0,
-                objectFit: "contain",
-              }}
-            />
-          ) : (
-            <span style={s.logoMark}>{initial}</span>
+        {/* ── Left: copyright + links ── */}
+        <div style={s.left}>
+          <span style={s.copyright}>
+            © {year} {siteName}. All rights reserved.
+          </span>
+          {links.length > 0 && (
+            <nav aria-label="Footer navigation">
+              <ul
+                style={{ ...s.links, listStyle: "none", padding: 0, margin: 0 }}
+              >
+                {links.map((link) => (
+                  <li key={link.href}>
+                    <a
+                      href={link.href}
+                      style={s.link}
+                      {...(link.external
+                        ? { target: "_blank", rel: "noopener noreferrer" }
+                        : {})}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           )}
-          {!logoUrl && <span style={s.brandName}>{siteName}</span>}
-        </a>
-        <span style={s.copyright}>
-          © {year} {siteName}. All rights reserved.
-        </span>
+        </div>
 
-        {/* Links */}
-        {links.length > 0 && (
-          <nav aria-label="Footer navigation">
-            <ul
-              style={{ ...s.links, listStyle: "none", padding: 0, margin: 0 }}
-            >
-              {links.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    style={s.link}
-                    {...(link.external
-                      ? { target: "_blank", rel: "noopener noreferrer" }
-                      : {})}
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        )}
+        {/* ── Center: brand lockup ── */}
+        <div style={s.center}>
+          <a href="/" style={s.brandLink}>
+            <BrandLockup iconUrl={logoIconUrl} size="sm" label={siteName} />
+          </a>
+        </div>
 
-        <div style={s.spacer} />
-
-        {/* Social icons */}
-        <div style={s.socials}>
+        {/* ── Right: social icons ── */}
+        <div style={s.right}>
           {githubUrl && (
             <a
               href={githubUrl}

@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { ThemeSelector } from "./ThemeSelector";
+import { BrandLockup } from "./BrandLockup";
 
 export interface NavItem {
   label: string;
@@ -12,6 +13,8 @@ export interface TutorialHeaderProps {
   siteName: string;
   /** Optional logo URL */
   logoUrl?: string;
+  /** Optional icon URL for brand mark rendering */
+  logoIconUrl?: string;
   /** Navigation links */
   navItems?: NavItem[];
   /** GitHub repository URL */
@@ -52,7 +55,7 @@ const s: Record<string, React.CSSProperties> = {
   brand: {
     display: "flex",
     alignItems: "center",
-    gap: "var(--tf-space-1)",
+    gap: "var(--tf-space-2)",
     textDecoration: "none",
     flexShrink: 0,
   },
@@ -147,6 +150,7 @@ const s: Record<string, React.CSSProperties> = {
 export function TutorialHeader({
   siteName,
   logoUrl,
+  logoIconUrl,
   navItems = [],
   githubUrl,
   youtubeUrl,
@@ -161,7 +165,9 @@ export function TutorialHeader({
       <div style={s.inner}>
         {/* Brand */}
         <a href="/" style={s.brand}>
-          {logoUrl ? (
+          {logoIconUrl ? (
+            <BrandLockup iconUrl={logoIconUrl} size="md" label={siteName} />
+          ) : logoUrl ? (
             <img
               src={logoUrl}
               alt={siteName}
@@ -175,7 +181,9 @@ export function TutorialHeader({
           ) : (
             <span style={s.logoMark}>{initial}</span>
           )}
-          {!logoUrl && <span style={s.siteName}>{siteName}</span>}
+          {!logoUrl && !logoIconUrl && (
+            <span style={s.siteName}>{siteName}</span>
+          )}
         </a>
 
         {/* Nav */}

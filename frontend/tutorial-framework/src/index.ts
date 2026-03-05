@@ -24,6 +24,7 @@ export type { Palette, Tokens, ThemeDef, ThemeColors } from "./theme";
 
 // Layout
 export {
+  BrandLockup,
   TutorialHeader,
   TutorialFooter,
   TutorialLayout,
@@ -31,6 +32,8 @@ export {
   ThemeSelector,
 } from "./components/layout";
 export type {
+  BrandLockupProps,
+  BrandLockupSize,
   TutorialHeaderProps,
   NavItem,
   TutorialFooterProps,
