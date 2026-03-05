@@ -28,9 +28,7 @@ const s: Record<string, React.CSSProperties> = {
   bg: {
     position: "absolute",
     inset: 0,
-    background:
-      "radial-gradient(ellipse 80% 60% at 50% -10%, var(--tf-color-primary-container-high) 0%, transparent 70%), " +
-      "radial-gradient(ellipse 50% 40% at 80% 80%, var(--tf-color-accent-container) 0%, transparent 60%)",
+    background: "none",
     pointerEvents: "none",
     zIndex: 0,
   },
