@@ -143,16 +143,16 @@ export function TutorialFooter({
               src={logoUrl}
               alt={siteName}
               style={{
-                width: 18,
+                width: 84,
                 height: 18,
                 borderRadius: "var(--tf-radius-sm)",
-                objectFit: "cover",
+                objectFit: "contain",
               }}
             />
           ) : (
             <span style={s.logoMark}>{initial}</span>
           )}
-          <span style={s.brandName}>{siteName}</span>
+          {!logoUrl && <span style={s.brandName}>{siteName}</span>}
         </a>
         <span style={s.copyright}>
           © {year} {siteName}. All rights reserved.
