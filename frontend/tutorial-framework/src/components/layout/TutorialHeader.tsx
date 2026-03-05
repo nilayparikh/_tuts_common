@@ -166,9 +166,9 @@ export function TutorialHeader({
               src={logoUrl}
               alt={siteName}
               style={{
-                width: 110,
-                height: 24,
-                borderRadius: "var(--tf-radius-md)",
+                width: 156,
+                height: 35,
+                borderRadius: 0,
                 objectFit: "contain",
               }}
             />

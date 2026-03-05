@@ -143,9 +143,9 @@ export function TutorialFooter({
               src={logoUrl}
               alt={siteName}
               style={{
-                width: 84,
-                height: 18,
-                borderRadius: "var(--tf-radius-sm)",
+                width: 132,
+                height: 30,
+                borderRadius: 0,
                 objectFit: "contain",
               }}
             />
