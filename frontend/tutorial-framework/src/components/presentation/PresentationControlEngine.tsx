@@ -432,7 +432,11 @@ const ENGINE_CSS = `
   /* ── Footer ────────────────────────── */
   .pe-footer {
     display: grid;
+<<<<<<< HEAD
     grid-template-columns: 1fr 1fr auto;
+=======
+    grid-template-columns: 1fr auto 1fr;
+>>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
     align-items: center;
     padding: 0 20px;
     height: 44px;
@@ -444,14 +448,23 @@ const ENGINE_CSS = `
     gap: 16px;
   }
   .pe-footer-left {
+<<<<<<< HEAD
     display: flex;
     align-items: center;
     gap: 8px;
     min-width: 0;
+=======
+    font-size: 11px;
+    color: var(--tf-text-muted, #8892a8);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+>>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
   }
   .pe-footer-center {
     display: flex;
     align-items: center;
+<<<<<<< HEAD
     gap: 12px;
     justify-content: center;
     min-width: 0;
@@ -462,6 +475,17 @@ const ENGINE_CSS = `
     object-fit: contain;
     display: block;
     opacity: 0.92;
+=======
+    gap: 8px;
+    justify-content: center;
+  }
+  .pe-footer-logo {
+    height: 18px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    opacity: 0.85;
+>>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
   }
   .pe-footer-brand {
     color: var(--tf-text-primary, #e2e6f0);
@@ -477,6 +501,7 @@ const ENGINE_CSS = `
   }
   .pe-footer-instructor {
     color: var(--tf-text-secondary, #bfc5d4);
+<<<<<<< HEAD
     font-size: 12px;
     font-weight: 500;
     white-space: nowrap;
@@ -486,6 +511,10 @@ const ENGINE_CSS = `
     color: var(--tf-text-muted, #8892a8);
     font-weight: 500;
     letter-spacing: 0.01em;
+=======
+    font-size: 11px;
+    font-weight: 500;
+>>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
     white-space: nowrap;
   }
   .pe-footer-social-link {
@@ -1290,7 +1319,12 @@ export function PresentationLayout({
 
         {/* ── Footer ── */}
         <div className="pe-footer">
+<<<<<<< HEAD
           <div className="pe-footer-left">
+=======
+          <span className="pe-footer-left">{copyrightText}</span>
+          <div className="pe-footer-center">
+>>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
             <img
               className="pe-footer-logo"
               src={brandLogoSrc}
@@ -1300,8 +1334,12 @@ export function PresentationLayout({
               <span className="pe-footer-brand">{brandLabel}</span>
             ) : null}
           </div>
+<<<<<<< HEAD
 
           <div className="pe-footer-center">
+=======
+          <div className="pe-footer-right">
+>>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
             {instructorName ? (
               <span className="pe-footer-instructor">
                 Instructor: {instructorName}
@@ -1332,10 +1370,13 @@ export function PresentationLayout({
               </a>
             ) : null}
           </div>
+<<<<<<< HEAD
 
           <div className="pe-footer-right">
             <span className="pe-footer-copy">{copyrightText}</span>
           </div>
+=======
+>>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
         </div>
       </div>
     </>

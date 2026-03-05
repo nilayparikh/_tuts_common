@@ -1,3 +1,5 @@
+export { BrandLockup } from "./BrandLockup";
+export type { BrandLockupProps, BrandLockupSize } from "./BrandLockup";
 export { TutorialHeader } from "./TutorialHeader";
 export type { TutorialHeaderProps, NavItem } from "./TutorialHeader";
 export { TutorialFooter } from "./TutorialFooter";
