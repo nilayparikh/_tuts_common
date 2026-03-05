@@ -484,7 +484,7 @@ const ENGINE_CSS = `
     white-space: nowrap;
   }
   .pe-footer-logo {
-    width: 22px;
+    width: 96px;
     height: 22px;
     object-fit: contain;
     display: block;
@@ -599,7 +599,7 @@ const ENGINE_CSS = `
     color: var(--tf-text-muted, #8892a8);
   }
   .pc-header-logo {
-    width: 20px;
+    width: 92px;
     height: 20px;
     object-fit: contain;
     display: block;
@@ -967,8 +967,11 @@ export function PresentationLayout({
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   controlWindowName = DEFAULT_CONTROL_WINDOW_NAME,
 }: PresentationLayoutProps) {
-  const brandLogoSrc = branding?.logoSrc ?? "/brand/icon-mark-gradient-64.png";
+  const brandLogoSrc =
+    branding?.logoSrc ?? "/brand/og-image-template-1200x630.png";
   const brandLabel = branding?.brandLabel ?? "Tutorial";
+  const showBrandLabel =
+    branding?.brandLabel != null && !brandLogoSrc.includes("og-image-template");
   const instructorName = branding?.instructorName;
   const githubUrl = branding?.githubUrl;
   const youtubeUrl = branding?.youtubeUrl;
@@ -1317,7 +1320,9 @@ export function PresentationLayout({
               src={brandLogoSrc}
               alt={brandLabel}
             />
-            <span className="pe-footer-brand">{brandLabel}</span>
+            {showBrandLabel ? (
+              <span className="pe-footer-brand">{brandLabel}</span>
+            ) : null}
           </div>
         </div>
       </div>
@@ -1342,7 +1347,8 @@ export function PresentationControlPanel({
   branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
 }: PresentationControlPanelProps) {
-  const brandLogoSrc = branding?.logoSrc ?? "/brand/icon-mark-gradient-64.png";
+  const brandLogoSrc =
+    branding?.logoSrc ?? "/brand/og-image-template-1200x630.png";
   const brandLabel = branding?.brandLabel ?? "Tutorial";
   const channelRef = useRef<BroadcastChannel | null>(null);
   const [state, setState] = useState<ControlState>({

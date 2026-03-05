@@ -166,16 +166,16 @@ export function TutorialHeader({
               src={logoUrl}
               alt={siteName}
               style={{
-                width: 24,
+                width: 110,
                 height: 24,
                 borderRadius: "var(--tf-radius-md)",
-                objectFit: "cover",
+                objectFit: "contain",
               }}
             />
           ) : (
             <span style={s.logoMark}>{initial}</span>
           )}
-          <span style={s.siteName}>{siteName}</span>
+          {!logoUrl && <span style={s.siteName}>{siteName}</span>}
         </a>
 
         {/* Nav */}

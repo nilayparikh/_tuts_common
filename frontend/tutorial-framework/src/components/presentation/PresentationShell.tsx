@@ -136,19 +136,11 @@ const CSS = `
   }
 
   .pres-footer-logo {
-    width: 18px;
+    width: 84px;
     height: 18px;
     border-radius: 4px;
-    background: linear-gradient(135deg,
-      var(--tf-color-primary, #6366f1) 0%,
-      var(--tf-color-accent, #f59e0b) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-    font-weight: 700;
-    color: var(--tf-text-inverse, #0b0d12);
-    font-family: var(--tf-font-mono, monospace);
+    object-fit: contain;
+    display: block;
   }
 
   .pres-footer-copy {
@@ -655,7 +647,11 @@ export function PresentationShell({
           {/* Footer */}
           <div className="pres-footer">
             <div className="pres-footer-brand">
-              <span className="pres-footer-logo">L</span>
+              <img
+                className="pres-footer-logo"
+                src="/brand/og-image-template-1200x630.png"
+                alt="LocalM"
+              />
               <span className="pres-footer-copy">
                 &copy; {year} {copyright}. All rights reserved.
               </span>

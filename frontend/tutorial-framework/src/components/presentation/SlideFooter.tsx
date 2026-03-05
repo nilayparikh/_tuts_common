@@ -21,7 +21,11 @@ export function SlideFooter({
   return (
     <div className="pres-footer">
       <div className="pres-footer-brand">
-        <span className="pres-footer-logo">L</span>
+        <img
+          className="pres-footer-logo"
+          src="/brand/og-image-template-1200x630.png"
+          alt="LocalM"
+        />
         <span className="pres-footer-copy">
           &copy; {year} {copyright}. All rights reserved.
         </span>
