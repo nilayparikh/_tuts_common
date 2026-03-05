@@ -37,6 +37,10 @@ export interface PresentationBranding {
   githubUrl?: string;
   youtubeUrl?: string;
   linkedinUrl?: string;
+  twitterUrl?: string;
+  twitterHandle?: string;
+  linkedinHandle?: string;
+  copyright?: string;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -424,74 +428,71 @@ const ENGINE_CSS = `
 
   /* ── Footer ────────────────────────── */
   .pe-footer {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    height: 52px;
-    min-height: 52px;
+    padding: 0 20px;
+    height: 44px;
+    min-height: 44px;
     background: var(--tf-bg-surface, #111318);
     border-top: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
     flex-shrink: 0;
     z-index: 20;
-    gap: 12px;
+    gap: 16px;
   }
   .pe-footer-left {
-    font-size: 12px;
-    color: var(--tf-text-secondary, #bfc5d4);
-    font-weight: 600;
+    font-size: 11px;
+    color: var(--tf-text-muted, #8892a8);
+    font-weight: 500;
     letter-spacing: 0.01em;
-    min-width: 180px;
+    white-space: nowrap;
   }
   .pe-footer-center {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 14px;
-    color: var(--tf-text-secondary, #bfc5d4);
-    flex: 1;
+    gap: 8px;
     justify-content: center;
-    min-width: 0;
-  }
-  .pe-footer-instructor {
-    color: var(--tf-text-primary, #e2e6f0);
-    font-weight: 500;
-    white-space: nowrap;
-  }
-  .pe-footer-social {
-    color: var(--tf-text-muted, #8892a8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    border-radius: 6px;
-    background: transparent;
-    transition: color 150ms;
-    text-decoration: none;
-  }
-  .pe-footer-social:hover {
-    color: var(--tf-color-primary-light, #818cf8);
-    background: var(--tf-bg-overlay, #1f222a);
-  }
-  .pe-footer-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--tf-text-secondary, #bfc5d4);
-    font-weight: 600;
-    white-space: nowrap;
   }
   .pe-footer-logo {
-    width: 96px;
-    height: 22px;
+    height: 18px;
+    width: auto;
     object-fit: contain;
     display: block;
+    opacity: 0.85;
   }
   .pe-footer-brand {
     color: var(--tf-text-primary, #e2e6f0);
     font-weight: 600;
+    font-size: 12px;
+  }
+  .pe-footer-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: flex-end;
+    white-space: nowrap;
+  }
+  .pe-footer-instructor {
+    color: var(--tf-text-secondary, #bfc5d4);
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .pe-footer-social-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--tf-text-muted, #8892a8);
+    text-decoration: none;
+    font-size: 11px;
+    transition: color 150ms;
+    white-space: nowrap;
+  }
+  .pe-footer-social-link:hover {
+    color: var(--tf-color-primary-light, #818cf8);
+  }
+  .pe-footer-social-link svg {
+    flex-shrink: 0;
   }
 
   /* ── Fullscreen button ─────────────── */
@@ -918,6 +919,11 @@ const Icons = {
       <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
     </svg>
   ),
+  twitter: (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  ),
 };
 
 type ControlCommand =
@@ -976,6 +982,11 @@ export function PresentationLayout({
   const githubUrl = branding?.githubUrl;
   const youtubeUrl = branding?.youtubeUrl;
   const linkedinUrl = branding?.linkedinUrl;
+  const twitterUrl = branding?.twitterUrl;
+  const twitterHandle = branding?.twitterHandle;
+  const linkedinHandle = branding?.linkedinHandle;
+  const copyrightText =
+    branding?.copyright ?? `\u00A9 ${new Date().getFullYear()} ${brandLabel}`;
   const rootRef = useRef<HTMLDivElement>(null);
   const controlChannelRef = useRef<BroadcastChannel | null>(null);
 
@@ -1131,7 +1142,6 @@ export function PresentationLayout({
     [goTo],
   );
 
-  const year = new Date().getFullYear();
   const duration = currentSlide?.duration;
   const progressPct =
     slideCount > 1 ? (slideIndex / (slideCount - 1)) * 100 : 0;
@@ -1272,49 +1282,8 @@ export function PresentationLayout({
 
         {/* ── Footer ── */}
         <div className="pe-footer">
-          <span className="pe-footer-left">{courseTitle}</span>
+          <span className="pe-footer-left">{copyrightText}</span>
           <div className="pe-footer-center">
-            {instructorName ? (
-              <span className="pe-footer-instructor">
-                Instructor: {instructorName}
-              </span>
-            ) : null}
-            {githubUrl ? (
-              <a
-                className="pe-footer-social"
-                href={githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="GitHub"
-              >
-                {Icons.github}
-              </a>
-            ) : null}
-            {youtubeUrl ? (
-              <a
-                className="pe-footer-social"
-                href={youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="YouTube"
-              >
-                {Icons.youtube}
-              </a>
-            ) : null}
-            {linkedinUrl ? (
-              <a
-                className="pe-footer-social"
-                href={linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-              >
-                {Icons.linkedin}
-              </a>
-            ) : null}
-          </div>
-          <div className="pe-footer-right">
-            <span>&copy; {year}</span>
             <img
               className="pe-footer-logo"
               src={brandLogoSrc}
@@ -1322,6 +1291,37 @@ export function PresentationLayout({
             />
             {showBrandLabel ? (
               <span className="pe-footer-brand">{brandLabel}</span>
+            ) : null}
+          </div>
+          <div className="pe-footer-right">
+            {instructorName ? (
+              <span className="pe-footer-instructor">
+                Instructor: {instructorName}
+              </span>
+            ) : null}
+            {twitterUrl ? (
+              <a
+                className="pe-footer-social-link"
+                href={twitterUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="X (Twitter)"
+              >
+                {Icons.twitter}
+                {twitterHandle ? <span>{twitterHandle}</span> : null}
+              </a>
+            ) : null}
+            {linkedinUrl ? (
+              <a
+                className="pe-footer-social-link"
+                href={linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+              >
+                {Icons.linkedin}
+                {linkedinHandle ? <span>{linkedinHandle}</span> : null}
+              </a>
             ) : null}
           </div>
         </div>

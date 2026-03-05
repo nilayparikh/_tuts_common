@@ -100,9 +100,8 @@ export function BrandLockup({
     fontSize: p.tm,
     color: "var(--tf-color-primary-light)",
     verticalAlign: "super",
-    marginLeft: "0.05em",
+    marginLeft: "0.02em",
     lineHeight: 1,
-    letterSpacing: "0.04em",
   };
 
   const secondaryStyle: React.CSSProperties = {
@@ -131,7 +130,7 @@ export function BrandLockup({
       )}
       <span style={wordmark}>
         <span style={primaryStyle}>
-          localm<span style={tmStyle}>TM</span>
+          localm<span style={tmStyle}>{"\u2122"}</span>
         </span>
         <span style={secondaryStyle}>TUTS</span>
       </span>
