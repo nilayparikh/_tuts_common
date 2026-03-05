@@ -6,9 +6,19 @@
  */
 
 export const palette = {
+  // ── LocalM Brand (canonical — from _brand/docs/BRAND_GUIDE.md) ──────────
+  localm: {
+    cyan: "#00F5FF",
+    blue: "#2932FF",
+    purple: "#A838FF",
+    green: "#00FFB2",
+    gold: "#FFB03A",
+    base: "#0B0B0F",
+  },
+
   // ── Surfaces (MD3 tonal surface system) ─────────────────────────────────
   background: {
-    base: "#0b0d12", // Surface Dim
+    base: "#0B0B0F", // Surface Dim — aligned with brand base
     surface: "#111318", // Surface
     elevated: "#191c23", // Surface Container
     overlay: "#1f222a", // Surface Container High
@@ -24,69 +34,69 @@ export const palette = {
 
   // ── Text (MD3 on-surface roles) ─────────────────────────────────────────
   text: {
-    primary: "#e2e6f0", // On Surface
-    secondary: "#bfc5d4", // On Surface Variant
-    muted: "#8892a8", // Outline (used for disabled/placeholder)
-    inverse: "#0b0d12", // Inverse On Surface
+    primary: "#FFFFFF", // brand.textPrimary
+    secondary: "#94A3B8", // brand.textSecondary
+    muted: "#64748B", // subdued supporting text
+    inverse: "#0B0B0F", // brand.base
   },
 
-  // ── Primary (Indigo — MD3 Primary) ──────────────────────────────────────
+  // ── Primary (brand.blue scale) ───────────────────────────────────────────
   primary: {
-    50: "#eef2ff",
-    100: "#e0e7ff",
-    200: "#c7d2fe",
-    300: "#a5b4fc",
-    400: "#818cf8",
-    500: "#6366f1", // Primary
-    600: "#4f46e5",
-    700: "#4338ca",
-    800: "#3730a3",
-    900: "#312e81",
-    950: "#1e1b4b",
+    50: "#eceeff",
+    100: "#d7daff",
+    200: "#b3b9ff",
+    300: "#8f97ff",
+    400: "#626bff",
+    500: "#2932FF", // brand.blue
+    600: "#2028d6",
+    700: "#1a21ad",
+    800: "#131885",
+    900: "#0d115c",
+    950: "#090b36",
   },
 
-  // ── Secondary (Teal — MD3 Secondary) ────────────────────────────────────
+  // ── Secondary (brand.cyan scale) ─────────────────────────────────────────
   secondary: {
-    300: "#5eead4",
-    400: "#2dd4bf",
-    500: "#14b8a6",
-    600: "#0d9488",
-    700: "#0f766e",
+    300: "#8dfaff",
+    400: "#45f7ff",
+    500: "#00F5FF", // brand.cyan
+    600: "#00c8d1",
+    700: "#00949b",
   },
 
-  // ── Tertiary (Amber — MD3 Tertiary / Accent) ───────────────────────────
+  // ── Tertiary (brand.purple scale) ────────────────────────────────────────
   accent: {
-    50: "#fffbeb",
-    100: "#fef3c7",
-    200: "#fde68a",
-    300: "#fcd34d",
-    400: "#fbbf24",
-    500: "#f59e0b", // Accent
-    600: "#d97706",
-    700: "#b45309",
-    800: "#92400e",
-    900: "#78350f",
+    50: "#f5e9ff",
+    100: "#ecd5ff",
+    200: "#d9b0ff",
+    300: "#c68bff",
+    400: "#b45fff",
+    500: "#A838FF", // brand.purple
+    600: "#8b2bd1",
+    700: "#6d21a6",
+    800: "#4f177a",
+    900: "#330e4f",
   },
 
-  // ── Success (Emerald) ──────────────────────────────────────────────────
+  // ── Success (brand.green scale) ─────────────────────────────────────────
   success: {
-    50: "#ecfdf5",
-    100: "#d1fae5",
-    200: "#a7f3d0",
-    300: "#6ee7b7",
-    400: "#34d399",
-    500: "#10b981",
-    600: "#059669",
-    700: "#047857",
-    800: "#065f46",
-    900: "#064e3b",
+    50: "#e6fff7",
+    100: "#ccffef",
+    200: "#99ffdf",
+    300: "#66ffcf",
+    400: "#33ffbf",
+    500: "#00FFB2", // brand.green
+    600: "#00cc8e",
+    700: "#00996b",
+    800: "#006647",
+    900: "#003324",
   },
 
-  // ── Warning (Amber alias) ─────────────────────────────────────────────
+  // ── Warning (brand.gold alias) ─────────────────────────────────────────
   warning: {
-    400: "#fbbf24",
-    500: "#f59e0b",
-    600: "#d97706",
+    400: "#ffc56b",
+    500: "#FFB03A", // brand.gold
+    600: "#d88b1f",
   },
 
   // ── Error / Danger (MD3 Error) ─────────────────────────────────────────

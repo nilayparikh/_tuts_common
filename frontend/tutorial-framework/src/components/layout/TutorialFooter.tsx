@@ -9,6 +9,7 @@ export interface FooterLink {
 
 export interface TutorialFooterProps {
   siteName: string;
+  logoUrl?: string;
   tagline?: string;
   links?: FooterLink[];
   githubUrl?: string;
@@ -39,13 +40,13 @@ const s: Record<string, React.CSSProperties> = {
   brand: {
     display: "flex",
     alignItems: "center",
-    gap: "var(--tf-space-2)",
+    gap: "var(--tf-space-1)",
     textDecoration: "none",
     flexShrink: 0,
   },
   logoMark: {
-    width: 20,
-    height: 20,
+    width: 18,
+    height: 18,
     borderRadius: "var(--tf-radius-sm)",
     background:
       "linear-gradient(135deg, var(--tf-color-primary) 0%, var(--tf-color-accent) 100%)",
@@ -102,6 +103,7 @@ const s: Record<string, React.CSSProperties> = {
 
 export function TutorialFooter({
   siteName,
+  logoUrl,
   links = [],
   githubUrl,
   youtubeUrl,
@@ -136,7 +138,20 @@ export function TutorialFooter({
       <div style={s.inner}>
         {/* Brand + copyright */}
         <a href="/" style={s.brand}>
-          <span style={s.logoMark}>{initial}</span>
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt={siteName}
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: "var(--tf-radius-sm)",
+                objectFit: "cover",
+              }}
+            />
+          ) : (
+            <span style={s.logoMark}>{initial}</span>
+          )}
           <span style={s.brandName}>{siteName}</span>
         </a>
         <span style={s.copyright}>

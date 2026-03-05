@@ -52,13 +52,13 @@ const s: Record<string, React.CSSProperties> = {
   brand: {
     display: "flex",
     alignItems: "center",
-    gap: "var(--tf-space-2)",
+    gap: "var(--tf-space-1)",
     textDecoration: "none",
     flexShrink: 0,
   },
   logoMark: {
-    width: 28,
-    height: 28,
+    width: 24,
+    height: 24,
     borderRadius: "var(--tf-radius-md)",
     background:
       "linear-gradient(135deg, var(--tf-color-primary) 0%, var(--tf-color-accent) 100%)",
@@ -166,8 +166,8 @@ export function TutorialHeader({
               src={logoUrl}
               alt={siteName}
               style={{
-                width: 28,
-                height: 28,
+                width: 24,
+                height: 24,
                 borderRadius: "var(--tf-radius-md)",
                 objectFit: "cover",
               }}

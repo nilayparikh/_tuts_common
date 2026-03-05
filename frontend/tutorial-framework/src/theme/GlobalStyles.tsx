@@ -85,7 +85,14 @@ function buildCSS(): string {
   --tf-color-warning-container-high:   ${c.warningContainerHigh};
   --tf-color-danger-container-high:    ${c.dangerContainerHigh};
 
-  /* Brand */
+  /* Brand — LocalM (canonical identity) */
+  --tf-brand-localm-cyan:   ${c.brandLocalmCyan};
+  --tf-brand-localm-blue:   ${c.brandLocalmBlue};
+  --tf-brand-localm-purple: ${c.brandLocalmPurple};
+  --tf-brand-localm-green:  ${c.brandLocalmGreen};
+  --tf-brand-localm-gold:   ${c.brandLocalmGold};
+
+  /* Brand — third-party services */
   --tf-brand-youtube:  ${c.brandYouTube};
   --tf-brand-spotify:  ${c.brandSpotify};
   --tf-brand-apple:    ${c.brandApple};

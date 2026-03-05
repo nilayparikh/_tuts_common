@@ -38,47 +38,54 @@ export const tokens = {
     primaryLight: palette.primary[400],
     primaryDark: palette.primary[700],
     primaryBg: palette.primary[950],
-    primaryContainer: "rgba(99,102,241,0.12)",
+    primaryContainer: "rgba(41,50,255,0.12)",
 
     // Secondary (Teal)
     secondary: palette.secondary[500],
     secondaryLight: palette.secondary[400],
-    secondaryContainer: "rgba(20,184,166,0.12)",
+    secondaryContainer: "rgba(0,245,255,0.12)",
 
     // Accent / Tertiary
     accent: palette.accent[500],
     accentLight: palette.accent[300],
     accentDark: palette.accent[700],
-    accentContainer: "rgba(245,158,11,0.10)",
+    accentContainer: "rgba(168,56,255,0.10)",
 
     // Semantic
     success: palette.success[500],
     successBg: palette.success[900],
-    successContainer: "rgba(16,185,129,0.10)",
+    successContainer: "rgba(0,255,178,0.10)",
     warning: palette.warning[500],
     warningBg: "#3d2e0a",
-    warningContainer: "rgba(251,191,36,0.10)",
+    warningContainer: "rgba(255,176,58,0.10)",
     danger: palette.danger[500],
     dangerBg: "#3b0f0f",
     dangerContainer: "rgba(239,68,68,0.08)",
 
     // Semantic borders (MD3 outline per role — ~35 % opacity)
-    primaryBorder: "rgba(99,102,241,0.35)",
-    secondaryBorder: "rgba(20,184,166,0.35)",
-    accentBorder: "rgba(245,158,11,0.35)",
-    successBorder: "rgba(16,185,129,0.35)",
-    warningBorder: "rgba(251,191,36,0.35)",
+    primaryBorder: "rgba(41,50,255,0.35)",
+    secondaryBorder: "rgba(0,245,255,0.35)",
+    accentBorder: "rgba(168,56,255,0.35)",
+    successBorder: "rgba(0,255,178,0.35)",
+    warningBorder: "rgba(255,176,58,0.35)",
     dangerBorder: "rgba(239,68,68,0.35)",
 
     // Stronger containers (MD3 Container High — ~18 % opacity)
-    primaryContainerHigh: "rgba(99,102,241,0.18)",
-    secondaryContainerHigh: "rgba(20,184,166,0.18)",
-    accentContainerHigh: "rgba(245,158,11,0.14)",
-    successContainerHigh: "rgba(16,185,129,0.15)",
-    warningContainerHigh: "rgba(251,191,36,0.14)",
+    primaryContainerHigh: "rgba(41,50,255,0.18)",
+    secondaryContainerHigh: "rgba(0,245,255,0.18)",
+    accentContainerHigh: "rgba(168,56,255,0.14)",
+    successContainerHigh: "rgba(0,255,178,0.15)",
+    warningContainerHigh: "rgba(255,176,58,0.14)",
     dangerContainerHigh: "rgba(239,68,68,0.12)",
 
-    // Brand (third-party service colors)
+    // Brand — LocalM (canonical identity colors)
+    brandLocalmCyan: palette.localm.cyan,
+    brandLocalmBlue: palette.localm.blue,
+    brandLocalmPurple: palette.localm.purple,
+    brandLocalmGreen: palette.localm.green,
+    brandLocalmGold: palette.localm.gold,
+
+    // Brand — third-party service colors
     brandYouTube: "#ff0000",
     brandSpotify: "#1DB954",
     brandApple: "#FC3C44",
@@ -99,10 +106,11 @@ export const tokens = {
   },
 
   typography: {
-    // Google Fonts: Inter for body, Inter Variable for display, JetBrains Mono
-    fontDisplay: '"Inter", "Segoe UI", system-ui, sans-serif',
-    fontBody: '"Inter", "Segoe UI", system-ui, sans-serif',
-    fontMono: '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
+    // Brand + readability: Outfit for display headings, Inter for body text
+    fontDisplay: '"Outfit", "Segoe UI", Roboto, Arial, sans-serif',
+    fontBody: '"Inter", "Segoe UI", Roboto, Arial, sans-serif',
+    fontMono:
+      '"JetBrains Mono", "Share Tech Mono", Consolas, "Courier New", monospace',
 
     // Fluid type scale (clamp: min, preferred, max)
     // MD3 naming: label-sm / body-sm / body-md / body-lg / title-sm / title-md / title-lg / headline-sm / headline-md / headline-lg / display-sm / display-md
