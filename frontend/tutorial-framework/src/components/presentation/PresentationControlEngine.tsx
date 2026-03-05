@@ -14,6 +14,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { BrandLockup } from "../layout/BrandLockup";
 
 export interface PresentationSlide {
   id: string;
@@ -32,6 +33,7 @@ export interface PresentationDeck {
 
 export interface PresentationBranding {
   logoSrc?: string;
+  brandIconUrl?: string;
   brandLabel?: string;
   instructorName?: string;
   githubUrl?: string;
@@ -41,6 +43,10 @@ export interface PresentationBranding {
   twitterHandle?: string;
   linkedinHandle?: string;
   copyright?: string;
+  /** URL to promote in footer with typing animation, e.g. "tuts.localm.dev/a2a" */
+  siteUrl?: string;
+  /** Rotating phrases typed after the URL, e.g. ["examples","interactive mode","course outline"] */
+  siteUrlPhrases?: string[];
 }
 
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -65,8 +71,8 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     padding: 0 20px;
-    height: 42px;
-    min-height: 42px;
+    height: 56px;
+    min-height: 56px;
     background: var(--tf-bg-surface, #111318);
     border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
     gap: 12px;
@@ -84,7 +90,6 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
     min-width: 0;
   }
   .pe-header-right {
@@ -99,13 +104,13 @@ const ENGINE_CSS = `
     gap: 8px;
     text-decoration: none;
     color: var(--tf-text-secondary, #bfc5d4);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     transition: color 150ms;
     cursor: pointer;
     background: none;
     border: none;
-    padding: 4px 8px;
+    padding: 6px 10px;
     border-radius: 6px;
   }
   .pe-header-home:hover {
@@ -114,43 +119,74 @@ const ENGINE_CSS = `
   }
   .pe-header-sep {
     color: var(--tf-text-muted, #8892a8);
-    font-size: 12px;
+    font-size: 13px;
   }
   .pe-header-lesson {
     font-size: 13px;
     font-weight: 600;
-    color: var(--tf-text-primary, #e2e6f0);
+    color: var(--tf-text-secondary, #bfc5d4);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 340px;
   }
   .pe-header-slide {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--tf-text-muted, #8892a8);
     font-family: 'JetBrains Mono', monospace;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
+
   .pe-header-nav {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     min-width: 0;
-    max-width: min(68vw, 720px);
+    max-width: min(68vw, 780px);
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
   }
-  .pe-header-nav-label {
-    font-size: 11px;
+  .pe-header-nav-prev,
+  .pe-header-nav-next {
+    font-size: 12px;
     color: var(--tf-text-muted, #8892a8);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 160px;
+    max-width: 180px;
+    padding: 0 6px;
+    opacity: 0.55;
+    transition: opacity 150ms, color 150ms;
+    cursor: default;
+  }
+  .pe-header-nav-prev:hover,
+  .pe-header-nav-next:hover {
+    opacity: 0.85;
+    color: var(--tf-text-secondary, #bfc5d4);
   }
   .pe-header-nav-current {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--tf-text-primary, #e2e6f0);
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 220px;
+    max-width: 280px;
+    padding: 0 10px;
+    background: transparent;
+    border-radius: 0;
+    border: none;
+    text-align: center;
+  }
+  .pe-header-nav-dot {
+    color: var(--tf-text-muted, #8892a8);
+    font-size: 10px;
+    opacity: 0.4;
+    flex-shrink: 0;
+    user-select: none;
   }
 
   /* ── Body ─────────────────────────── */
@@ -192,15 +228,16 @@ const ENGINE_CSS = `
     border-radius: 8px;
     background: var(--tf-bg-base, #0b0d12);
     box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    zoom: 1.05;
   }
 
   .pe-nav-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 26px;
-    border-radius: 6px;
+    width: 34px;
+    height: 30px;
+    border-radius: 8px;
     background: var(--tf-bg-elevated, #191c23);
     border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
     color: var(--tf-text-secondary, #bfc5d4);
@@ -223,8 +260,8 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     border-radius: 6px;
     background: transparent;
     border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
@@ -432,98 +469,69 @@ const ENGINE_CSS = `
   /* ── Footer ────────────────────────── */
   .pe-footer {
     display: grid;
-<<<<<<< HEAD
-    grid-template-columns: 1fr 1fr auto;
-=======
-    grid-template-columns: 1fr auto 1fr;
->>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
+    grid-template-columns: auto 1fr auto auto;
     align-items: center;
-    padding: 0 20px;
-    height: 44px;
-    min-height: 44px;
+    padding: 0 24px;
+    height: 52px;
+    min-height: 52px;
     background: var(--tf-bg-surface, #111318);
     border-top: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
     flex-shrink: 0;
     z-index: 20;
-    gap: 16px;
+    gap: 20px;
   }
   .pe-footer-left {
-<<<<<<< HEAD
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     min-width: 0;
-=======
-    font-size: 11px;
-    color: var(--tf-text-muted, #8892a8);
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    white-space: nowrap;
->>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
   }
   .pe-footer-center {
     display: flex;
     align-items: center;
-<<<<<<< HEAD
-    gap: 12px;
+    gap: 16px;
     justify-content: center;
     min-width: 0;
   }
   .pe-footer-logo {
-    height: 20px;
+    height: 24px;
     width: auto;
     object-fit: contain;
     display: block;
     opacity: 0.92;
-=======
-    gap: 8px;
-    justify-content: center;
-  }
-  .pe-footer-logo {
-    height: 18px;
-    width: auto;
-    object-fit: contain;
-    display: block;
-    opacity: 0.85;
->>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
   }
   .pe-footer-brand {
     color: var(--tf-text-primary, #e2e6f0);
     font-weight: 600;
-    font-size: 12px;
+    font-size: 13px;
   }
   .pe-footer-right {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     justify-content: flex-end;
     white-space: nowrap;
   }
   .pe-footer-instructor {
     color: var(--tf-text-secondary, #bfc5d4);
-<<<<<<< HEAD
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
     white-space: nowrap;
   }
   .pe-footer-copy {
-    font-size: 11px;
+    font-size: 14px;
     color: var(--tf-text-muted, #8892a8);
     font-weight: 500;
     letter-spacing: 0.01em;
-=======
-    font-size: 11px;
-    font-weight: 500;
->>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
     white-space: nowrap;
   }
   .pe-footer-social-link {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     color: var(--tf-text-muted, #8892a8);
     text-decoration: none;
-    font-size: 11px;
+    font-size: 14px;
     transition: color 150ms;
     white-space: nowrap;
   }
@@ -532,6 +540,71 @@ const ENGINE_CSS = `
   }
   .pe-footer-social-link svg {
     flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+  .pe-footer-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--tf-border-default, rgba(202,211,230,0.14));
+    flex-shrink: 0;
+    opacity: 0.9;
+  }
+
+  /* ── Footer logo glow animation ────── */
+  @keyframes pe-logo-glow {
+    0%, 100% { filter: drop-shadow(0 0 2px rgba(99,102,241,0.0)); }
+    50% { filter: drop-shadow(0 0 8px rgba(99,102,241,0.45)) drop-shadow(0 0 20px rgba(129,140,248,0.2)); }
+  }
+  .pe-footer-left :is(.brand-lockup, img) {
+    animation: pe-logo-glow 4s ease-in-out infinite;
+  }
+
+  /* ── Footer URL Promotion ───────────── */
+  .pe-footer-url {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 13px;
+    white-space: nowrap;
+    color: var(--tf-text-muted, #8892a8);
+    min-width: 320px;
+    width: 320px;
+    overflow: hidden;
+  }
+  .pe-footer-url-static {
+    color: var(--tf-color-primary-light, #818cf8);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    flex-shrink: 0;
+  }
+  .pe-footer-url-prompt {
+    color: var(--tf-color-accent, #f59e0b);
+    font-weight: 700;
+    opacity: 0.9;
+    flex-shrink: 0;
+  }
+  .pe-footer-url-typed {
+    color: var(--tf-text-secondary, #bfc5d4);
+    font-weight: 400;
+    min-width: 0;
+    overflow: hidden;
+    display: inline;
+  }
+  .pe-footer-url-cursor {
+    display: inline-block;
+    width: 7px;
+    height: 15px;
+    background: var(--tf-color-primary-light, #818cf8);
+    margin-left: 1px;
+    vertical-align: middle;
+    animation: pe-blink 1s step-end infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pe-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
   }
 
   /* ── Fullscreen button ─────────────── */
@@ -539,8 +612,8 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border-radius: 6px;
     background: transparent;
     border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
@@ -558,15 +631,15 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 24px;
-    padding: 0 8px;
-    border-radius: 6px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 8px;
     background: transparent;
     border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
     color: var(--tf-text-muted, #8892a8);
     cursor: pointer;
     transition: all 150ms;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -965,9 +1038,71 @@ const Icons = {
   ),
 };
 
+/* ═══════════════════════════════════════════════════════════════════════ */
+/*  Typing Promotion — animated footer URL with rotating phrases          */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+function TypingPromotion({ url, phrases }: { url: string; phrases: string[] }) {
+  const [phraseIdx, setPhraseIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (phrases.length === 0) return;
+    const current = phrases[phraseIdx % phrases.length];
+
+    if (paused) {
+      const t = setTimeout(() => {
+        setPaused(false);
+        setDeleting(true);
+      }, 2200);
+      return () => clearTimeout(t);
+    }
+
+    if (deleting) {
+      if (charIdx <= 0) {
+        setDeleting(false);
+        setPhraseIdx((p) => (p + 1) % phrases.length);
+        return;
+      }
+      const t = setTimeout(() => setCharIdx((c) => c - 1), 30);
+      return () => clearTimeout(t);
+    }
+
+    // typing
+    if (charIdx < current.length) {
+      const t = setTimeout(() => setCharIdx((c) => c + 1), 55);
+      return () => clearTimeout(t);
+    }
+
+    // finished typing — pause
+    setPaused(true);
+  }, [charIdx, deleting, paused, phraseIdx, phrases]);
+
+  const displayed =
+    phrases.length > 0
+      ? (phrases[phraseIdx % phrases.length] ?? "").slice(0, charIdx)
+      : "";
+
+  return (
+    <span className="pe-footer-url">
+      <span className="pe-footer-url-prompt">{">_"}</span>
+      <span className="pe-footer-url-static">{url}</span>
+      {phrases.length > 0 && (
+        <>
+          <span className="pe-footer-url-typed">{displayed}</span>
+          <span className="pe-footer-url-cursor" />
+        </>
+      )}
+    </span>
+  );
+}
+
 type ControlCommand =
   | { type: "command"; deckId: string; action: "prev" | "next" }
   | { type: "command"; deckId: string; action: "goto"; index: number }
+  | { type: "command"; deckId: string; action: "set-zoom"; zoom: number }
   | {
       type: "command";
       deckId: string;
@@ -984,12 +1119,14 @@ type ControlState = {
   slideCount: number;
   elapsed: number;
   duration?: number;
+  zoom: number;
   slideTitle?: string;
   narration?: string;
 };
 
 const DEFAULT_CONTROL_CHANNEL = "tf-slides-control";
 const DEFAULT_CONTROL_WINDOW_NAME = "tf-slide-control-window";
+const DEFAULT_SLIDE_ZOOM = 1.15;
 
 /* ═══════════════════════════════════════════════════════════════════════ */
 /*  PresentationLayout                                                    */
@@ -1014,6 +1151,7 @@ export function PresentationLayout({
 }: PresentationLayoutProps) {
   const brandLogoSrc =
     branding?.logoSrc ?? "/brand/og-image-template-1200x630.png";
+  const brandIconUrl = branding?.brandIconUrl;
   const brandLabel = branding?.brandLabel ?? "Tutorial";
   const showBrandLabel =
     branding?.brandLabel != null && !brandLogoSrc.includes("og-image-template");
@@ -1026,6 +1164,8 @@ export function PresentationLayout({
   const linkedinHandle = branding?.linkedinHandle;
   const copyrightText =
     branding?.copyright ?? `\u00A9 ${new Date().getFullYear()} ${brandLabel}`;
+  const siteUrl = branding?.siteUrl;
+  const siteUrlPhrases = branding?.siteUrlPhrases ?? [];
   const rootRef = useRef<HTMLDivElement>(null);
   const controlChannelRef = useRef<BroadcastChannel | null>(null);
 
@@ -1037,6 +1177,7 @@ export function PresentationLayout({
   }, []);
 
   const [slideIndex, setSlideIndex] = useState(getIndexFromHash);
+  const [slideZoom, setSlideZoom] = useState<number>(DEFAULT_SLIDE_ZOOM);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const slideCount = deck.slides.length;
   const elapsed = useSlideTimer(slideIndex);
@@ -1072,11 +1213,12 @@ export function PresentationLayout({
       slideCount,
       elapsed,
       duration: slide?.duration,
+      zoom: slideZoom,
       slideTitle: slide?.title,
       narration: slide?.narration,
     };
     channel.postMessage(message);
-  }, [deck, slideIndex, slideCount, elapsed]);
+  }, [deck, slideIndex, slideCount, elapsed, slideZoom]);
 
   /* ── Keyboard ── */
   useEffect(() => {
@@ -1138,6 +1280,10 @@ export function PresentationLayout({
         if (msg.action === "prev") goPrev();
         else if (msg.action === "next") goNext();
         else if (msg.action === "goto") goTo(msg.index);
+        else if (msg.action === "set-zoom") {
+          const nextZoom = Math.max(0.85, Math.min(msg.zoom, 1.4));
+          setSlideZoom(nextZoom);
+        }
       }
     };
 
@@ -1219,15 +1365,28 @@ export function PresentationLayout({
               >
                 {Icons.chevLeft}
               </button>
-              <span className="pe-header-nav-label">
-                {prevSlide ? `« ${prevSlide.title}` : ""}
-              </span>
-              <span className="pe-header-nav-current">
+              {prevSlide ? (
+                <>
+                  <span className="pe-header-nav-prev" title={prevSlide.title}>
+                    {prevSlide.title}
+                  </span>
+                  <span className="pe-header-nav-dot" aria-hidden="true">•</span>
+                </>
+              ) : null}
+              <span
+                className="pe-header-nav-current"
+                title={currentSlide?.title}
+              >
                 {currentSlide?.title ?? ""}
               </span>
-              <span className="pe-header-nav-label">
-                {nextSlide ? `${nextSlide.title} »` : ""}
-              </span>
+              {nextSlide ? (
+                <>
+                  <span className="pe-header-nav-dot" aria-hidden="true">•</span>
+                  <span className="pe-header-nav-next" title={nextSlide.title}>
+                    {nextSlide.title}
+                  </span>
+                </>
+              ) : null}
               <button
                 className="pe-nav-btn"
                 onClick={goNext}
@@ -1312,38 +1471,43 @@ export function PresentationLayout({
 
             {/* Slide viewport */}
             <div className="pe-viewport">
-              <div className="pe-slide-box">{currentSlide?.content}</div>
+              <div className="pe-slide-box" style={{ zoom: slideZoom }}>
+                {currentSlide?.content}
+              </div>
             </div>
           </div>
         </div>
 
         {/* ── Footer ── */}
         <div className="pe-footer">
-<<<<<<< HEAD
           <div className="pe-footer-left">
-=======
-          <span className="pe-footer-left">{copyrightText}</span>
-          <div className="pe-footer-center">
->>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
-            <img
-              className="pe-footer-logo"
-              src={brandLogoSrc}
-              alt={brandLabel}
-            />
-            {showBrandLabel ? (
-              <span className="pe-footer-brand">{brandLabel}</span>
-            ) : null}
+            {brandIconUrl ? (
+              <BrandLockup
+                iconUrl={brandIconUrl}
+                size="md"
+                label={brandLabel}
+              />
+            ) : (
+              <>
+                <img
+                  className="pe-footer-logo"
+                  src={brandLogoSrc}
+                  alt={brandLabel}
+                />
+                {showBrandLabel ? (
+                  <span className="pe-footer-brand">{brandLabel}</span>
+                ) : null}
+              </>
+            )}
           </div>
-<<<<<<< HEAD
-
           <div className="pe-footer-center">
-=======
-          <div className="pe-footer-right">
->>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
             {instructorName ? (
               <span className="pe-footer-instructor">
                 Instructor: {instructorName}
               </span>
+            ) : null}
+            {instructorName && (twitterUrl || linkedinUrl) ? (
+              <span className="pe-footer-divider" aria-hidden="true" />
             ) : null}
             {twitterUrl ? (
               <a
@@ -1356,6 +1520,9 @@ export function PresentationLayout({
                 {Icons.twitter}
                 {twitterHandle ? <span>{twitterHandle}</span> : null}
               </a>
+            ) : null}
+            {twitterUrl && linkedinUrl ? (
+              <span className="pe-footer-divider" aria-hidden="true" />
             ) : null}
             {linkedinUrl ? (
               <a
@@ -1370,13 +1537,20 @@ export function PresentationLayout({
               </a>
             ) : null}
           </div>
-<<<<<<< HEAD
-
+          {siteUrl ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+              }}
+            >
+              <TypingPromotion url={siteUrl} phrases={siteUrlPhrases} />
+            </div>
+          ) : null}
           <div className="pe-footer-right">
             <span className="pe-footer-copy">{copyrightText}</span>
           </div>
-=======
->>>>>>> 43fb0949bcca3660e5b9a9fc4c1db8bf0db67fd3
         </div>
       </div>
     </>
@@ -1412,6 +1586,7 @@ export function PresentationControlPanel({
     slideCount: deck.slides.length,
     elapsed: 0,
     duration: deck.slides[0]?.duration,
+    zoom: DEFAULT_SLIDE_ZOOM,
     slideTitle: deck.slides[0]?.title,
     narration: deck.slides[0]?.narration,
   });
@@ -1482,6 +1657,7 @@ export function PresentationControlPanel({
               {formatTime(state.elapsed)}
               {state.duration != null ? ` / ${formatTime(state.duration)}` : ""}
             </span>
+            <span>Zoom {state.zoom.toFixed(2)}x</span>
           </div>
           <img className="pc-header-logo" src={brandLogoSrc} alt={brandLabel} />
           {onOpenPresenter && (
@@ -1506,6 +1682,30 @@ export function PresentationControlPanel({
                     {lessonDeck.number}. {lessonDeck.title}
                   </option>
                 ))}
+              </select>
+
+              <span className="pc-section-label" style={{ marginTop: 8 }}>
+                Slide Zoom
+              </span>
+              <select
+                className="pc-lesson-select"
+                value={state.zoom.toFixed(2)}
+                onChange={(e) =>
+                  send({
+                    type: "command",
+                    deckId: deck.id,
+                    action: "set-zoom",
+                    zoom: parseFloat(e.target.value),
+                  })
+                }
+                aria-label="Slide zoom"
+              >
+                <option value="1.00">1.00x</option>
+                <option value="1.05">1.05x</option>
+                <option value="1.08">1.08x</option>
+                <option value="1.10">1.10x</option>
+                <option value="1.12">1.12x</option>
+                <option value="1.15">1.15x</option>
               </select>
             </div>
 
