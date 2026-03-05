@@ -965,7 +965,7 @@ export function PresentationLayout({
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   controlWindowName = DEFAULT_CONTROL_WINDOW_NAME,
 }: PresentationLayoutProps) {
-  const brandLogoSrc = branding?.logoSrc ?? "/brand/icon-circle-64.png";
+  const brandLogoSrc = branding?.logoSrc ?? "/brand/icon-mark-gradient-64.png";
   const brandLabel = branding?.brandLabel ?? "Tutorial";
   const instructorName = branding?.instructorName;
   const githubUrl = branding?.githubUrl;
@@ -1340,7 +1340,7 @@ export function PresentationControlPanel({
   branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
 }: PresentationControlPanelProps) {
-  const brandLogoSrc = branding?.logoSrc ?? "/brand/icon-circle-64.png";
+  const brandLogoSrc = branding?.logoSrc ?? "/brand/icon-mark-gradient-64.png";
   const brandLabel = branding?.brandLabel ?? "Tutorial";
   const channelRef = useRef<BroadcastChannel | null>(null);
   const [state, setState] = useState<ControlState>({
