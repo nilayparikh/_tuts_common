@@ -45,11 +45,13 @@ export function getPartTypePresentation(
   part: CoursePart,
 ): PartTypePresentation {
   const codeExample = hasCodeExample(part);
+  const presentationType = part.displayTypeOverride ?? part.type;
+  const forcePlainVideo = part.displayTypeOverride === "video";
 
-  switch (part.type) {
+  switch (presentationType) {
     case "video":
     case "video-code":
-      return codeExample
+      return !forcePlainVideo && codeExample
         ? basePresentation(
             "code",
             "💻",
@@ -148,7 +150,7 @@ export function getPartTypePresentation(
             "var(--tf-color-secondary-border)",
           );
     default: {
-      const neverType: never = part.type satisfies PartType;
+      const neverType: never = presentationType satisfies PartType;
       return neverType;
     }
   }

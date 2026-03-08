@@ -19,6 +19,8 @@ export interface CoursePart {
   slug: string;
   title: string;
   type: PartType;
+  /** Optional user-facing presentation override for badges/sidebar labels */
+  displayTypeOverride?: PartType;
   /** e.g. "4 mins", "1 hour" */
   duration: string;
   /** Optional GitHub source repository or example URL */
