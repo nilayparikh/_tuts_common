@@ -1,10 +1,12 @@
 import React from "react";
 import { PartTypeBadge } from "./PartTypeBadge";
-import type { PartType } from "./CourseSidebar";
+import type { CoursePart, PartType } from "./CourseSidebar";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
 export interface LessonHeaderProps {
+  /** Full part metadata for accurate visible labeling */
+  part?: CoursePart;
   /** Part type (video, reading, quiz, etc.) */
   type: PartType;
   /** Duration label (e.g. "4 mins") */
@@ -26,6 +28,7 @@ export interface LessonHeaderProps {
  * type badge, title, and optional description.
  */
 export function LessonHeader({
+  part,
   type,
   duration,
   title,
@@ -40,7 +43,7 @@ export function LessonHeader({
         gap: "var(--tf-space-4)",
       }}
     >
-      <PartTypeBadge type={type} duration={duration} />
+      <PartTypeBadge part={part} type={type} duration={duration} />
 
       <h1
         style={{

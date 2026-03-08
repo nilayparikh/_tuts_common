@@ -1,100 +1,33 @@
 import React from "react";
-import type { PartType } from "./CourseSidebar";
+import type { CoursePart, PartType } from "./CourseSidebar";
+import { getPartTypePresentation } from "./partTypePresentation";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
 export interface PartTypeBadgeProps {
+  part?: CoursePart;
   type: PartType;
   duration?: string;
   /** Visual size */
   size?: "sm" | "md";
 }
 
-// ─── Meta map ──────────────────────────────────────────────────────────────
-
-const META: Record<
-  PartType,
-  {
-    icon: string;
-    label: string;
-    bg: string;
-    color: string;
-    borderColor: string;
-  }
-> = {
-  video: {
-    icon: "▶",
-    label: "Video",
-    bg: "var(--tf-color-danger-container)",
-    color: "var(--tf-color-danger)",
-    borderColor: "var(--tf-color-danger-border)",
-  },
-  reading: {
-    icon: "📖",
-    label: "Reading",
-    bg: "var(--tf-color-primary-container)",
-    color: "var(--tf-color-primary-light)",
-    borderColor: "var(--tf-color-primary-border)",
-  },
-  "video-code": {
-    icon: "💻",
-    label: "Video with Code",
-    bg: "var(--tf-color-accent-container)",
-    color: "var(--tf-color-accent-light)",
-    borderColor: "var(--tf-color-accent-border)",
-  },
-  quiz: {
-    icon: "📝",
-    label: "Graded · Quiz",
-    bg: "var(--tf-color-success-container)",
-    color: "var(--tf-color-success)",
-    borderColor: "var(--tf-color-success-border)",
-  },
-  podcast: {
-    icon: "🎙",
-    label: "Podcast",
-    bg: "var(--tf-color-success-container)",
-    color: "var(--tf-brand-spotify)",
-    borderColor: "var(--tf-color-success-border)",
-  },
-  slideshow: {
-    icon: "📑",
-    label: "Slides",
-    bg: "var(--tf-color-primary-container)",
-    color: "var(--tf-color-primary-light)",
-    borderColor: "var(--tf-color-primary-border)",
-  },
-  article: {
-    icon: "📰",
-    label: "Article",
-    bg: "var(--tf-color-secondary-container)",
-    color: "var(--tf-color-secondary-light)",
-    borderColor: "var(--tf-color-secondary-border)",
-  },
-  lab: {
-    icon: "🧪",
-    label: "Lab",
-    bg: "var(--tf-color-accent-container)",
-    color: "var(--tf-color-accent)",
-    borderColor: "var(--tf-color-accent-border)",
-  },
-  code: {
-    icon: "🖥️",
-    label: "Code",
-    bg: "var(--tf-color-secondary-container)",
-    color: "var(--tf-color-secondary-light)",
-    borderColor: "var(--tf-color-secondary-border)",
-  },
-};
-
 // ─── Component ─────────────────────────────────────────────────────────────
 
 export function PartTypeBadge({
+  part,
   type,
   duration,
   size = "md",
 }: PartTypeBadgeProps): React.ReactElement {
-  const m = META[type];
+  const m = getPartTypePresentation(
+    part ?? {
+      slug: type,
+      title: "",
+      type,
+      duration: duration ?? "",
+    },
+  );
   const isSm = size === "sm";
 
   return (
@@ -116,7 +49,7 @@ export function PartTypeBadge({
         whiteSpace: "nowrap",
       }}
     >
-      <span style={{ fontSize: "var(--tf-text-xs)" }}>{m.icon}</span>
+      <span style={{ fontSize: "var(--tf-text-xs)" }}>{m.badgeIcon}</span>
       <span>{m.label}</span>
       {duration && (
         <>

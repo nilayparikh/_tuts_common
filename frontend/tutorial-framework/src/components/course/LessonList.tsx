@@ -1,6 +1,7 @@
 import React from "react";
 import { PartTypeBadge } from "./PartTypeBadge";
-import type { CoursePart, PartType } from "./CourseSidebar";
+import type { CoursePart } from "./CourseSidebar";
+import { getPartTypePresentation } from "./partTypePresentation";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -10,20 +11,6 @@ export interface LessonListProps {
   /** Base path for part links (e.g. "" for root or "/tutorials/a2a") */
   basePath?: string;
 }
-
-// ─── Type icons ────────────────────────────────────────────────────────────
-
-const TYPE_ICON: Record<PartType, string> = {
-  video: "▶",
-  reading: "📖",
-  "video-code": "💻",
-  quiz: "📝",
-  podcast: "🎙",
-  slideshow: "📑",
-  article: "📰",
-  lab: "🧪",
-  code: "🖥️",
-};
 
 // ─── Component ─────────────────────────────────────────────────────────────
 
@@ -46,7 +33,7 @@ export function LessonList({
     >
       {parts.map((part, i) => {
         const href = `${basePath}/${part.slug}/`;
-        const icon = TYPE_ICON[part.type] ?? "\u25b6";
+        const meta = getPartTypePresentation(part);
 
         return (
           <a
@@ -99,7 +86,7 @@ export function LessonList({
                 lineHeight: 1,
               }}
             >
-              {icon}
+              {meta.badgeIcon}
             </span>
 
             {/* Title + badge + description */}
@@ -116,6 +103,7 @@ export function LessonList({
               </p>
               <div style={{ marginTop: "var(--tf-space-1)" }}>
                 <PartTypeBadge
+                  part={part}
                   type={part.type}
                   duration={part.duration}
                   size="sm"

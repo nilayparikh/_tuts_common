@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { getPartTypePresentation } from "./partTypePresentation";
 
 // ─── Part type definitions ─────────────────────────────────────────────────
 
@@ -20,6 +21,16 @@ export interface CoursePart {
   type: PartType;
   /** e.g. "4 mins", "1 hour" */
   duration: string;
+  /** Optional GitHub source repository or example URL */
+  codeUrl?: string;
+  /** Optional notebook preview or notebook source URL */
+  notebookUrl?: string;
+  /** Optional Colab URL */
+  colabUrl?: string;
+  /** Optional inline code walkthrough metadata */
+  codePreview?: {
+    segments?: unknown[];
+  };
   /** Mark as completed (progress tracking) */
   isCompleted?: boolean;
 }
@@ -36,20 +47,6 @@ export interface CourseSidebarProps {
   /** Optional total duration string */
   totalDuration?: string;
 }
-
-// ─── Material Symbol icon per part type ────────────────────────────────────
-
-const TYPE_META: Record<PartType, { icon: string; label: string }> = {
-  video: { icon: "play_circle", label: "Video" },
-  reading: { icon: "menu_book", label: "Reading" },
-  "video-code": { icon: "code", label: "Video with Code" },
-  quiz: { icon: "quiz", label: "Quiz" },
-  podcast: { icon: "podcasts", label: "Podcast" },
-  slideshow: { icon: "slideshow", label: "Slides" },
-  article: { icon: "article", label: "Article" },
-  lab: { icon: "science", label: "Lab" },
-  code: { icon: "code_blocks", label: "Code" },
-};
 
 // ─── Component ─────────────────────────────────────────────────────────────
 
@@ -146,7 +143,7 @@ export function CourseSidebar({
       >
         {parts.map((part, i) => {
           const isCurrent = part.slug === currentSlug;
-          const meta = TYPE_META[part.type];
+          const meta = getPartTypePresentation(part);
           const href = `${basePath}/${part.slug}/`;
 
           return (
@@ -251,7 +248,7 @@ export function CourseSidebar({
                           : "var(--tf-text-muted)",
                       }}
                     >
-                      {meta.icon}
+                      {meta.materialIcon}
                     </span>
                     <span>{meta.label}</span>
                     <span style={{ opacity: 0.4 }}>·</span>
