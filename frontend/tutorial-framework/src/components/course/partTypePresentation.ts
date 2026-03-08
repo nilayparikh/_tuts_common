@@ -53,7 +53,7 @@ export function getPartTypePresentation(
         ? basePresentation(
             "code",
             "💻",
-            "Video + Code Walkthrough",
+            "Video + Code Examples",
             "var(--tf-color-accent-container)",
             "var(--tf-color-accent-light)",
             "var(--tf-color-accent-border)",

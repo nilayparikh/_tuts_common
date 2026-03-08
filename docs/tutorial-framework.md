@@ -243,20 +243,21 @@ actual lesson metadata so the site does not leak template jargon.
 
 Use these conventions consistently:
 
-| Internal `type` | Display label rule                                                                 |
-| --------------- | ---------------------------------------------------------------------------------- |
-| `video`         | `Video Lesson`, unless a real code example exists                                  |
-| `video-code`    | `Video + Code Walkthrough` only when a GitHub/code example exists; otherwise video |
-| `reading`       | `Reading Guide`                                                                    |
-| `quiz`          | `Assessment`, or `Interview Questions` when the lesson is clearly interview-style  |
-| `podcast`       | `Audio Lesson`                                                                     |
-| `slideshow`     | `Slide Deck`                                                                       |
-| `article`       | `Article`                                                                          |
-| `lab`           | `Hands-On Lab`                                                                     |
-| `code`          | `Code Example` when example assets exist; otherwise `Code Lab`                     |
+| Internal `type` | Display label rule                                                                |
+| --------------- | --------------------------------------------------------------------------------- |
+| `video`         | `Video Lesson`, unless a real code example exists                                 |
+| `video-code`    | `Video + Code Examples` only when a real code example exists; otherwise video     |
+| `reading`       | `Reading Guide`                                                                   |
+| `quiz`          | `Assessment`, or `Interview Questions` when the lesson is clearly interview-style |
+| `podcast`       | `Audio Lesson`                                                                    |
+| `slideshow`     | `Slide Deck`                                                                      |
+| `article`       | `Article`                                                                         |
+| `lab`           | `Hands-On Lab`                                                                    |
+| `code`          | `Code Example` when example assets exist; otherwise `Code Lab`                    |
 
-Code-example detection should come from real lesson metadata such as `codeUrl`,
-`notebookUrl`, `colabUrl`, or populated `codePreview` segments.
+Code-example detection should come from real lesson metadata such as
+`notebookUrl`, `colabUrl`, or populated `codePreview` segments. Use wording that
+describes supporting examples, not necessarily a full end-to-end walkthrough.
 
 ### Content Components
 
