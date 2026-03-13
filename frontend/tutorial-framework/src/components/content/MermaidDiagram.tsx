@@ -21,7 +21,7 @@ export interface MermaidDiagramProps {
  * Applied automatically to charts that don't have their own %%{init:...}%%
  */
 const MERMAID_SPACING_CONFIG =
-  "%%{init: {'flowchart': {'nodeSpacing': 30, 'rankSpacing': 40, 'padding': 15}, 'sequence': {'actorMargin': 50, 'messageMargin': 35}, 'gantt': {'barHeight': 20, 'barGap': 4}}}%%\n";
+  "%%{init: {'flowchart': {'nodeSpacing': 42, 'rankSpacing': 56, 'padding': 22, 'useMaxWidth': true}, 'sequence': {'actorMargin': 64, 'messageMargin': 42, 'noteMargin': 18}, 'gantt': {'barHeight': 24, 'barGap': 6}, 'themeVariables': {'fontSize': '18px'}}}%%\n";
 
 // ─── Component ─────────────────────────────────────────────────────────────
 
@@ -109,6 +109,19 @@ export function MermaidDiagram({
     };
   }, [enhancedChart, theme]);
 
+  React.useEffect(() => {
+    if (!svg || !containerRef.current) return;
+
+    const targetSvg = containerRef.current.querySelector("svg");
+    if (!targetSvg) return;
+
+    targetSvg.style.width = "100%";
+    targetSvg.style.height = "auto";
+    targetSvg.style.maxWidth = "100%";
+    targetSvg.style.minWidth = "44rem";
+    targetSvg.style.display = "block";
+  }, [svg]);
+
   // Close dialog on Escape key
   React.useEffect(() => {
     if (!isOpen) return;
@@ -160,7 +173,7 @@ export function MermaidDiagram({
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            minHeight: "8rem",
+            minHeight: "16rem",
           }}
         >
           {svg ? (
@@ -168,6 +181,7 @@ export function MermaidDiagram({
               <div
                 dangerouslySetInnerHTML={{ __html: svg }}
                 style={{
+                  width: "100%",
                   minWidth: "fit-content",
                   display: "flex",
                   justifyContent: "center",
@@ -298,6 +312,7 @@ export function MermaidDiagram({
                 justifyContent: "center",
                 alignItems: "center",
                 flex: 1,
+                width: "100%",
                 minWidth: "fit-content",
               }}
             />
