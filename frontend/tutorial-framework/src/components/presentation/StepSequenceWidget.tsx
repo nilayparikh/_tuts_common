@@ -278,29 +278,16 @@ export function StepSequenceWidget({
                   const isToLane = laneIndex === toIndex;
                   const isHighlightedLane = isFromLane || isToLane;
                   const laneWidth = isActive
-                    ? isToLane
-                      ? "3px"
-                      : isFromLane
-                        ? "2px"
-                        : "1px"
+                    ? isHighlightedLane
+                      ? "2px"
+                      : "1px"
                     : isComplete && isHighlightedLane
                       ? "2px"
                       : "1px";
-                  const laneGlow = isActive
-                    ? isToLane
-                      ? `0 0 12px ${laneColor}`
-                      : isFromLane
-                        ? `0 0 8px ${mixWithTransparent(laneColor, 68)}`
-                        : "none"
-                    : isComplete && isHighlightedLane
-                      ? `0 0 4px ${mixWithTransparent(laneColor, 28)}`
-                      : "none";
                   const laneBackground = isActive
-                    ? isToLane
-                      ? mixWithTransparent(laneColor, 92)
-                      : isFromLane
-                        ? mixWithTransparent(laneColor, 72)
-                        : "rgba(202,211,230,0.08)"
+                    ? isHighlightedLane
+                      ? mixWithTransparent(laneColor, 64)
+                      : "rgba(202,211,230,0.08)"
                     : isComplete && isHighlightedLane
                       ? mixWithTransparent(laneColor, 42)
                       : isHighlightedLane
@@ -309,22 +296,6 @@ export function StepSequenceWidget({
 
                   return (
                     <React.Fragment key={`${step.id}-lane-${laneIndex}`}>
-                      {isActive && isHighlightedLane ? (
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            bottom: 0,
-                            left: `${lanePercent}%`,
-                            width: isToLane ? "18px" : "12px",
-                            background: `linear-gradient(90deg, transparent 0%, ${mixWithTransparent(laneColor, 10)} 30%, ${mixWithTransparent(laneColor, isToLane ? 30 : 20)} 50%, ${mixWithTransparent(laneColor, 10)} 70%, transparent 100%)`,
-                            boxShadow: `0 0 12px ${mixWithTransparent(laneColor, 18)}`,
-                            transform: "translateX(-50%)",
-                            zIndex: 1,
-                            pointerEvents: "none",
-                          }}
-                        />
-                      ) : null}
                       <div
                         style={{
                           position: "absolute",
@@ -333,7 +304,6 @@ export function StepSequenceWidget({
                           left: `${lanePercent}%`,
                           width: laneWidth,
                           background: laneBackground,
-                          boxShadow: laneGlow,
                           transform: "translateX(-50%)",
                           zIndex: 3,
                         }}
@@ -360,12 +330,7 @@ export function StepSequenceWidget({
                           }`,
                           transform: "translate(-50%, -50%)",
                           zIndex: 4,
-                          boxShadow:
-                            isActive && isToLane
-                              ? `0 0 12px ${laneColor}`
-                              : isHighlightedLane
-                                ? `0 0 8px ${mixWithTransparent(laneColor, 60)}`
-                                : "none",
+                          boxShadow: "none",
                         }}
                       />
                     </React.Fragment>
@@ -379,14 +344,13 @@ export function StepSequenceWidget({
                     left: `${connectorStart}%`,
                     width: `${connectorWidth}%`,
                     height: "2px",
-                    background: `linear-gradient(90deg, ${mixWithTransparent(accentColor, 34)}, ${accentColor}, ${mixWithTransparent(accentColor, 34)})`,
+                    background: isActive
+                      ? accentColor
+                      : isComplete
+                        ? mixWithTransparent(accentColor, 72)
+                        : mixWithTransparent(accentColor, 40),
                     transform: "translateY(-50%)",
                     zIndex: 2,
-                    boxShadow: isActive
-                      ? `0 0 14px ${accentColor}`
-                      : isComplete
-                        ? `0 0 8px ${accentColor}`
-                        : "none",
                     transformOrigin: isRightward
                       ? "left center"
                       : "right center",

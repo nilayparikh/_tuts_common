@@ -109,19 +109,6 @@ export function MermaidDiagram({
     };
   }, [enhancedChart, theme]);
 
-  React.useEffect(() => {
-    if (!svg || !containerRef.current) return;
-
-    const targetSvg = containerRef.current.querySelector("svg");
-    if (!targetSvg) return;
-
-    targetSvg.style.width = "100%";
-    targetSvg.style.height = "auto";
-    targetSvg.style.maxWidth = "100%";
-    targetSvg.style.minWidth = "44rem";
-    targetSvg.style.display = "block";
-  }, [svg]);
-
   // Close dialog on Escape key
   React.useEffect(() => {
     if (!isOpen) return;
@@ -181,10 +168,9 @@ export function MermaidDiagram({
               <div
                 dangerouslySetInnerHTML={{ __html: svg }}
                 style={{
-                  width: "100%",
-                  minWidth: "fit-content",
-                  display: "flex",
+                  display: "inline-flex",
                   justifyContent: "center",
+                  alignItems: "center",
                 }}
               />
               <button
