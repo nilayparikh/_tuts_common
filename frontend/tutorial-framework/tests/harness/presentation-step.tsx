@@ -1,0 +1,123 @@
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { TutorialGlobalStyles } from "../../src/index";
+import {
+  PresentationControlPanel,
+  PresentationLayout,
+  usePresentationStep,
+} from "../../src/components/presentation";
+
+const CHANNEL_ID = "tf-step-harness";
+const deck = {
+  id: "01",
+  number: "01",
+  title: "Step Harness",
+  slides: [
+    {
+      id: "step-slide",
+      title: "Animated Step Slide",
+      duration: 30,
+      narration: "Fallback narration",
+      steps: [
+        {
+          id: "step-1",
+          title: "Step 1",
+          transcript: "Step 1:\nPrompt is entered.",
+        },
+        {
+          id: "step-2",
+          title: "Step 2",
+          transcript: "Step 2:\nRepository context is discovered.",
+        },
+        {
+          id: "step-3",
+          title: "Step 3",
+          transcript: "Step 3:\nThe agent plans the implementation.",
+        },
+        {
+          id: "step-4",
+          title: "Step 4",
+          transcript: "Step 4:\nThe final output is produced.",
+        },
+      ],
+      content: (
+        <div
+          data-testid="step-slide-content"
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "grid",
+            placeItems: "center",
+            background: "#0b0d12",
+            color: "#e2e6f0",
+            fontFamily: "Inter, system-ui, sans-serif",
+          }}
+        >
+          Step Harness Slide
+        </div>
+      ),
+    },
+  ],
+} as any;
+
+function StepAwareContent() {
+  const { activeStep } = usePresentationStep();
+
+  return (
+    <div
+      data-testid="step-slide-content"
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "grid",
+        placeItems: "center",
+        background: "#0b0d12",
+        color: "#e2e6f0",
+        fontFamily: "Inter, system-ui, sans-serif",
+      }}
+    >
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontSize: 14, opacity: 0.7, marginBottom: 12 }}>
+          Step Harness Slide
+        </div>
+        <div
+          data-testid="step-active-title"
+          style={{ fontSize: 28, fontWeight: 700 }}
+        >
+          {activeStep?.title ?? "No Step"}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+deck.slides[0].content = <StepAwareContent />;
+
+function App() {
+  const params = new URLSearchParams(window.location.search);
+  const control = params.get("control") === "1";
+
+  return (
+    <>
+      <TutorialGlobalStyles />
+      {control ? (
+        <PresentationControlPanel
+          deck={deck}
+          decks={[deck]}
+          controlChannelId={CHANNEL_ID}
+        />
+      ) : (
+        <PresentationLayout
+          courseTitle="Harness"
+          deck={deck}
+          onHome={() => {
+            window.location.hash = "#/";
+          }}
+          controlChannelId={CHANNEL_ID}
+        />
+      )}
+    </>
+  );
+}
+
+createRoot(document.getElementById("root")!).render(<App />);

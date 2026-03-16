@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import {
+  ThemeProvider,
   TutorialGlobalStyles,
   TutorialHeader,
   TutorialFooter,
@@ -77,12 +78,18 @@ const courseParts = [
 ] as const;
 
 function Marker({ id }: { id: string }) {
-  return <div data-testid={id} style={{ display: "none" }} />;
+  return (
+    <div
+      data-testid={id}
+      aria-hidden="true"
+      style={{ width: 1, height: 1, overflow: "hidden" }}
+    />
+  );
 }
 
 function App() {
   return (
-    <>
+    <ThemeProvider>
       <TutorialGlobalStyles />
 
       <main style={{ padding: "24px", display: "grid", gap: "20px" }}>
@@ -321,7 +328,7 @@ function App() {
           />
         </section>
       </main>
-    </>
+    </ThemeProvider>
   );
 }
 
