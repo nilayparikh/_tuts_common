@@ -58,8 +58,12 @@ export interface ExampleRun {
 export interface ExampleResultsProps {
   /** Assessment data */
   assessment?: ExampleAssessment;
+  /** Direct link to the source ASSESSMENT.md artifact */
+  assessmentUrl?: string;
   /** Run analysis data */
   run?: ExampleRun;
+  /** Direct link to the source RUN.md artifact */
+  runUrl?: string;
   /** Default active tab */
   defaultTab?: "assessment" | "run";
 }
@@ -147,7 +151,9 @@ function MetaChip({
         {icon}
       </span>
       <span style={{ opacity: 0.7 }}>{label}</span>
-      <span style={{ fontWeight: 600, color: "var(--tf-text-primary, #e2e8f0)" }}>
+      <span
+        style={{ fontWeight: 600, color: "var(--tf-text-primary, #e2e8f0)" }}
+      >
         {value}
       </span>
     </div>
@@ -216,6 +222,33 @@ function CollapsibleSection({
         {children}
       </div>
     </details>
+  );
+}
+
+function ShortcutLink({ href, label }: { href: string; label: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "0.375rem",
+        padding: "0.375rem 0.625rem",
+        borderRadius: "var(--tf-radius-sm, 0.375rem)",
+        border: "1px solid var(--tf-border-default, rgba(255,255,255,0.1))",
+        background: "var(--tf-bg-surface, rgba(255,255,255,0.01))",
+        color: "var(--tf-text-secondary, #94a3b8)",
+        fontSize: "var(--tf-text-xs, 0.75rem)",
+        fontFamily: "var(--tf-font-mono, monospace)",
+        textDecoration: "none",
+        whiteSpace: "nowrap",
+      }}
+    >
+      <span aria-hidden="true">↗</span>
+      {label}
+    </a>
   );
 }
 
@@ -522,11 +555,7 @@ function RunTab({ data }: { data: ExampleRun }) {
 
       {/* ── Context stages ─────────────────────────────────────── */}
       {data.stages && data.stages.length > 0 && (
-        <CollapsibleSection
-          title="Context at Each Stage"
-          icon="🧭"
-          defaultOpen
-        >
+        <CollapsibleSection title="Context at Each Stage" icon="🧭" defaultOpen>
           <div
             style={{
               display: "flex",
@@ -656,7 +685,8 @@ function RunTab({ data }: { data: ExampleRun }) {
                   display: "grid",
                   gridTemplateColumns: "1.5rem 1fr",
                   gap: "var(--tf-space-2, 0.5rem)",
-                  padding: "var(--tf-space-2, 0.5rem) var(--tf-space-3, 0.75rem)",
+                  padding:
+                    "var(--tf-space-2, 0.5rem) var(--tf-space-3, 0.75rem)",
                   borderRadius: "var(--tf-radius-sm, 0.375rem)",
                   background: d.validated
                     ? "var(--tf-color-success-container, rgba(16,185,129,0.06))"
@@ -751,8 +781,7 @@ function ToolCallTimeline({ calls }: { calls: RunToolCall[] }) {
               display: "grid",
               gridTemplateColumns: "5.5rem 1fr 1.5rem",
               gap: "var(--tf-space-2, 0.5rem)",
-              padding:
-                "var(--tf-space-1, 0.25rem) var(--tf-space-3, 0.75rem)",
+              padding: "var(--tf-space-1, 0.25rem) var(--tf-space-3, 0.75rem)",
               borderBottom:
                 "1px solid var(--tf-border-subtle, rgba(255,255,255,0.03))",
               fontSize: "var(--tf-text-xs, 0.75rem)",
@@ -792,8 +821,7 @@ function ToolCallTimeline({ calls }: { calls: RunToolCall[] }) {
             margin: "var(--tf-space-2, 0.5rem) 0",
             padding: "var(--tf-space-2, 0.5rem) var(--tf-space-4, 1rem)",
             borderRadius: "var(--tf-radius-sm, 0.375rem)",
-            border:
-              "1px solid var(--tf-border-default, rgba(255,255,255,0.1))",
+            border: "1px solid var(--tf-border-default, rgba(255,255,255,0.1))",
             background: "transparent",
             color: "var(--tf-color-primary-light, #818cf8)",
             fontSize: "var(--tf-text-xs, 0.75rem)",
@@ -813,7 +841,9 @@ function ToolCallTimeline({ calls }: { calls: RunToolCall[] }) {
 
 export function ExampleResults({
   assessment,
+  assessmentUrl,
   run,
+  runUrl,
   defaultTab = "assessment",
 }: ExampleResultsProps): React.ReactElement | null {
   const hasBoth = !!assessment && !!run;
@@ -841,6 +871,8 @@ export function ExampleResults({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: "var(--tf-space-3, 0.75rem)",
+          flexWrap: "wrap",
           padding: "var(--tf-space-4, 1rem) var(--tf-space-5, 1.25rem)",
           borderBottom:
             "1px solid var(--tf-border-subtle, rgba(255,255,255,0.06))",
@@ -868,48 +900,62 @@ export function ExampleResults({
           </h3>
         </div>
 
-        {/* Tabs */}
-        {hasBoth && (
-          <div
-            style={{
-              display: "flex",
-              gap: "0.125rem",
-              padding: "0.125rem",
-              borderRadius: "var(--tf-radius-sm, 0.375rem)",
-              background:
-                "var(--tf-bg-overlay, rgba(255,255,255,0.04))",
-            }}
-          >
-            {(["assessment", "run"] as const).map((tab) => {
-              const isActive = activeTab === tab;
-              return (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  style={{
-                    padding: "0.375rem 0.75rem",
-                    borderRadius: "var(--tf-radius-xs, 0.25rem)",
-                    border: "none",
-                    background: isActive
-                      ? "var(--tf-color-primary-container, rgba(129,140,248,0.12))"
-                      : "transparent",
-                    color: isActive
-                      ? "var(--tf-color-primary-light, #818cf8)"
-                      : "var(--tf-text-tertiary, #64748b)",
-                    fontSize: "var(--tf-text-xs, 0.75rem)",
-                    fontFamily: "var(--tf-font-display, system-ui)",
-                    fontWeight: isActive ? 700 : 500,
-                    cursor: "pointer",
-                    transition: "all var(--tf-transition-fast, 0.15s)",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {tab === "assessment" ? "📋 Assessment" : "🔬 Run Analysis"}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            gap: "var(--tf-space-2, 0.5rem)",
+            flexWrap: "wrap",
+          }}
+        >
+          {assessmentUrl && (
+            <ShortcutLink href={assessmentUrl} label="ASSESSMENT.md" />
+          )}
+          {runUrl && <ShortcutLink href={runUrl} label="RUN.md" />}
+
+          {/* Tabs */}
+          {hasBoth && (
+            <div
+              style={{
+                display: "flex",
+                gap: "0.125rem",
+                padding: "0.125rem",
+                borderRadius: "var(--tf-radius-sm, 0.375rem)",
+                background: "var(--tf-bg-overlay, rgba(255,255,255,0.04))",
+              }}
+            >
+              {(["assessment", "run"] as const).map((tab) => {
+                const isActive = activeTab === tab;
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    style={{
+                      padding: "0.375rem 0.75rem",
+                      borderRadius: "var(--tf-radius-xs, 0.25rem)",
+                      border: "none",
+                      background: isActive
+                        ? "var(--tf-color-primary-container, rgba(129,140,248,0.12))"
+                        : "transparent",
+                      color: isActive
+                        ? "var(--tf-color-primary-light, #818cf8)"
+                        : "var(--tf-text-tertiary, #64748b)",
+                      fontSize: "var(--tf-text-xs, 0.75rem)",
+                      fontFamily: "var(--tf-font-display, system-ui)",
+                      fontWeight: isActive ? 700 : 500,
+                      cursor: "pointer",
+                      transition: "all var(--tf-transition-fast, 0.15s)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {tab === "assessment" ? "📋 Assessment" : "🔬 Run Analysis"}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Content ────────────────────────────────────────────── */}
