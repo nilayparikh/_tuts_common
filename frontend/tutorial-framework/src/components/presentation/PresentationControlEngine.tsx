@@ -21,7 +21,14 @@ export interface PresentationSlide {
   title: string;
   duration?: number;
   narration?: string;
+  steps?: PresentationStep[];
   content: React.ReactNode;
+}
+
+export interface PresentationStep {
+  id: string;
+  title: string;
+  transcript: string;
 }
 
 export interface PresentationDeck {
@@ -50,6 +57,25 @@ export interface PresentationBranding {
   siteUrlPhrases?: string[];
 }
 
+interface PresentationStepContextValue {
+  stepIndex: number;
+  stepCount: number;
+  activeStep: PresentationStep | null;
+  steps: PresentationStep[];
+}
+
+const PresentationStepContext =
+  React.createContext<PresentationStepContextValue>({
+    stepIndex: 0,
+    stepCount: 0,
+    activeStep: null,
+    steps: [],
+  });
+
+export function usePresentationStep(): PresentationStepContextValue {
+  return React.useContext(PresentationStepContext);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════ */
 /*  CSS                                                                   */
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -69,7 +95,8 @@ const ENGINE_CSS = `
 
   /* ── Header ────────────────────────── */
   .pe-header {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     padding: 0 20px;
     height: 56px;
@@ -85,19 +112,21 @@ const ENGINE_CSS = `
     align-items: center;
     gap: 12px;
     min-width: 0;
+    justify-self: start;
   }
   .pe-header-center {
-    flex: 1;
+    width: clamp(620px, 56vw, 880px);
     display: flex;
     align-items: center;
     justify-content: center;
     min-width: 0;
+    justify-self: center;
   }
   .pe-header-right {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: auto;
+    justify-self: end;
   }
   .pe-header-home {
     display: flex;
@@ -140,15 +169,16 @@ const ENGINE_CSS = `
   }
 
   .pe-header-nav {
-    display: flex;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 34px minmax(180px, 220px) minmax(280px, 340px) minmax(180px, 220px) 34px;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
     min-width: 0;
-    max-width: min(68vw, 780px);
-    padding: 0;
-    border: none;
-    border-radius: 0;
-    background: transparent;
+    padding: 3px 4px;
+    border: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    border-radius: 10px;
+    background: var(--tf-bg-surface, #111318);
   }
   .pe-header-nav-prev,
   .pe-header-nav-next {
@@ -157,37 +187,43 @@ const ENGINE_CSS = `
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 180px;
-    padding: 0 6px;
-    opacity: 0.55;
+    max-width: none;
+    width: 100%;
+    padding: 2px 8px;
+    opacity: 0.65;
     transition: opacity 150ms, color 150ms;
     cursor: default;
   }
+  .pe-header-nav-prev {
+    text-align: right;
+  }
+  .pe-header-nav-next {
+    text-align: left;
+  }
+  .pe-header-nav-prev.empty,
+  .pe-header-nav-next.empty {
+    opacity: 0;
+    pointer-events: none;
+  }
   .pe-header-nav-prev:hover,
   .pe-header-nav-next:hover {
-    opacity: 0.85;
+    opacity: 1;
     color: var(--tf-text-secondary, #bfc5d4);
   }
   .pe-header-nav-current {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--tf-text-primary, #e2e6f0);
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 280px;
-    padding: 0 10px;
-    background: transparent;
-    border-radius: 0;
-    border: none;
+    width: 100%;
+    max-width: none;
+    padding: 3px 12px;
+    background: var(--tf-bg-elevated, #191c23);
+    border-radius: 7px;
+    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
     text-align: center;
-  }
-  .pe-header-nav-dot {
-    color: var(--tf-text-muted, #8892a8);
-    font-size: 10px;
-    opacity: 0.4;
-    flex-shrink: 0;
-    user-select: none;
   }
 
   /* ── Body ─────────────────────────── */
@@ -692,6 +728,13 @@ const ENGINE_CSS = `
     border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
     background: var(--tf-bg-surface, #111318);
   }
+  .pc-header-separator {
+    width: 1px;
+    height: 22px;
+    background: var(--tf-border-default, rgba(202,211,230,0.14));
+    opacity: 0.95;
+    flex-shrink: 0;
+  }
   .pc-pill {
     padding: 2px 8px;
     border-radius: 999px;
@@ -702,22 +745,42 @@ const ENGINE_CSS = `
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
+  .pc-title-wrap {
+    min-width: 0;
+    max-width: min(36vw, 500px);
+    display: flex;
+    align-items: center;
+  }
   .pc-title {
     font-size: 13px;
     color: var(--tf-text-primary, #e2e6f0);
     font-weight: 600;
+    font-family: 'Inter', system-ui, sans-serif;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .pc-meta {
-    margin-left: auto;
     display: flex;
     align-items: center;
     gap: 10px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     color: var(--tf-text-muted, #8892a8);
+  }
+  .pc-meta-item {
+    white-space: nowrap;
+  }
+  .pc-meta-divider {
+    width: 1px;
+    height: 14px;
+    background: var(--tf-border-default, rgba(202,211,230,0.14));
+    opacity: 0.85;
+    flex-shrink: 0;
+  }
+  .pc-header-spacer {
+    flex: 1;
+    min-width: 12px;
   }
   .pc-header-logo {
     width: 92px;
@@ -865,6 +928,50 @@ const ENGINE_CSS = `
     overflow: hidden;
     background: var(--tf-bg-base, #0b0d12);
   }
+  .pc-step-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0d12));
+  }
+  .pc-step-counter {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tf-color-primary-light, #818cf8);
+    white-space: nowrap;
+  }
+  .pc-step-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pc-step-btn {
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
+    background: var(--tf-bg-elevated, #191c23);
+    color: var(--tf-text-primary, #e2e6f0);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: all 150ms;
+  }
+  .pc-step-btn:hover:not(:disabled) {
+    border-color: var(--tf-color-primary-light, #818cf8);
+    color: var(--tf-color-primary-light, #818cf8);
+  }
+  .pc-step-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
   .pc-transcript-header {
     height: 40px;
     min-height: 40px;
@@ -884,10 +991,70 @@ const ENGINE_CSS = `
     min-height: 0;
     overflow-y: auto;
     padding: 16px;
-    white-space: pre-wrap;
     line-height: 1.7;
     color: var(--tf-text-secondary, #bfc5d4);
     font-size: 14px;
+  }
+  .pc-transcript-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .pc-transcript-step {
+    width: 100%;
+    text-align: left;
+    appearance: none;
+    -webkit-appearance: none;
+    font: inherit;
+    color: var(--tf-text-secondary, #bfc5d4);
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    background: var(--tf-bg-surface, #111318);
+    opacity: 0.55;
+    transition: all 180ms ease;
+    cursor: pointer;
+  }
+  .pc-transcript-step:hover {
+    opacity: 0.92;
+    border-color: var(--tf-border-default, rgba(202,211,230,0.14));
+  }
+  .pc-transcript-step.active {
+    opacity: 1;
+    border-color: var(--tf-color-primary, #6366f1);
+    box-shadow: 0 0 0 1px rgba(99,102,241,0.22);
+  }
+  .pc-transcript-step.complete {
+    opacity: 0.82;
+  }
+  .pc-transcript-step-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tf-text-muted, #8892a8);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .pc-transcript-step-index {
+    color: var(--tf-text-secondary, #bfc5d4);
+  }
+  .pc-transcript-step-label {
+    color: var(--tf-text-muted, #8892a8);
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .pc-transcript-step-text {
+    color: var(--tf-text-secondary, #bfc5d4);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .pc-transcript-step-text,
+  .pc-transcript-text {
+    white-space: pre-wrap;
   }
   .pc-transcript-empty {
     color: var(--tf-text-muted, #8892a8);
@@ -1086,6 +1253,7 @@ function TypingPromotion({ url, phrases }: { url: string; phrases: string[] }) {
 
     // finished typing — pause
     setPaused(true);
+    return undefined;
   }, [charIdx, deleting, paused, phraseIdx, phrases]);
 
   const displayed =
@@ -1110,6 +1278,12 @@ function TypingPromotion({ url, phrases }: { url: string; phrases: string[] }) {
 type ControlCommand =
   | { type: "command"; deckId: string; action: "prev" | "next" }
   | { type: "command"; deckId: string; action: "goto"; index: number }
+  | {
+      type: "command";
+      deckId: string;
+      action: "step-prev" | "step-next" | "step-reset" | "step-goto";
+      index?: number;
+    }
   | { type: "command"; deckId: string; action: "set-zoom"; zoom: number }
   | {
       type: "command";
@@ -1130,11 +1304,18 @@ type ControlState = {
   zoom: number;
   slideTitle?: string;
   narration?: string;
+  steps?: PresentationStep[];
+  stepIndex: number;
+  stepCount: number;
 };
 
 const DEFAULT_CONTROL_CHANNEL = "tf-slides-control";
 const DEFAULT_CONTROL_WINDOW_NAME = "tf-slide-control-window";
 const DEFAULT_SLIDE_ZOOM = 1.15;
+
+function getControlStorageKey(channelId: string, kind: "command" | "state") {
+  return `${channelId}:${kind}`;
+}
 
 /* ═══════════════════════════════════════════════════════════════════════ */
 /*  PresentationLayout                                                    */
@@ -1164,7 +1345,6 @@ export function PresentationLayout({
   const showBrandLabel =
     branding?.brandLabel != null && !brandLogoSrc.includes("og-image-template");
   const instructorName = branding?.instructorName;
-  const githubUrl = branding?.githubUrl;
   const linkedinUrl = branding?.linkedinUrl;
   const twitterUrl = branding?.twitterUrl;
   const twitterHandle = branding?.twitterHandle;
@@ -1177,6 +1357,8 @@ export function PresentationLayout({
   const siteUrlPhrases = branding?.siteUrlPhrases ?? [];
   const rootRef = useRef<HTMLDivElement>(null);
   const controlChannelRef = useRef<BroadcastChannel | null>(null);
+  const stateStorageKey = getControlStorageKey(controlChannelId, "state");
+  const commandStorageKey = getControlStorageKey(controlChannelId, "command");
 
   /* ── Parse initial slide from hash ── */
   const getIndexFromHash = useCallback((): number => {
@@ -1186,6 +1368,7 @@ export function PresentationLayout({
   }, []);
 
   const [slideIndex, setSlideIndex] = useState(getIndexFromHash);
+  const [stepIndex, setStepIndex] = useState(0);
   const [slideZoom, setSlideZoom] = useState<number>(DEFAULT_SLIDE_ZOOM);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const slideCount = deck.slides.length;
@@ -1193,6 +1376,11 @@ export function PresentationLayout({
 
   /* ── Derived slide data ── */
   const currentSlide = deck.slides[slideIndex];
+  const currentSteps = currentSlide?.steps ?? [];
+  const currentStepCount = currentSteps.length;
+  const activeStepIndex =
+    currentStepCount > 0 ? Math.min(stepIndex, currentStepCount - 1) : 0;
+  const activeStep = currentSteps[activeStepIndex] ?? null;
   const prevSlide = slideIndex > 0 ? deck.slides[slideIndex - 1] : null;
   const nextSlide =
     slideIndex < slideCount - 1 ? deck.slides[slideIndex + 1] : null;
@@ -1202,13 +1390,41 @@ export function PresentationLayout({
     (idx: number) => {
       const clamped = Math.max(0, Math.min(idx, slideCount - 1));
       setSlideIndex(clamped);
+      setStepIndex(0);
       window.location.hash = `#/${deck.id}/${clamped}`;
     },
     [slideCount, deck.id],
   );
 
-  const goPrev = useCallback(() => goTo(slideIndex - 1), [goTo, slideIndex]);
-  const goNext = useCallback(() => goTo(slideIndex + 1), [goTo, slideIndex]);
+  const goPrev = useCallback(() => {
+    if (currentStepCount > 0 && activeStepIndex > 0) {
+      setStepIndex((value) => Math.max(0, value - 1));
+      return;
+    }
+    goTo(slideIndex - 1);
+  }, [activeStepIndex, currentStepCount, goTo, slideIndex]);
+
+  const goNext = useCallback(() => {
+    if (currentStepCount > 0 && activeStepIndex < currentStepCount - 1) {
+      setStepIndex((value) => Math.min(currentStepCount - 1, value + 1));
+      return;
+    }
+    goTo(slideIndex + 1);
+  }, [activeStepIndex, currentStepCount, goTo, slideIndex]);
+
+  const stepBack = useCallback(() => {
+    if (currentStepCount <= 0) return;
+    setStepIndex((value) => Math.max(0, value - 1));
+  }, [currentStepCount]);
+
+  const stepForward = useCallback(() => {
+    if (currentStepCount <= 0) return;
+    setStepIndex((value) => Math.min(currentStepCount - 1, value + 1));
+  }, [currentStepCount]);
+
+  const resetStep = useCallback(() => {
+    setStepIndex(0);
+  }, []);
 
   const postControlState = useCallback(() => {
     const channel = controlChannelRef.current;
@@ -1225,9 +1441,21 @@ export function PresentationLayout({
       zoom: slideZoom,
       slideTitle: slide?.title,
       narration: slide?.narration,
+      steps: slide?.steps,
+      stepIndex: slide?.steps?.length ? activeStepIndex : 0,
+      stepCount: slide?.steps?.length ?? 0,
     };
     channel.postMessage(message);
-  }, [deck, slideIndex, slideCount, elapsed, slideZoom]);
+    localStorage.setItem(stateStorageKey, JSON.stringify(message));
+  }, [
+    deck,
+    slideIndex,
+    slideCount,
+    elapsed,
+    slideZoom,
+    activeStepIndex,
+    stateStorageKey,
+  ]);
 
   /* ── Keyboard ── */
   useEffect(() => {
@@ -1271,42 +1499,78 @@ export function PresentationLayout({
     const channel = new BroadcastChannel(controlChannelId);
     controlChannelRef.current = channel;
 
-    const onMessage = (ev: MessageEvent<ControlCommand>) => {
-      const msg = ev.data;
+    const handleCommand = (msg: ControlCommand) => {
       if (!msg) return;
       if (msg.type === "request-state") {
         if (msg.deckId !== deck.id) return;
         postControlState();
         return;
       }
-      if (msg.type === "command") {
-        if (msg.action === "switch-deck") {
-          if (msg.deckId !== deck.id || !msg.targetDeckId) return;
-          window.location.hash = `#/${msg.targetDeckId}/0`;
-          return;
-        }
-        if (msg.deckId !== deck.id) return;
-        if (msg.action === "prev") goPrev();
-        else if (msg.action === "next") goNext();
-        else if (msg.action === "goto") goTo(msg.index);
-        else if (msg.action === "set-zoom") {
-          const nextZoom = Math.max(0.85, Math.min(msg.zoom, 1.4));
-          setSlideZoom(nextZoom);
-        }
+      if (msg.type !== "command") return;
+      if (msg.action === "switch-deck") {
+        if (msg.deckId !== deck.id || !msg.targetDeckId) return;
+        window.location.hash = `#/${msg.targetDeckId}/0`;
+        return;
+      }
+      if (msg.deckId !== deck.id) return;
+      if (msg.action === "prev") goPrev();
+      else if (msg.action === "next") goNext();
+      else if (msg.action === "goto") goTo(msg.index);
+      else if (msg.action === "step-prev") stepBack();
+      else if (msg.action === "step-next") stepForward();
+      else if (msg.action === "step-reset") resetStep();
+      else if (msg.action === "step-goto") {
+        if (typeof msg.index !== "number") return;
+        setStepIndex(Math.max(0, Math.min(msg.index, currentStepCount - 1)));
+      }
+      else if (msg.action === "set-zoom") {
+        const nextZoom = Math.max(0.85, Math.min(msg.zoom, 1.4));
+        setSlideZoom(nextZoom);
+      }
+    };
+
+    const onMessage = (ev: MessageEvent<ControlCommand>) => {
+      handleCommand(ev.data);
+    };
+
+    const onStorage = (ev: StorageEvent) => {
+      if (ev.key !== commandStorageKey || !ev.newValue) return;
+      try {
+        handleCommand(JSON.parse(ev.newValue) as ControlCommand);
+      } catch {
+        // Ignore malformed sync payloads.
       }
     };
 
     channel.addEventListener("message", onMessage);
+    window.addEventListener("storage", onStorage);
     return () => {
       channel.removeEventListener("message", onMessage);
+      window.removeEventListener("storage", onStorage);
       channel.close();
       controlChannelRef.current = null;
     };
-  }, [deck.id, goPrev, goNext, goTo, postControlState, controlChannelId]);
+  }, [
+    commandStorageKey,
+    controlChannelId,
+    currentStepCount,
+    deck.id,
+    goPrev,
+    goNext,
+    goTo,
+    postControlState,
+    resetStep,
+    stepBack,
+    stepForward,
+  ]);
 
   useEffect(() => {
     postControlState();
   }, [postControlState]);
+
+  useEffect(() => {
+    setStepIndex(0);
+  }, [deck.id, slideIndex]);
 
   /* ── Fullscreen ── */
   const toggleFs = useCallback(() => {
@@ -1336,14 +1600,19 @@ export function PresentationLayout({
     [goTo],
   );
 
-  const duration = currentSlide?.duration;
   const progressPct =
     slideCount > 1 ? (slideIndex / (slideCount - 1)) * 100 : 0;
+  const stepContextValue: PresentationStepContextValue = {
+    stepIndex: activeStepIndex,
+    stepCount: currentStepCount,
+    activeStep,
+    steps: currentSteps,
+  };
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
-      <div className="pe-root" ref={rootRef}>
+      <div className="pe-root" ref={rootRef} aria-label={courseTitle}>
         {/* ── Header ── */}
         <div className="pe-header">
           <div className="pe-header-left">
@@ -1374,32 +1643,24 @@ export function PresentationLayout({
               >
                 {Icons.chevLeft}
               </button>
-              {prevSlide ? (
-                <>
-                  <span className="pe-header-nav-prev" title={prevSlide.title}>
-                    {prevSlide.title}
-                  </span>
-                  <span className="pe-header-nav-dot" aria-hidden="true">
-                    •
-                  </span>
-                </>
-              ) : null}
+              <span
+                className={`pe-header-nav-prev ${prevSlide ? "" : "empty"}`}
+                title={prevSlide?.title}
+              >
+                {prevSlide?.title ?? ""}
+              </span>
               <span
                 className="pe-header-nav-current"
                 title={currentSlide?.title}
               >
                 {currentSlide?.title ?? ""}
               </span>
-              {nextSlide ? (
-                <>
-                  <span className="pe-header-nav-dot" aria-hidden="true">
-                    •
-                  </span>
-                  <span className="pe-header-nav-next" title={nextSlide.title}>
-                    {nextSlide.title}
-                  </span>
-                </>
-              ) : null}
+              <span
+                className={`pe-header-nav-next ${nextSlide ? "" : "empty"}`}
+                title={nextSlide?.title}
+              >
+                {nextSlide?.title ?? ""}
+              </span>
               <button
                 className="pe-nav-btn"
                 onClick={goNext}
@@ -1485,7 +1746,9 @@ export function PresentationLayout({
             {/* Slide viewport */}
             <div className="pe-viewport">
               <div className="pe-slide-box" style={{ zoom: slideZoom }}>
-                {currentSlide?.content}
+                <PresentationStepContext.Provider value={stepContextValue}>
+                  {currentSlide?.content}
+                </PresentationStepContext.Provider>
               </div>
             </div>
           </div>
@@ -1590,8 +1853,11 @@ export function PresentationControlPanel({
 }: PresentationControlPanelProps) {
   const brandLogoSrc =
     branding?.logoSrc ?? "/brand/og-image-template-1200x630.png";
+  const brandIconUrl = branding?.brandIconUrl;
   const brandLabel = branding?.brandLabel ?? "Tutorial";
   const channelRef = useRef<BroadcastChannel | null>(null);
+  const stateStorageKey = getControlStorageKey(controlChannelId, "state");
+  const commandStorageKey = getControlStorageKey(controlChannelId, "command");
   const [state, setState] = useState<ControlState>({
     type: "state",
     deckId: deck.id,
@@ -1603,6 +1869,9 @@ export function PresentationControlPanel({
     zoom: DEFAULT_SLIDE_ZOOM,
     slideTitle: deck.slides[0]?.title,
     narration: deck.slides[0]?.narration,
+    steps: deck.slides[0]?.steps,
+    stepIndex: 0,
+    stepCount: deck.slides[0]?.steps?.length ?? 0,
   });
 
   useEffect(() => {
@@ -1615,19 +1884,48 @@ export function PresentationControlPanel({
       setState(msg);
     };
 
+    const onStorage = (ev: StorageEvent) => {
+      if (ev.key !== stateStorageKey || !ev.newValue) return;
+      try {
+        const msg = JSON.parse(ev.newValue) as ControlState;
+        if (!msg || msg.type !== "state" || msg.deckId !== deck.id) return;
+        setState(msg);
+      } catch {
+        // Ignore malformed sync payloads.
+      }
+    };
+
     channel.addEventListener("message", onMessage);
+    window.addEventListener("storage", onStorage);
     channel.postMessage({ type: "request-state", deckId: deck.id });
+
+    const cachedState = localStorage.getItem(stateStorageKey);
+    if (cachedState) {
+      try {
+        const msg = JSON.parse(cachedState) as ControlState;
+        if (msg?.type === "state" && msg.deckId === deck.id) {
+          setState(msg);
+        }
+      } catch {
+        // Ignore malformed sync payloads.
+      }
+    }
 
     return () => {
       channel.removeEventListener("message", onMessage);
+      window.removeEventListener("storage", onStorage);
       channel.close();
       channelRef.current = null;
     };
-  }, [deck.id, controlChannelId]);
+  }, [controlChannelId, deck.id, stateStorageKey]);
 
-  const send = useCallback((cmd: ControlCommand) => {
-    channelRef.current?.postMessage(cmd);
-  }, []);
+  const send = useCallback(
+    (cmd: ControlCommand) => {
+      channelRef.current?.postMessage(cmd);
+      localStorage.setItem(commandStorageKey, JSON.stringify(cmd));
+    },
+    [commandStorageKey],
+  );
 
   const handleSelectDeck = useCallback(
     (nextDeckId: string) => {
@@ -1654,14 +1952,19 @@ export function PresentationControlPanel({
       <div className="pc-root">
         <div className="pc-header">
           <span className="pc-pill">Control</span>
-          <span className="pc-title">
-            {deck.number}. {deck.title}
-          </span>
+          <div className="pc-title-wrap">
+            <span className="pc-title">
+              {deck.number}. {deck.title}
+            </span>
+          </div>
+          <span className="pc-header-separator" aria-hidden="true" />
           <div className="pc-meta">
-            <span>
+            <span className="pc-meta-item">
               {state.slideIndex + 1}/{state.slideCount}
             </span>
+            <span className="pc-meta-divider" aria-hidden="true" />
             <span
+              className="pc-meta-item"
               style={{
                 color: timerOver
                   ? "var(--tf-color-danger, #ef4444)"
@@ -1671,13 +1974,30 @@ export function PresentationControlPanel({
               {formatTime(state.elapsed)}
               {state.duration != null ? ` / ${formatTime(state.duration)}` : ""}
             </span>
-            <span>Zoom {state.zoom.toFixed(2)}x</span>
+            <span className="pc-meta-divider" aria-hidden="true" />
+            <span className="pc-meta-item">Zoom {state.zoom.toFixed(2)}x</span>
           </div>
-          <img className="pc-header-logo" src={brandLogoSrc} alt={brandLabel} />
+          <div className="pc-header-spacer" />
+          <span className="pc-header-separator" aria-hidden="true" />
+          {brandIconUrl ? (
+            <BrandLockup iconUrl={brandIconUrl} size="sm" label={brandLabel} />
+          ) : (
+            <img
+              className="pc-header-logo"
+              src={brandLogoSrc}
+              alt={brandLabel}
+            />
+          )}
           {onOpenPresenter && (
-            <button className="pc-btn pc-btn-header" onClick={onOpenPresenter}>
-              Open Presenter
-            </button>
+            <>
+              <span className="pc-header-separator" aria-hidden="true" />
+              <button
+                className="pc-btn pc-btn-header"
+                onClick={onOpenPresenter}
+              >
+                Open Presenter
+              </button>
+            </>
           )}
         </div>
 
@@ -1767,10 +2087,94 @@ export function PresentationControlPanel({
           </aside>
 
           <section className="pc-transcript">
-            <div className="pc-transcript-header">Transcript</div>
+            {state.stepCount > 0 ? (
+              <div className="pc-step-controls">
+                <span className="pc-step-counter">
+                  Step {Math.min(state.stepIndex + 1, state.stepCount)} /{" "}
+                  {state.stepCount}
+                </span>
+                <div className="pc-step-actions">
+                  <button
+                    className="pc-step-btn"
+                    onClick={() =>
+                      send({
+                        type: "command",
+                        deckId: deck.id,
+                        action: "step-goto",
+                        index: Math.max(0, state.stepIndex - 1),
+                      })
+                    }
+                    disabled={state.stepIndex <= 0}
+                  >
+                    Back
+                  </button>
+                  <button
+                    className="pc-step-btn"
+                    data-testid="presentation-step-next"
+                    onClick={() =>
+                      send({
+                        type: "command",
+                        deckId: deck.id,
+                        action: "step-goto",
+                        index: Math.min(state.stepCount - 1, state.stepIndex + 1),
+                      })
+                    }
+                    disabled={state.stepIndex >= state.stepCount - 1}
+                  >
+                    Step
+                  </button>
+                  <button
+                    className="pc-step-btn"
+                    onClick={() =>
+                      send({
+                        type: "command",
+                        deckId: deck.id,
+                        action: "step-reset",
+                      })
+                    }
+                    disabled={state.stepIndex <= 0}
+                  >
+                    Reset
+                  </button>
+                </div>
+              </div>
+            ) : null}
+            <div className="pc-transcript-header">
+              {state.stepCount > 0 ? "Step Transcript" : "Transcript"}
+            </div>
             <div className="pc-transcript-body">
-              {state.narration ? (
-                state.narration
+              {state.stepCount > 0 && state.steps?.length ? (
+                <div className="pc-transcript-steps">
+                  {state.steps.map((step, index) => (
+                    <button
+                      key={step.id}
+                      type="button"
+                      className={`pc-transcript-step ${index === state.stepIndex ? "active" : ""} ${index < state.stepIndex ? "complete" : ""}`}
+                      onClick={() =>
+                        send({
+                          type: "command",
+                          deckId: deck.id,
+                          action: "step-goto",
+                          index,
+                        })
+                      }
+                    >
+                      <div className="pc-transcript-step-title">
+                        <span className="pc-transcript-step-index">
+                          Step {index + 1}
+                        </span>
+                        <span className="pc-transcript-step-label">
+                          {step.title}
+                        </span>
+                      </div>
+                      <div className="pc-transcript-step-text">
+                        {step.transcript}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : state.narration ? (
+                <div className="pc-transcript-text">{state.narration}</div>
               ) : (
                 <div className="pc-transcript-empty">
                   No transcript for this slide.

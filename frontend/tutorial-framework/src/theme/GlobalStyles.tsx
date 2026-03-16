@@ -254,16 +254,35 @@ code:not(pre code) {
 }
 
 /* ─── Scrollbar (slim, MD3-themed) ───────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 0.375rem;
-  height: 0.375rem;
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--tf-color-primary-light) 68%, var(--tf-color-secondary) 32%) transparent;
 }
-::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  {
-  background: var(--tf-border-default);
+
+::-webkit-scrollbar {
+  width: 0.3125rem;
+  height: 0.3125rem;
+}
+::-webkit-scrollbar-track  {
+  background: color-mix(in srgb, var(--tf-bg-overlay) 42%, transparent);
   border-radius: var(--tf-radius-full);
 }
-::-webkit-scrollbar-thumb:hover { background: var(--tf-border-strong); }
+::-webkit-scrollbar-thumb  {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tf-color-primary-light) 76%, white 24%),
+    color-mix(in srgb, var(--tf-color-secondary) 72%, var(--tf-color-primary) 28%));
+  border-radius: var(--tf-radius-full);
+  border: 1px solid color-mix(in srgb, var(--tf-bg-overlay) 36%, transparent);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.08),
+    0 0 10px color-mix(in srgb, var(--tf-color-primary) 24%, transparent);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--tf-color-primary-light) 84%, white 16%),
+    color-mix(in srgb, var(--tf-color-secondary-light) 78%, var(--tf-color-primary) 22%));
+}
+::-webkit-scrollbar-corner { background: transparent; }
 
 /* ─── Selection ──────────────────────────────────────────────────────────── */
 ::selection {

@@ -20,8 +20,10 @@ export {
 export {
   PresentationLayout,
   PresentationControlPanel,
+  usePresentationStep,
   type PresentationDeck,
   type PresentationSlide,
+  type PresentationStep,
   type PresentationBranding,
 } from "./PresentationControlEngine";
 export { SlideDrawer } from "./SlideDrawer";
@@ -51,6 +53,11 @@ export {
   MermaidDiagram,
   type BulletItem,
 } from "./SlideContent";
+export {
+  StepSequenceWidget,
+  type StepActor,
+  type StepSequenceItem,
+} from "./StepSequenceWidget";
 
 // Diagram components
 export {

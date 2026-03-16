@@ -99,6 +99,7 @@ export {
   AccordionList,
   LessonObjectives,
   GitHubRepoCard,
+  ExampleResults,
 } from "./components/content";
 export type {
   LabSettingsProps,
@@ -111,6 +112,14 @@ export type {
   AccordionItem,
   LessonObjectivesProps,
   GitHubRepoCardProps,
+  ExampleResultsProps,
+  ExampleAssessment,
+  ExampleRun,
+  ExampleAssessmentDimension,
+  ExampleAssessmentRating,
+  ExampleRunToolCall,
+  ExampleRunContextStage,
+  ExampleRunDecision,
 } from "./components/content";
 
 // Embeds

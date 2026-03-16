@@ -71,3 +71,15 @@ export type { LessonObjectivesProps } from "./LessonObjectives";
 
 export { GitHubRepoCard } from "./GitHubRepoCard";
 export type { GitHubRepoCardProps } from "./GitHubRepoCard";
+
+export { ExampleResults } from "./ExampleResults";
+export type {
+  ExampleResultsProps,
+  ExampleAssessment,
+  ExampleRun,
+  AssessmentDimension as ExampleAssessmentDimension,
+  RunToolCall as ExampleRunToolCall,
+  RunContextStage as ExampleRunContextStage,
+  RunDecision as ExampleRunDecision,
+} from "./ExampleResults";
+export type { AssessmentRating as ExampleAssessmentRating } from "./ExampleResults";
