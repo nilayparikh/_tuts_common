@@ -2253,11 +2253,15 @@ export function PresentationControlPanel({
                     step="1"
                     value={String(transcriptScaleIndex)}
                     onChange={(e) =>
-                      setTranscriptScaleIndex(Number.parseInt(e.target.value, 10))
+                      setTranscriptScaleIndex(
+                        Number.parseInt(e.target.value, 10),
+                      )
                     }
                     aria-label="Transcript size"
                   />
-                  <span className="pc-slider-value">{transcriptFontScaleLabel}</span>
+                  <span className="pc-slider-value">
+                    {transcriptFontScaleLabel}
+                  </span>
                 </div>
               </div>
             </div>

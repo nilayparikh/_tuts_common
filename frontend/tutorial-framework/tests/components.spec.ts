@@ -75,9 +75,7 @@ test("control window transcript size defaults larger and is adjustable", async (
   const transcriptText = control.getByText(/prompt is entered/i);
   const transcriptHeader = control.locator(".pc-transcript-header");
   await expect(transcriptText).toBeVisible();
-  await expect(
-    transcriptHeader.getByLabel("Transcript size"),
-  ).toBeVisible();
+  await expect(transcriptHeader.getByLabel("Transcript size")).toBeVisible();
   await expect(transcriptHeader.getByText("110%")).toBeVisible();
 
   const defaultFontSize = await transcriptText.evaluate(
