@@ -874,6 +874,38 @@ const ENGINE_CSS = `
     background: var(--tf-bg-surface, #111318);
     color: var(--tf-text-primary, #e2e6f0);
   }
+  .pc-slider-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+  }
+  .pc-slider-row.compact {
+    grid-template-columns: auto minmax(96px, 140px) auto;
+    gap: 8px;
+  }
+  .pc-slider-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tf-text-muted, #8892a8);
+    white-space: nowrap;
+  }
+  .pc-slider {
+    width: 100%;
+    margin: 0;
+    accent-color: var(--tf-color-primary, #6366f1);
+    cursor: pointer;
+  }
+  .pc-slider-value {
+    min-width: 42px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--tf-text-secondary, #bfc5d4);
+  }
   .pc-btn:disabled {
     opacity: 0.35;
     cursor: default;
@@ -977,6 +1009,8 @@ const ENGINE_CSS = `
     min-height: 40px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     padding: 0 14px;
     font-size: 11px;
     font-weight: 700;
@@ -986,6 +1020,15 @@ const ENGINE_CSS = `
     border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
     background: var(--tf-bg-surface, #111318);
   }
+  .pc-transcript-header-title {
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .pc-transcript-header-tools {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
   .pc-transcript-body {
     flex: 1;
     min-height: 0;
@@ -993,7 +1036,7 @@ const ENGINE_CSS = `
     padding: 16px;
     line-height: 1.7;
     color: var(--tf-text-secondary, #bfc5d4);
-    font-size: 14px;
+    font-size: calc(14px * var(--pc-transcript-font-scale, 1.1));
   }
   .pc-transcript-steps {
     display: flex;
@@ -1049,7 +1092,7 @@ const ENGINE_CSS = `
   .pc-transcript-step-text {
     color: var(--tf-text-secondary, #bfc5d4);
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 14px;
+    font-size: calc(14px * var(--pc-transcript-font-scale, 1.1));
     line-height: 1.7;
   }
   .pc-transcript-step-text,
@@ -1312,6 +1355,8 @@ type ControlState = {
 const DEFAULT_CONTROL_CHANNEL = "tf-slides-control";
 const DEFAULT_CONTROL_WINDOW_NAME = "tf-slide-control-window";
 const DEFAULT_SLIDE_ZOOM = 1.15;
+const TRANSCRIPT_FONT_SCALE_STOPS = [1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7];
+const DEFAULT_TRANSCRIPT_FONT_SCALE_INDEX = 1;
 
 function getControlStorageKey(channelId: string, kind: "command" | "state") {
   return `${channelId}:${kind}`;
@@ -1522,8 +1567,7 @@ export function PresentationLayout({
       else if (msg.action === "step-goto") {
         if (typeof msg.index !== "number") return;
         setStepIndex(Math.max(0, Math.min(msg.index, currentStepCount - 1)));
-      }
-      else if (msg.action === "set-zoom") {
+      } else if (msg.action === "set-zoom") {
         const nextZoom = Math.max(0.85, Math.min(msg.zoom, 1.4));
         setSlideZoom(nextZoom);
       }
@@ -1858,6 +1902,7 @@ export function PresentationControlPanel({
   const channelRef = useRef<BroadcastChannel | null>(null);
   const stateStorageKey = getControlStorageKey(controlChannelId, "state");
   const commandStorageKey = getControlStorageKey(controlChannelId, "command");
+  const transcriptScaleStorageKey = `${controlChannelId}:transcript-scale`;
   const [state, setState] = useState<ControlState>({
     type: "state",
     deckId: deck.id,
@@ -1873,6 +1918,37 @@ export function PresentationControlPanel({
     stepIndex: 0,
     stepCount: deck.slides[0]?.steps?.length ?? 0,
   });
+  const [transcriptScaleIndex, setTranscriptScaleIndex] = useState<number>(
+    () => {
+      try {
+        const cachedItem = localStorage.getItem(transcriptScaleStorageKey);
+        if (cachedItem != null) {
+          const cachedValue = Number(cachedItem);
+          if (
+            Number.isInteger(cachedValue) &&
+            cachedValue >= 0 &&
+            cachedValue < TRANSCRIPT_FONT_SCALE_STOPS.length
+          ) {
+            return cachedValue;
+          }
+        }
+      } catch {
+        // Ignore localStorage access issues.
+      }
+      return DEFAULT_TRANSCRIPT_FONT_SCALE_INDEX;
+    },
+  );
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        transcriptScaleStorageKey,
+        String(transcriptScaleIndex),
+      );
+    } catch {
+      // Ignore localStorage access issues.
+    }
+  }, [transcriptScaleIndex, transcriptScaleStorageKey]);
 
   useEffect(() => {
     const channel = new BroadcastChannel(controlChannelId);
@@ -1945,6 +2021,10 @@ export function PresentationControlPanel({
   const atEnd = state.slideIndex >= state.slideCount - 1;
   const timerOver =
     state.duration != null ? state.elapsed > state.duration : false;
+  const transcriptFontScale =
+    TRANSCRIPT_FONT_SCALE_STOPS[transcriptScaleIndex] ??
+    TRANSCRIPT_FONT_SCALE_STOPS[DEFAULT_TRANSCRIPT_FONT_SCALE_INDEX];
+  const transcriptFontScaleLabel = `${Math.round(transcriptFontScale * 100)}%`;
 
   return (
     <>
@@ -2040,6 +2120,9 @@ export function PresentationControlPanel({
                 <option value="1.10">1.10x</option>
                 <option value="1.12">1.12x</option>
                 <option value="1.15">1.15x</option>
+                <option value="1.20">1.20x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.30">1.30x</option>
               </select>
             </div>
 
@@ -2086,7 +2169,14 @@ export function PresentationControlPanel({
             </div>
           </aside>
 
-          <section className="pc-transcript">
+          <section
+            className="pc-transcript"
+            style={
+              {
+                "--pc-transcript-font-scale": String(transcriptFontScale),
+              } as React.CSSProperties
+            }
+          >
             {state.stepCount > 0 ? (
               <div className="pc-step-controls">
                 <span className="pc-step-counter">
@@ -2116,7 +2206,10 @@ export function PresentationControlPanel({
                         type: "command",
                         deckId: deck.id,
                         action: "step-goto",
-                        index: Math.min(state.stepCount - 1, state.stepIndex + 1),
+                        index: Math.min(
+                          state.stepCount - 1,
+                          state.stepIndex + 1,
+                        ),
                       })
                     }
                     disabled={state.stepIndex >= state.stepCount - 1}
@@ -2140,7 +2233,33 @@ export function PresentationControlPanel({
               </div>
             ) : null}
             <div className="pc-transcript-header">
-              {state.stepCount > 0 ? "Step Transcript" : "Transcript"}
+              <span className="pc-transcript-header-title">
+                {state.stepCount > 0 ? "Step Transcript" : "Transcript"}
+              </span>
+              <div className="pc-transcript-header-tools">
+                <div className="pc-slider-row compact">
+                  <label
+                    className="pc-slider-label"
+                    htmlFor="pc-transcript-size-slider"
+                  >
+                    Size
+                  </label>
+                  <input
+                    id="pc-transcript-size-slider"
+                    className="pc-slider"
+                    type="range"
+                    min="0"
+                    max={String(TRANSCRIPT_FONT_SCALE_STOPS.length - 1)}
+                    step="1"
+                    value={String(transcriptScaleIndex)}
+                    onChange={(e) =>
+                      setTranscriptScaleIndex(Number.parseInt(e.target.value, 10))
+                    }
+                    aria-label="Transcript size"
+                  />
+                  <span className="pc-slider-value">{transcriptFontScaleLabel}</span>
+                </div>
+              </div>
             </div>
             <div className="pc-transcript-body">
               {state.stepCount > 0 && state.steps?.length ? (

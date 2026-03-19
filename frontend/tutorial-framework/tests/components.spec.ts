@@ -60,3 +60,39 @@ test("step slides expose a control step button", async ({ browser }) => {
     control.getByText(/repository context is discovered/i),
   ).toBeVisible();
 });
+
+test("control window transcript size defaults larger and is adjustable", async ({
+  browser,
+}) => {
+  const presenter = await browser.newPage();
+  await presenter.goto("/presentation-step.html#/01/0");
+
+  const controlPromise = presenter.waitForEvent("popup");
+  await presenter.getByRole("button", { name: "Control" }).click();
+  const control = await controlPromise;
+  await control.waitForLoadState("domcontentloaded");
+
+  const transcriptText = control.getByText(/prompt is entered/i);
+  const transcriptHeader = control.locator(".pc-transcript-header");
+  await expect(transcriptText).toBeVisible();
+  await expect(
+    transcriptHeader.getByLabel("Transcript size"),
+  ).toBeVisible();
+  await expect(transcriptHeader.getByText("110%")).toBeVisible();
+
+  const defaultFontSize = await transcriptText.evaluate(
+    (node) => window.getComputedStyle(node).fontSize,
+  );
+  expect(defaultFontSize).toBe("15.4px");
+
+  await transcriptHeader.getByLabel("Transcript size").fill("7");
+  await expect(transcriptHeader.getByText("170%")).toBeVisible();
+
+  const largerFontSize = await transcriptText.evaluate(
+    (node) => window.getComputedStyle(node).fontSize,
+  );
+  expect(largerFontSize).toBe("23.8px");
+
+  await control.getByLabel("Slide zoom").selectOption("1.30");
+  await expect(control.getByText("Zoom 1.30x")).toBeVisible();
+});
