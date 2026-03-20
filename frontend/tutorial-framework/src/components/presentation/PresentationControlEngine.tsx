@@ -76,6 +76,25 @@ export function usePresentationStep(): PresentationStepContextValue {
   return React.useContext(PresentationStepContext);
 }
 
+/* ── Title capsule helper ─────────────────────────────────────────────── */
+
+const TITLE_PREFIX_RE = /^\[([^\]]+)\]\s*/;
+
+/** Parse `[Prefix] Rest` → capsule badge + title text, or plain title. */
+function renderSlideTitle(title: string | undefined): React.ReactNode {
+  if (!title) return "";
+  const m = title.match(TITLE_PREFIX_RE);
+  if (!m) return title;
+  const prefix = m[1];
+  const rest = title.slice(m[0].length);
+  return (
+    <>
+      <span className="pe-title-capsule">{prefix}</span>
+      {rest}
+    </>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════════════ */
 /*  CSS                                                                   */
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -224,6 +243,34 @@ const ENGINE_CSS = `
     border-radius: 7px;
     border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .pe-title-capsule {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, var(--tf-color-secondary, #14b8a6), #2dd4bf);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--tf-text-inverse, #0b0d12);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    line-height: 1.6;
+  }
+  .pe-header-nav-prev .pe-title-capsule,
+  .pe-header-nav-next .pe-title-capsule {
+    font-size: 9px;
+    padding: 0px 6px;
+  }
+  .pe-drawer-item-title .pe-title-capsule {
+    font-size: 9px;
+    padding: 1px 6px;
+    vertical-align: middle;
   }
 
   /* ── Body ─────────────────────────── */
@@ -1691,19 +1738,19 @@ export function PresentationLayout({
                 className={`pe-header-nav-prev ${prevSlide ? "" : "empty"}`}
                 title={prevSlide?.title}
               >
-                {prevSlide?.title ?? ""}
+                {renderSlideTitle(prevSlide?.title)}
               </span>
               <span
                 className="pe-header-nav-current"
                 title={currentSlide?.title}
               >
-                {currentSlide?.title ?? ""}
+                {renderSlideTitle(currentSlide?.title)}
               </span>
               <span
                 className={`pe-header-nav-next ${nextSlide ? "" : "empty"}`}
                 title={nextSlide?.title}
               >
-                {nextSlide?.title ?? ""}
+                {renderSlideTitle(nextSlide?.title)}
               </span>
               <button
                 className="pe-nav-btn"
@@ -1769,7 +1816,7 @@ export function PresentationLayout({
                       <span className="pe-drawer-item-num">{idx + 1}</span>
                       <div className="pe-drawer-item-info">
                         <div className="pe-drawer-item-title">
-                          {slide.title}
+                          {renderSlideTitle(slide.title)}
                         </div>
                         {slide.duration != null && (
                           <div className="pe-drawer-item-duration">
@@ -2163,7 +2210,7 @@ export function PresentationControlPanel({
                   title={slide.title}
                 >
                   <span className="pc-jump-index">{idx + 1}</span>
-                  <span className="pc-jump-title">{slide.title}</span>
+                  <span className="pc-jump-title">{renderSlideTitle(slide.title)}</span>
                 </button>
               ))}
             </div>

@@ -142,9 +142,9 @@ export function ProcessStagesWidget({
                   boxShadow: isActive
                     ? `0 0 24px ${mixAlpha(color, 25)}, 0 4px 16px rgba(0,0,0,0.3)`
                     : "0 2px 8px rgba(0,0,0,0.15)",
-                  opacity: isRevealed ? 1 : 0.3,
-                  transform: isRevealed ? "scale(1)" : "scale(0.9)",
-                  transition: "all 350ms cubic-bezier(0.4, 0, 0.2, 1)",
+                  opacity: isRevealed ? 1 : 0,
+                  transform: isRevealed ? "scale(1)" : "scale(0.92)",
+                  transition: "all 400ms cubic-bezier(0.4, 0, 0.2, 1)",
                   flex: isHorizontal ? "1 1 0" : undefined,
                   minWidth: 0,
                   maxWidth: isHorizontal
@@ -195,7 +195,7 @@ export function ProcessStagesWidget({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    transition: "all 350ms ease",
+                    transition: "all 400ms ease",
                   }}
                 >
                   <span
@@ -203,7 +203,7 @@ export function ProcessStagesWidget({
                     style={{
                       fontSize: `${iconSize}px`,
                       color: isRevealed ? color : v.textMuted,
-                      transition: "color 350ms ease",
+                      transition: "color 400ms ease",
                     }}
                   >
                     {stage.icon}
@@ -219,7 +219,7 @@ export function ProcessStagesWidget({
                     fontFamily: v.fontMono,
                     textAlign: "center",
                     lineHeight: 1.2,
-                    transition: "color 350ms ease",
+                    transition: "color 400ms ease",
                   }}
                 >
                   {stage.label}

@@ -174,7 +174,7 @@ export function AnimatedMermaidWidget({
       if (!el) continue;
       const revealed = revealedNodes.has(nodeId);
       const active = nodeId === activeNodeId;
-      el.style.opacity = revealed ? "1" : "0.1";
+      el.style.opacity = revealed ? "1" : "0";
       el.style.filter = active
         ? `drop-shadow(0 0 6px ${steps[activeIdx]?.color ?? "#818cf8"})`
         : "none";
@@ -187,7 +187,7 @@ export function AnimatedMermaidWidget({
     const edgeLabels = containerRef.current.querySelectorAll(".edgeLabel");
     edges.forEach(({ from, to }, i) => {
       const show = revealedNodes.has(from) && revealedNodes.has(to);
-      const op = show ? "0.85" : "0.08";
+      const op = show ? "0.85" : "0";
       if (linkPaths[i]) (linkPaths[i] as HTMLElement).style.opacity = op;
       if (edgeLabels[i]) (edgeLabels[i] as HTMLElement).style.opacity = op;
     });

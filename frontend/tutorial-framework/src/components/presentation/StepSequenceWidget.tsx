@@ -200,9 +200,9 @@ export function StepSequenceWidget({
                 gridTemplateColumns: `${topColumnWidth} minmax(0, 1fr)`,
                 gap: isCompact ? "10px" : "14px",
                 alignItems: "stretch",
-                opacity: isRevealed ? 1 : 0.38,
+                opacity: isRevealed ? 1 : 0,
                 transform: isRevealed ? "translateY(0)" : "translateY(8px)",
-                transition: "all 220ms ease",
+                transition: "all 400ms ease",
               }}
             >
               <div
