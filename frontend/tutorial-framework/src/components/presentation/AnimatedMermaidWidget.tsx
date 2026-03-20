@@ -17,6 +17,7 @@
 
 import { useRef, useEffect, useState, useMemo } from "react";
 import { usePresentationStep } from "./PresentationControlEngine";
+import { initMermaid } from "../../theme/mermaidTheme";
 
 /* ── CSS var shorthands ───────────────────────────────────────────────── */
 
@@ -106,6 +107,7 @@ export function AnimatedMermaidWidget({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mermaid = (window as any).mermaid;
       if (!mermaid?.render || !containerRef.current) return false;
+      initMermaid();
       try {
         const { svg } = await mermaid.render(renderId, chart);
         if (!containerRef.current) return true;

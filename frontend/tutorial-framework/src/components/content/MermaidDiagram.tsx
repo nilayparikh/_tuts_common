@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { mermaidThemeVariables } from "../../theme/mermaidTheme";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -66,23 +67,7 @@ export function MermaidDiagram({
           darkMode: theme === "dark",
           fontFamily: "var(--tf-font-body)",
           securityLevel: "loose",
-          themeVariables:
-            theme === "dark"
-              ? {
-                  primaryColor: "#6366f1",
-                  primaryTextColor: "#e2e6f0",
-                  primaryBorderColor: "#818cf8",
-                  lineColor: "#8892a8",
-                  secondaryColor: "#14b8a6",
-                  tertiaryColor: "#1f222a",
-                  mainBkg: "#191c23",
-                  nodeBorder: "#818cf8",
-                  clusterBkg: "#111318",
-                  clusterBorder: "rgba(202,211,230,0.14)",
-                  titleColor: "#e2e6f0",
-                  edgeLabelBackground: "#191c23",
-                }
-              : {},
+          themeVariables: theme === "dark" ? mermaidThemeVariables : {},
         });
 
         const { svg: rendered } = await mermaid.render(

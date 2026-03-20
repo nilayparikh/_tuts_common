@@ -1581,7 +1581,10 @@ export function PresentationLayout({
 
   /* ── Hash sync ── */
   useEffect(() => {
-    const onHash = () => setSlideIndex(getIndexFromHash());
+    const onHash = () => {
+      setSlideIndex(getIndexFromHash());
+      setStepIndex(0);
+    };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, [getIndexFromHash]);
