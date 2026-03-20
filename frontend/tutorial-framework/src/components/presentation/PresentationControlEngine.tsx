@@ -1552,6 +1552,22 @@ export function PresentationLayout({
   /* ── Keyboard ── */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const isNavigationKey =
+        e.key === "ArrowLeft" ||
+        e.key === "PageUp" ||
+        e.key === "ArrowRight" ||
+        e.key === " " ||
+        e.key === "PageDown" ||
+        e.key === "Home" ||
+        e.key === "End";
+
+      // Prevent a held remote/clicker button from advancing into the next
+      // slide's first step immediately after navigation.
+      if (e.repeat && isNavigationKey) {
+        e.preventDefault();
+        return;
+      }
+
       if (e.key === "Escape" && drawerOpen) {
         e.preventDefault();
         setDrawerOpen(false);
@@ -1840,7 +1856,10 @@ export function PresentationLayout({
             {/* Slide viewport */}
             <div className="pe-viewport">
               <div className="pe-slide-box" style={{ zoom: slideZoom }}>
-                <PresentationStepContext.Provider value={stepContextValue}>
+                <PresentationStepContext.Provider
+                  key={`${deck.id}:${currentSlide?.id ?? slideIndex}`}
+                  value={stepContextValue}
+                >
                   {currentSlide?.content}
                 </PresentationStepContext.Provider>
               </div>

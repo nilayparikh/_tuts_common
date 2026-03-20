@@ -103,6 +103,11 @@ export function AnimatedMermaidWidget({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    let cancelled = false;
+    let retryInterval: ReturnType<typeof setInterval> | null = null;
+    setRendered(false);
+    containerRef.current.innerHTML = "";
+
     const doRender = async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const mermaid = (window as any).mermaid;
@@ -110,7 +115,7 @@ export function AnimatedMermaidWidget({
       initMermaid();
       try {
         const { svg } = await mermaid.render(renderId, chart);
-        if (!containerRef.current) return true;
+        if (cancelled || !containerRef.current) return true;
         containerRef.current.innerHTML = svg;
 
         // Size SVG to fit within container (both axes)
@@ -139,10 +144,10 @@ export function AnimatedMermaidWidget({
             htmlEl.style.transition = "opacity 400ms ease";
           });
 
-        setRendered(true);
+        if (!cancelled) setRendered(true);
         return true;
       } catch {
-        if (containerRef.current)
+        if (!cancelled && containerRef.current)
           containerRef.current.textContent = "Diagram render error";
         return true;
       }
@@ -151,11 +156,20 @@ export function AnimatedMermaidWidget({
     doRender().then((ok) => {
       if (ok) return;
       let attempts = 0;
-      const interval = setInterval(async () => {
+      retryInterval = setInterval(async () => {
         attempts++;
-        if ((await doRender()) || attempts > 50) clearInterval(interval);
+        if ((await doRender()) || attempts > 50) {
+          clearInterval(retryInterval!);
+          retryInterval = null;
+        }
       }, 100);
     });
+
+    return () => {
+      cancelled = true;
+      if (retryInterval) clearInterval(retryInterval);
+      if (containerRef.current) containerRef.current.innerHTML = "";
+    };
   }, [chart, renderId]);
 
   /* ── Animate nodes + edges on step changes ─────────────────────── */
