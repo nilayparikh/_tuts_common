@@ -9,6 +9,7 @@
 
 import React from "react";
 import { Appear, Text, FlexBox, Box } from "spectacle";
+import { initMermaid } from "../../theme/mermaidTheme";
 
 /* ── CSS var shorthands ───────────────────────────────────────────────── */
 
@@ -500,6 +501,7 @@ export function MermaidDiagram({
         const m = (window as any).mermaid;
         if (m?.render && ref.current) {
           clearInterval(interval);
+          initMermaid();
           try {
             const { svg } = await m.render(id, enhancedChart);
             ref.current.innerHTML = svg;
@@ -514,6 +516,7 @@ export function MermaidDiagram({
     }
 
     // Mermaid is already loaded
+    initMermaid();
     (async () => {
       try {
         const { svg } = await mermaid.render(id, enhancedChart);
