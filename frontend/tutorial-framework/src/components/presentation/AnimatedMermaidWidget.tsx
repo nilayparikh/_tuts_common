@@ -131,19 +131,18 @@ export function AnimatedMermaidWidget({
         }
 
         // Add CSS transitions to animatable SVG elements
-        containerRef.current
-          .querySelectorAll(".node")
-          .forEach(
-            (el) =>
-              ((el as HTMLElement).style.transition =
-                "opacity 400ms ease, filter 400ms ease"),
-          );
+        containerRef.current.querySelectorAll(".node").forEach((el) => {
+          const htmlEl = el as HTMLElement;
+          htmlEl.style.opacity = "0";
+          htmlEl.style.transition = "opacity 400ms ease, filter 400ms ease";
+        });
         containerRef.current
           .querySelectorAll(".flowchart-link, .edge-pattern-solid, .edgeLabel")
-          .forEach(
-            (el) =>
-              ((el as HTMLElement).style.transition = "opacity 400ms ease"),
-          );
+          .forEach((el) => {
+            const htmlEl = el as HTMLElement;
+            htmlEl.style.opacity = "0";
+            htmlEl.style.transition = "opacity 400ms ease";
+          });
 
         if (!cancelled) setRendered(true);
         return true;
@@ -196,16 +195,22 @@ export function AnimatedMermaidWidget({
         : "none";
     }
 
-    // Animate edge paths + labels (index-based: chart declaration order)
+    // Animate edge paths + labels — hide ALL first, then reveal matched ones
     const linkPaths = containerRef.current.querySelectorAll(
       ".flowchart-link, .edge-pattern-solid",
     );
     const edgeLabels = containerRef.current.querySelectorAll(".edgeLabel");
+
+    // Start with all hidden
+    linkPaths.forEach((el) => ((el as HTMLElement).style.opacity = "0"));
+    edgeLabels.forEach((el) => ((el as HTMLElement).style.opacity = "0"));
+
+    // Reveal edges whose both endpoints are revealed (index-based: chart declaration order)
     edges.forEach(({ from, to }, i) => {
       const show = revealedNodes.has(from) && revealedNodes.has(to);
-      const op = show ? "0.85" : "0";
-      if (linkPaths[i]) (linkPaths[i] as HTMLElement).style.opacity = op;
-      if (edgeLabels[i]) (edgeLabels[i] as HTMLElement).style.opacity = op;
+      if (!show) return;
+      if (linkPaths[i]) (linkPaths[i] as HTMLElement).style.opacity = "0.85";
+      if (edgeLabels[i]) (edgeLabels[i] as HTMLElement).style.opacity = "0.85";
     });
   }, [rendered, activeIdx, steps, edges, allNodeIds]);
 
