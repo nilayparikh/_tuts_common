@@ -58,11 +58,23 @@ export {
   type StepActor,
   type StepSequenceItem,
 } from "./StepSequenceWidget";
+export {
+  FlowDiagramWidget,
+  type FlowNode,
+  type FlowEdge,
+  type FlowStep,
+} from "./FlowDiagramWidget";
+export {
+  AnimatedMermaidWidget,
+  type AnimatedMermaidStep,
+  type AnimatedMermaidEdge,
+} from "./AnimatedMermaidWidget";
+export { ProcessStagesWidget, type ProcessStage } from "./ProcessStagesWidget";
 
 // Diagram components
 export {
   DiagramBox,
-  FlowNode,
+  FlowNode as DiagramFlowNode,
   Arrow,
   TwoColumn,
   Timeline,
