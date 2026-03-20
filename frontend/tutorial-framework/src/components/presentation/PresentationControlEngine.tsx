@@ -2210,7 +2210,9 @@ export function PresentationControlPanel({
                   title={slide.title}
                 >
                   <span className="pc-jump-index">{idx + 1}</span>
-                  <span className="pc-jump-title">{renderSlideTitle(slide.title)}</span>
+                  <span className="pc-jump-title">
+                    {renderSlideTitle(slide.title)}
+                  </span>
                 </button>
               ))}
             </div>
