@@ -1209,14 +1209,14 @@ const ENGINE_CSS = `
     flex-direction: column;
     border-left: 1px solid rgba(202,211,230,0.10);
     background: var(--tf-bg-surface, #111318);
+    overflow: hidden;
   }
 
   .pe-pip-header {
     display: flex;
     align-items: center;
-    padding: 0 14px;
-    height: 52px;
-    min-height: 52px;
+    padding: 18px 14px 14px;
+    min-height: 86px;
     gap: 8px;
     border-bottom: 1px solid rgba(202,211,230,0.08);
     background: linear-gradient(180deg, rgba(15,18,28,0.82), rgba(11,13,18,0.62));
@@ -1253,53 +1253,38 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    padding: 12px 16px;
     min-height: 0;
+    overflow: hidden;
   }
   .pe-pip-inset-box {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    border: 2px dashed rgba(99,102,241,0.45);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    aspect-ratio: 9 / 16;
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
     background:
-      radial-gradient(ellipse at center, rgba(99,102,241,0.06), transparent 70%),
-      rgba(99,102,241,0.02);
+      linear-gradient(180deg, rgba(19,22,33,0.96), rgba(13,15,23,0.96)),
+      radial-gradient(circle at top, rgba(99,102,241,0.10), transparent 50%),
+      radial-gradient(circle at bottom, rgba(20,184,166,0.08), transparent 42%);
     position: relative;
-    box-shadow: inset 0 0 40px rgba(99,102,241,0.04);
-  }
-  .pe-pip-inset-label {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: rgba(99,102,241,0.35);
-    user-select: none;
-  }
-  .pe-pip-inset-badge {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    padding: 2px 8px;
-    border-radius: 6px;
-    background: rgba(99,102,241,0.14);
-    border: 1px solid rgba(99,102,241,0.22);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    color: var(--tf-color-primary-light, #818cf8);
+    border-radius: 18px 18px 0 0;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.04),
+      0 0 0 1px rgba(202,211,230,0.05);
+    overflow: hidden;
   }
 
   .pe-pip-footer {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 14px;
-    min-height: 48px;
+    justify-content: flex-end;
+    gap: 16px;
+    padding: 20px 18px 26px;
+    min-height: 138px;
     border-top: 1px solid rgba(202,211,230,0.08);
     background: var(--tf-bg-surface, #111318);
     flex-shrink: 0;
@@ -1307,8 +1292,27 @@ const ENGINE_CSS = `
   .pe-pip-footer-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 12px;
     flex-wrap: nowrap;
+  }
+  .pe-pip-footer .pe-footer-social-link {
+    gap: 8px;
+    font-size: 15px;
+    color: var(--tf-text-secondary, #bfc5d4);
+  }
+  .pe-pip-footer .pe-footer-social-link svg {
+    width: 18px;
+    height: 18px;
+  }
+  .pe-pip-footer .pe-footer-logo {
+    height: 28px;
+  }
+  .pe-pip-footer .pe-footer-copy {
+    font-size: 12px;
+  }
+  .pe-pip-footer .pe-footer-instructor {
+    font-size: 14px;
   }
 
   /* PIP toggle button (shared style) */
@@ -2134,10 +2138,10 @@ export function PresentationLayout({
               </div>
 
               <div className="pe-pip-inset">
-                <div className="pe-pip-inset-box">
-                  <span className="pe-pip-inset-badge">16 : 9</span>
-                  <span className="pe-pip-inset-label">PIP</span>
-                </div>
+                <div
+                  className="pe-pip-inset-box"
+                  aria-label="9:16 PIP background area"
+                />
               </div>
 
               <div className="pe-pip-footer">
@@ -2145,7 +2149,7 @@ export function PresentationLayout({
                   {brandIconUrl ? (
                     <BrandLockup
                       iconUrl={brandIconUrl}
-                      size="sm"
+                      size="md"
                       label={brandLabel}
                     />
                   ) : (
