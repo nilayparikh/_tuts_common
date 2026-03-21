@@ -1193,6 +1193,148 @@ const ENGINE_CSS = `
     color: var(--tf-text-muted, #8892a8);
     font-style: italic;
   }
+
+  /* ── PIP Mode ──────────────────────── */
+  .pe-root.pe-pip-mode > .pe-header,
+  .pe-root.pe-pip-mode > .pe-footer,
+  .pe-root.pe-pip-mode > .pe-progress {
+    display: none;
+  }
+
+  .pe-pip-column {
+    flex: 0 0 28%;
+    min-width: 300px;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid rgba(202,211,230,0.10);
+    background: var(--tf-bg-surface, #111318);
+  }
+
+  .pe-pip-header {
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    height: 52px;
+    min-height: 52px;
+    gap: 8px;
+    border-bottom: 1px solid rgba(202,211,230,0.08);
+    background: linear-gradient(180deg, rgba(15,18,28,0.82), rgba(11,13,18,0.62));
+    backdrop-filter: blur(18px) saturate(150%);
+    flex-shrink: 0;
+  }
+  .pe-pip-header-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .pe-pip-header-lesson {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tf-text-secondary, #bfc5d4);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .pe-pip-header-slide {
+    font-size: 12px;
+    color: var(--tf-text-muted, #8892a8);
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .pe-pip-inset {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    min-height: 0;
+  }
+  .pe-pip-inset-box {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 2px dashed rgba(99,102,241,0.45);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(ellipse at center, rgba(99,102,241,0.06), transparent 70%),
+      rgba(99,102,241,0.02);
+    position: relative;
+    box-shadow: inset 0 0 40px rgba(99,102,241,0.04);
+  }
+  .pe-pip-inset-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(99,102,241,0.35);
+    user-select: none;
+  }
+  .pe-pip-inset-badge {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(99,102,241,0.14);
+    border: 1px solid rgba(99,102,241,0.22);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--tf-color-primary-light, #818cf8);
+  }
+
+  .pe-pip-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    min-height: 48px;
+    border-top: 1px solid rgba(202,211,230,0.08);
+    background: var(--tf-bg-surface, #111318);
+    flex-shrink: 0;
+  }
+  .pe-pip-footer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  /* PIP toggle button (shared style) */
+  .pe-pip-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
+    color: var(--tf-text-muted, #8892a8);
+    cursor: pointer;
+    padding: 0;
+    transition: all 150ms;
+  }
+  .pe-pip-btn:hover {
+    color: var(--tf-text-primary, #e2e6f0);
+    border-color: var(--tf-color-primary, #6366f1);
+  }
+  .pe-pip-btn.active {
+    color: var(--tf-color-primary-light, #818cf8);
+    border-color: var(--tf-color-primary, #6366f1);
+    background: var(--tf-bg-elevated, #191c23);
+  }
 `;
 
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -1342,6 +1484,29 @@ const Icons = {
   twitter: (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  ),
+  pip: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="2" y="3" width="20" height="18" rx="2" />
+      <rect
+        x="12"
+        y="10"
+        width="9"
+        height="7"
+        rx="1"
+        fill="currentColor"
+        opacity="0.25"
+      />
     </svg>
   ),
 };
@@ -1506,6 +1671,7 @@ export function PresentationLayout({
   const [stepIndex, setStepIndex] = useState(0);
   const [slideZoom, setSlideZoom] = useState<number>(DEFAULT_SLIDE_ZOOM);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [pipMode, setPipMode] = useState(false);
   const slideCount = deck.slides.length;
   const elapsed = useSlideTimer(slideIndex);
 
@@ -1632,6 +1798,9 @@ export function PresentationLayout({
       } else if (e.key === "End") {
         e.preventDefault();
         goTo(slideCount - 1);
+      } else if (e.key === "p" || e.key === "P") {
+        e.preventDefault();
+        setPipMode((v) => !v);
       }
     };
     window.addEventListener("keydown", onKey);
@@ -1765,7 +1934,11 @@ export function PresentationLayout({
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
-      <div className="pe-root" ref={rootRef} aria-label={courseTitle}>
+      <div
+        className={`pe-root${pipMode ? " pe-pip-mode" : ""}`}
+        ref={rootRef}
+        aria-label={courseTitle}
+      >
         {/* ── Header ── */}
         <div className="pe-header">
           <div className="pe-header-left">
@@ -1836,6 +2009,13 @@ export function PresentationLayout({
             >
               {Icons.panel}
               <span style={{ marginLeft: 6 }}>Control</span>
+            </button>
+            <button
+              className={`pe-pip-btn${pipMode ? " active" : ""}`}
+              onClick={() => setPipMode((v) => !v)}
+              title="Toggle PIP mode (P)"
+            >
+              {Icons.pip}
             </button>
             <button className="pe-fs-btn" onClick={toggleFs} title="Fullscreen">
               {Icons.fullscreen}
@@ -1908,6 +2088,127 @@ export function PresentationLayout({
               </div>
             </div>
           </div>
+
+          {/* ── PIP Column (visible in PIP mode) ── */}
+          {pipMode && (
+            <div className="pe-pip-column">
+              <div className="pe-pip-header">
+                <button
+                  className={`pe-drawer-toggle ${drawerOpen ? "active" : ""}`}
+                  onClick={() => setDrawerOpen(!drawerOpen)}
+                  title="Slide navigator"
+                >
+                  {Icons.menu}
+                </button>
+                <div className="pe-pip-header-info">
+                  <span className="pe-pip-header-lesson">
+                    {deck.number}. {sanitizePresentationTitle(deck.title)}
+                  </span>
+                  <span className="pe-pip-header-slide">
+                    {slideIndex + 1}/{slideCount}
+                  </span>
+                </div>
+                <button
+                  className="pe-nav-btn"
+                  onClick={goPrev}
+                  disabled={slideIndex <= 0}
+                  aria-label="Previous"
+                >
+                  {Icons.chevLeft}
+                </button>
+                <button
+                  className="pe-nav-btn"
+                  onClick={goNext}
+                  disabled={slideIndex >= slideCount - 1}
+                  aria-label="Next"
+                >
+                  {Icons.chevRight}
+                </button>
+                <button
+                  className="pe-pip-btn active"
+                  onClick={() => setPipMode(false)}
+                  title="Exit PIP mode (P)"
+                >
+                  {Icons.pip}
+                </button>
+              </div>
+
+              <div className="pe-pip-inset">
+                <div className="pe-pip-inset-box">
+                  <span className="pe-pip-inset-badge">16 : 9</span>
+                  <span className="pe-pip-inset-label">PIP</span>
+                </div>
+              </div>
+
+              <div className="pe-pip-footer">
+                <div className="pe-pip-footer-row">
+                  {brandIconUrl ? (
+                    <BrandLockup
+                      iconUrl={brandIconUrl}
+                      size="sm"
+                      label={brandLabel}
+                    />
+                  ) : (
+                    <img
+                      className="pe-footer-logo"
+                      src={brandLogoSrc}
+                      alt={brandLabel}
+                    />
+                  )}
+                  {instructorName ? (
+                    <>
+                      <span className="pe-footer-divider" aria-hidden="true" />
+                      <span
+                        className="pe-footer-instructor"
+                        style={{ fontSize: "12px" }}
+                      >
+                        {instructorName}
+                      </span>
+                    </>
+                  ) : null}
+                </div>
+                <div className="pe-pip-footer-row">
+                  {youtubeUrl ? (
+                    <a
+                      className="pe-footer-social-link"
+                      href={youtubeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="YouTube"
+                    >
+                      {Icons.youtube}
+                    </a>
+                  ) : null}
+                  {twitterUrl ? (
+                    <a
+                      className="pe-footer-social-link"
+                      href={twitterUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="X"
+                    >
+                      {Icons.twitter}
+                    </a>
+                  ) : null}
+                  {linkedinUrl ? (
+                    <a
+                      className="pe-footer-social-link"
+                      href={linkedinUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="LinkedIn"
+                    >
+                      {Icons.linkedin}
+                    </a>
+                  ) : null}
+                  <span className="pe-footer-divider" aria-hidden="true" />
+                  <span className="pe-footer-copy" style={{ fontSize: "11px" }}>
+                    {copyrightText}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── Footer ── */}
