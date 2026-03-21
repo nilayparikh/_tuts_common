@@ -1256,6 +1256,10 @@ const ENGINE_CSS = `
     padding: 12px 16px;
     min-height: 0;
     overflow: hidden;
+    background:
+      radial-gradient(circle at top, var(--tf-secondary-container-high, rgba(0,245,255,0.18)), transparent 34%),
+      radial-gradient(circle at bottom, var(--tf-accent-container-high, rgba(168,56,255,0.14)), transparent 36%),
+      linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
   }
   .pe-pip-inset-box {
     aspect-ratio: 9 / 16;
@@ -1264,29 +1268,24 @@ const ENGINE_CSS = `
     max-width: 100%;
     max-height: 100%;
     display: block;
-    background:
-      linear-gradient(180deg, rgba(19,22,33,0.96), rgba(13,15,23,0.96)),
-      radial-gradient(circle at top, rgba(99,102,241,0.10), transparent 50%),
-      radial-gradient(circle at bottom, rgba(20,184,166,0.08), transparent 42%);
     position: relative;
-    border-radius: 18px 18px 0 0;
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.04),
-      0 0 0 1px rgba(202,211,230,0.05);
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
     overflow: hidden;
   }
 
   .pe-pip-footer {
     display: flex;
     flex-direction: column;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
-    gap: 16px;
+    gap: 10px;
     padding: 20px 18px 26px;
     min-height: 138px;
     border-top: 1px solid rgba(202,211,230,0.08);
-    background: var(--tf-bg-surface, #111318);
+    background:
+      linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
     flex-shrink: 0;
   }
   .pe-pip-footer-row {
@@ -1294,7 +1293,18 @@ const ENGINE_CSS = `
     align-items: center;
     justify-content: center;
     gap: 12px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    width: 100%;
+    text-align: center;
+  }
+  .pe-pip-footer-row.brand {
+    margin-bottom: 2px;
+  }
+  .pe-pip-footer-row.meta {
+    gap: 14px;
+  }
+  .pe-pip-footer-row.copy {
+    gap: 0;
   }
   .pe-pip-footer .pe-footer-social-link {
     gap: 8px;
@@ -1302,17 +1312,23 @@ const ENGINE_CSS = `
     color: var(--tf-text-secondary, #bfc5d4);
   }
   .pe-pip-footer .pe-footer-social-link svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
   }
   .pe-pip-footer .pe-footer-logo {
-    height: 28px;
+    height: 34px;
   }
   .pe-pip-footer .pe-footer-copy {
     font-size: 12px;
+    color: var(--tf-text-muted, #64748b);
   }
   .pe-pip-footer .pe-footer-instructor {
     font-size: 14px;
+    color: var(--tf-text-primary, #ffffff);
+  }
+  .pe-pip-footer .brand-lockup {
+    transform: scale(1.06);
+    transform-origin: center;
   }
 
   /* PIP toggle button (shared style) */
@@ -2145,11 +2161,11 @@ export function PresentationLayout({
               </div>
 
               <div className="pe-pip-footer">
-                <div className="pe-pip-footer-row">
+                <div className="pe-pip-footer-row brand">
                   {brandIconUrl ? (
                     <BrandLockup
                       iconUrl={brandIconUrl}
-                      size="md"
+                      size="lg"
                       label={brandLabel}
                     />
                   ) : (
@@ -2159,19 +2175,13 @@ export function PresentationLayout({
                       alt={brandLabel}
                     />
                   )}
-                  {instructorName ? (
-                    <>
-                      <span className="pe-footer-divider" aria-hidden="true" />
-                      <span
-                        className="pe-footer-instructor"
-                        style={{ fontSize: "12px" }}
-                      >
-                        {instructorName}
-                      </span>
-                    </>
-                  ) : null}
                 </div>
-                <div className="pe-pip-footer-row">
+                <div className="pe-pip-footer-row meta">
+                  {instructorName ? (
+                    <span className="pe-footer-instructor">
+                      {instructorName}
+                    </span>
+                  ) : null}
                   {youtubeUrl ? (
                     <a
                       className="pe-footer-social-link"
@@ -2205,10 +2215,9 @@ export function PresentationLayout({
                       {Icons.linkedin}
                     </a>
                   ) : null}
-                  <span className="pe-footer-divider" aria-hidden="true" />
-                  <span className="pe-footer-copy" style={{ fontSize: "11px" }}>
-                    {copyrightText}
-                  </span>
+                </div>
+                <div className="pe-pip-footer-row copy">
+                  <span className="pe-footer-copy">{copyrightText}</span>
                 </div>
               </div>
             </div>
