@@ -145,6 +145,9 @@ const ENGINE_CSS = `
     min-width: 0;
     justify-self: center;
   }
+  .pe-header:not(:has(.pe-header-center)) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
   .pe-header-right {
     display: flex;
     align-items: center;
@@ -1318,7 +1321,7 @@ const ENGINE_CSS = `
     align-items: center;
     justify-content: center;
     gap: 18px;
-    padding: 22px 22px 26px;
+    padding: 28px 22px;
     height: var(--pe-pip-footer-height);
     overflow: hidden;
     border-top: 1px solid rgba(202,211,230,0.08);
@@ -1692,6 +1695,10 @@ interface PresentationLayoutProps {
   branding?: PresentationBranding;
   controlChannelId?: string;
   controlWindowName?: string;
+  /** Hide the centre prev/current/next slide navigation in the header bar */
+  hideHeaderNav?: boolean;
+  /** Hash prefix for navigation (e.g. "#/my-show"). goTo writes `{hashPrefix}/{deckId}/{slide}`. */
+  hashPrefix?: string;
 }
 
 export function PresentationLayout({
@@ -1701,6 +1708,8 @@ export function PresentationLayout({
   branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   controlWindowName = DEFAULT_CONTROL_WINDOW_NAME,
+  hideHeaderNav = false,
+  hashPrefix,
 }: PresentationLayoutProps) {
   const brandLogoSrc =
     branding?.logoSrc ?? "/brand/og-image-template-1200x630.png";
@@ -1735,8 +1744,8 @@ export function PresentationLayout({
 
   /* ── Parse initial slide from hash ── */
   const getIndexFromHash = useCallback((): number => {
-    const hash = window.location.hash; // e.g. #/01/3
-    const m = hash.match(/#\/[^/]+\/(\d+)/);
+    const hash = window.location.hash; // e.g. #/01/3 or #/a2a/why-a2a/3
+    const m = hash.match(/\/(\d+)$/);
     return m ? parseInt(m[1], 10) : 0;
   }, []);
 
@@ -1765,9 +1774,11 @@ export function PresentationLayout({
       const clamped = Math.max(0, Math.min(idx, slideCount - 1));
       setSlideIndex(clamped);
       setStepIndex(0);
-      window.location.hash = `#/${deck.id}/${clamped}`;
+      window.location.hash = hashPrefix
+        ? `${hashPrefix}/${deck.id}/${clamped}`
+        : `#/${deck.id}/${clamped}`;
     },
-    [slideCount, deck.id],
+    [slideCount, deck.id, hashPrefix],
   );
 
   const goPrev = useCallback(() => {
@@ -1905,7 +1916,9 @@ export function PresentationLayout({
       if (msg.type !== "command") return;
       if (msg.action === "switch-deck") {
         if (msg.deckId !== deck.id || !msg.targetDeckId) return;
-        window.location.hash = `#/${msg.targetDeckId}/0`;
+        window.location.hash = hashPrefix
+          ? `${hashPrefix}/${msg.targetDeckId}/0`
+          : `#/${msg.targetDeckId}/0`;
         return;
       }
       if (msg.deckId !== deck.id) return;
@@ -1953,6 +1966,7 @@ export function PresentationLayout({
     goPrev,
     goNext,
     goTo,
+    hashPrefix,
     postControlState,
     resetStep,
     stepBack,
@@ -2032,44 +2046,46 @@ export function PresentationLayout({
             </span>
           </div>
 
-          <div className="pe-header-center">
-            <div className="pe-header-nav">
-              <button
-                className="pe-nav-btn"
-                onClick={goPrev}
-                disabled={slideIndex <= 0}
-                aria-label="Previous"
-              >
-                {Icons.chevLeft}
-              </button>
-              <span
-                className={`pe-header-nav-prev ${prevSlide ? "" : "empty"}`}
-                title={prevSlide?.title}
-              >
-                {renderSlideTitle(prevSlide?.title)}
-              </span>
-              <span
-                className="pe-header-nav-current"
-                title={currentSlide?.title}
-              >
-                {renderSlideTitle(currentSlide?.title)}
-              </span>
-              <span
-                className={`pe-header-nav-next ${nextSlide ? "" : "empty"}`}
-                title={nextSlide?.title}
-              >
-                {renderSlideTitle(nextSlide?.title)}
-              </span>
-              <button
-                className="pe-nav-btn"
-                onClick={goNext}
-                disabled={slideIndex >= slideCount - 1}
-                aria-label="Next"
-              >
-                {Icons.chevRight}
-              </button>
+          {!hideHeaderNav && (
+            <div className="pe-header-center">
+              <div className="pe-header-nav">
+                <button
+                  className="pe-nav-btn"
+                  onClick={goPrev}
+                  disabled={slideIndex <= 0}
+                  aria-label="Previous"
+                >
+                  {Icons.chevLeft}
+                </button>
+                <span
+                  className={`pe-header-nav-prev ${prevSlide ? "" : "empty"}`}
+                  title={prevSlide?.title}
+                >
+                  {renderSlideTitle(prevSlide?.title)}
+                </span>
+                <span
+                  className="pe-header-nav-current"
+                  title={currentSlide?.title}
+                >
+                  {renderSlideTitle(currentSlide?.title)}
+                </span>
+                <span
+                  className={`pe-header-nav-next ${nextSlide ? "" : "empty"}`}
+                  title={nextSlide?.title}
+                >
+                  {renderSlideTitle(nextSlide?.title)}
+                </span>
+                <button
+                  className="pe-nav-btn"
+                  onClick={goNext}
+                  disabled={slideIndex >= slideCount - 1}
+                  aria-label="Next"
+                >
+                  {Icons.chevRight}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="pe-header-right">
             <span className="pe-header-slide">
@@ -2197,6 +2213,13 @@ export function PresentationLayout({
                   title="Exit PIP mode (P)"
                 >
                   {Icons.pip}
+                </button>
+                <button
+                  className="pe-fs-btn"
+                  onClick={toggleFs}
+                  title="Fullscreen"
+                >
+                  {Icons.fullscreen}
                 </button>
               </div>
 
@@ -2381,6 +2404,8 @@ interface PresentationControlPanelProps {
   onOpenPresenter?: () => void;
   branding?: PresentationBranding;
   controlChannelId?: string;
+  /** Optional React node rendered above the "Jump Lesson" section in the sidebar */
+  headerSlot?: React.ReactNode;
 }
 
 export function PresentationControlPanel({
@@ -2390,6 +2415,7 @@ export function PresentationControlPanel({
   onOpenPresenter,
   branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
+  headerSlot,
 }: PresentationControlPanelProps) {
   const brandLogoSrc =
     branding?.logoSrc ?? "/brand/og-image-template-1200x630.png";
@@ -2580,6 +2606,7 @@ export function PresentationControlPanel({
         <div className="pc-body">
           <aside className="pc-sidebar">
             <div className="pc-lessons">
+              {headerSlot}
               <span className="pc-section-label">Jump Lesson</span>
               <select
                 className="pc-lesson-select"

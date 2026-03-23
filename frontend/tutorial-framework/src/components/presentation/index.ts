@@ -60,7 +60,7 @@ export {
 } from "./StepSequenceWidget";
 export {
   FlowDiagramWidget,
-  type FlowNode,
+  type FlowNode as FlowDiagramNodeConfig,
   type FlowEdge,
   type FlowStep,
 } from "./FlowDiagramWidget";
@@ -74,7 +74,7 @@ export { ProcessStagesWidget, type ProcessStage } from "./ProcessStagesWidget";
 // Diagram components
 export {
   DiagramBox,
-  FlowNode as DiagramFlowNode,
+  FlowNode,
   Arrow,
   TwoColumn,
   Timeline,
