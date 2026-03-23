@@ -1200,13 +1200,23 @@ const ENGINE_CSS = `
   .pe-root.pe-pip-mode > .pe-progress {
     display: none;
   }
+  .pe-root.pe-pip-mode {
+    --pe-pip-column-width: calc((100vh * 9 / 16) - 40px);
+    --pe-pip-header-height: 44px;
+    --pe-pip-info-height: 100px;
+    --pe-pip-footer-height: 300px;
+  }
+  .pe-root.pe-pip-mode .pe-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--pe-pip-column-width);
+  }
 
   .pe-pip-column {
-    flex: 0 0 28%;
-    min-width: 300px;
-    max-width: 480px;
-    display: flex;
-    flex-direction: column;
+    position: relative;
+    width: var(--pe-pip-column-width);
+    height: 100vh;
+    display: grid;
+    grid-template-rows: var(--pe-pip-header-height) var(--pe-pip-info-height) 1fr var(--pe-pip-footer-height);
     border-left: 1px solid rgba(202,211,230,0.10);
     background: var(--tf-bg-surface, #111318);
     overflow: hidden;
@@ -1215,78 +1225,105 @@ const ENGINE_CSS = `
   .pe-pip-header {
     display: flex;
     align-items: center;
-    padding: 18px 14px 14px;
-    min-height: 86px;
-    gap: 8px;
+    padding: 0 10px;
+    height: var(--pe-pip-header-height);
+    gap: 6px;
     border-bottom: 1px solid rgba(202,211,230,0.08);
     background: linear-gradient(180deg, rgba(15,18,28,0.82), rgba(11,13,18,0.62));
     backdrop-filter: blur(18px) saturate(150%);
     flex-shrink: 0;
   }
-  .pe-pip-header-info {
-    flex: 1;
+
+  .pe-pip-info {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+    padding: 14px 22px;
+    gap: 6px;
+    height: var(--pe-pip-info-height);
+    border-bottom: 1px solid rgba(202,211,230,0.06);
+    background: linear-gradient(180deg, rgba(11,13,18,0.62), var(--tf-bg-surface, #111318));
+    overflow: hidden;
   }
-  .pe-pip-header-lesson {
-    font-size: 13px;
+  .pe-pip-info-course {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--tf-color-primary-light, #818cf8);
     font-weight: 600;
-    color: var(--tf-text-secondary, #bfc5d4);
+  }
+  .pe-pip-info-lesson {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--tf-text-primary, #e2e6f0);
+    line-height: 1.3;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-width: 0;
   }
-  .pe-pip-header-slide {
-    font-size: 12px;
+  .pe-pip-info-slide {
+    font-size: 13px;
     color: var(--tf-text-muted, #8892a8);
     font-family: 'JetBrains Mono', monospace;
     font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    flex-shrink: 0;
   }
 
   .pe-pip-inset {
-    flex: 1;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 16px;
-    min-height: 0;
     overflow: hidden;
     background:
       radial-gradient(circle at top, var(--tf-secondary-container-high, rgba(0,245,255,0.18)), transparent 34%),
       radial-gradient(circle at bottom, var(--tf-accent-container-high, rgba(168,56,255,0.14)), transparent 36%),
       linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
   }
-  .pe-pip-inset-box {
-    aspect-ratio: 9 / 16;
-    width: auto;
-    height: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    display: block;
-    position: relative;
-    background: transparent;
-    border-radius: 0;
-    box-shadow: none;
-    overflow: hidden;
+  .pe-pip-guide {
+    position: absolute;
+    z-index: 10;
+    background: rgba(0,245,255,0.75);
+    pointer-events: none;
+  }
+  .pe-pip-guide.top,
+  .pe-pip-guide.bottom {
+    left: 50%;
+    width: 1px;
+    height: 12px;
+    transform: translateX(-50%);
+  }
+  .pe-pip-guide.top {
+    top: 0;
+  }
+  .pe-pip-guide.bottom {
+    bottom: 0;
+  }
+  .pe-pip-guide.left,
+  .pe-pip-guide.right {
+    top: 50%;
+    width: 12px;
+    height: 1px;
+    transform: translateY(-50%);
+  }
+  .pe-pip-guide.left {
+    left: 0;
+  }
+  .pe-pip-guide.right {
+    right: 0;
   }
 
   .pe-pip-footer {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    padding: 20px 18px 26px;
-    min-height: 138px;
+    justify-content: center;
+    gap: 18px;
+    padding: 22px 22px 26px;
+    height: var(--pe-pip-footer-height);
+    overflow: hidden;
     border-top: 1px solid rgba(202,211,230,0.08);
     background:
       linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
-    flex-shrink: 0;
   }
   .pe-pip-footer-row {
     display: flex;
@@ -1300,34 +1337,41 @@ const ENGINE_CSS = `
   .pe-pip-footer-row.brand {
     margin-bottom: 2px;
   }
-  .pe-pip-footer-row.meta {
-    gap: 14px;
+  .pe-pip-footer-row.instructor {
+    margin-bottom: 0;
+  }
+  .pe-pip-footer-row.socials {
+    gap: 16px;
   }
   .pe-pip-footer-row.copy {
     gap: 0;
   }
   .pe-pip-footer .pe-footer-social-link {
-    gap: 8px;
-    font-size: 15px;
+    gap: 10px;
+    font-size: 17px;
     color: var(--tf-text-secondary, #bfc5d4);
   }
   .pe-pip-footer .pe-footer-social-link svg {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
+  }
+  .pe-pip-footer .pe-footer-social-text {
+    line-height: 1;
   }
   .pe-pip-footer .pe-footer-logo {
-    height: 34px;
+    height: 48px;
   }
   .pe-pip-footer .pe-footer-copy {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--tf-text-muted, #64748b);
   }
   .pe-pip-footer .pe-footer-instructor {
-    font-size: 14px;
+    font-size: 18px;
     color: var(--tf-text-primary, #ffffff);
+    font-weight: 500;
   }
   .pe-pip-footer .brand-lockup {
-    transform: scale(1.06);
+    transform: scale(1.4);
     transform-origin: center;
   }
 
@@ -1679,6 +1723,15 @@ export function PresentationLayout({
   const controlChannelRef = useRef<BroadcastChannel | null>(null);
   const stateStorageKey = getControlStorageKey(controlChannelId, "state");
   const commandStorageKey = getControlStorageKey(controlChannelId, "command");
+  const youtubeLabel = youtubeHandle
+    ? `yt/${youtubeHandle.replace(/^@/, "")}`
+    : "YouTube";
+  const twitterLabel = twitterHandle
+    ? `x/${twitterHandle.replace(/^@/, "")}`
+    : "X";
+  const linkedinLabel = linkedinHandle
+    ? `in/${linkedinHandle.replace(/^@/, "")}`
+    : "LinkedIn";
 
   /* ── Parse initial slide from hash ── */
   const getIndexFromHash = useCallback((): number => {
@@ -2112,6 +2165,7 @@ export function PresentationLayout({
           {/* ── PIP Column (visible in PIP mode) ── */}
           {pipMode && (
             <div className="pe-pip-column">
+              {/* Compact header — nav buttons only */}
               <div className="pe-pip-header">
                 <button
                   className={`pe-drawer-toggle ${drawerOpen ? "active" : ""}`}
@@ -2120,14 +2174,7 @@ export function PresentationLayout({
                 >
                   {Icons.menu}
                 </button>
-                <div className="pe-pip-header-info">
-                  <span className="pe-pip-header-lesson">
-                    {deck.number}. {sanitizePresentationTitle(deck.title)}
-                  </span>
-                  <span className="pe-pip-header-slide">
-                    {slideIndex + 1}/{slideCount}
-                  </span>
-                </div>
+                <div style={{ flex: 1 }} />
                 <button
                   className="pe-nav-btn"
                   onClick={goPrev}
@@ -2153,11 +2200,23 @@ export function PresentationLayout({
                 </button>
               </div>
 
-              <div className="pe-pip-inset">
-                <div
-                  className="pe-pip-inset-box"
-                  aria-label="9:16 PIP background area"
-                />
+              {/* Course / lesson info section */}
+              <div className="pe-pip-info">
+                <span className="pe-pip-info-course">{courseTitle}</span>
+                <span className="pe-pip-info-lesson">
+                  {deck.number}. {sanitizePresentationTitle(deck.title)}
+                </span>
+                <span className="pe-pip-info-slide">
+                  Slide {slideIndex + 1} of {slideCount}
+                </span>
+              </div>
+
+              {/* PIP video area (middle) */}
+              <div className="pe-pip-inset" aria-label="9:16 PIP video area">
+                <span className="pe-pip-guide top" aria-hidden="true" />
+                <span className="pe-pip-guide right" aria-hidden="true" />
+                <span className="pe-pip-guide bottom" aria-hidden="true" />
+                <span className="pe-pip-guide left" aria-hidden="true" />
               </div>
 
               <div className="pe-pip-footer">
@@ -2176,12 +2235,14 @@ export function PresentationLayout({
                     />
                   )}
                 </div>
-                <div className="pe-pip-footer-row meta">
-                  {instructorName ? (
+                {instructorName ? (
+                  <div className="pe-pip-footer-row instructor">
                     <span className="pe-footer-instructor">
                       {instructorName}
                     </span>
-                  ) : null}
+                  </div>
+                ) : null}
+                <div className="pe-pip-footer-row socials">
                   {youtubeUrl ? (
                     <a
                       className="pe-footer-social-link"
@@ -2191,6 +2252,9 @@ export function PresentationLayout({
                       aria-label="YouTube"
                     >
                       {Icons.youtube}
+                      <span className="pe-footer-social-text">
+                        {youtubeLabel}
+                      </span>
                     </a>
                   ) : null}
                   {twitterUrl ? (
@@ -2202,6 +2266,9 @@ export function PresentationLayout({
                       aria-label="X"
                     >
                       {Icons.twitter}
+                      <span className="pe-footer-social-text">
+                        {twitterLabel}
+                      </span>
                     </a>
                   ) : null}
                   {linkedinUrl ? (
@@ -2213,6 +2280,9 @@ export function PresentationLayout({
                       aria-label="LinkedIn"
                     >
                       {Icons.linkedin}
+                      <span className="pe-footer-social-text">
+                        {linkedinLabel}
+                      </span>
                     </a>
                   ) : null}
                 </div>
