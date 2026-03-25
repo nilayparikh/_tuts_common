@@ -755,6 +755,11 @@ const ENGINE_CSS = `
     border-color: var(--tf-color-primary, #6366f1);
     background: var(--tf-bg-elevated, #191c23);
   }
+  .pe-control-btn.pe-control-btn-icon {
+    width: 28px;
+    min-width: 28px;
+    padding: 0;
+  }
 
   /* ── Progress bar ──────────────────── */
   .pe-progress {
@@ -2261,7 +2266,7 @@ export function PresentationLayout({
           {/* ── PIP Column (visible in PIP mode) ── */}
           {pipMode && (
             <div className="pe-pip-column">
-              {/* Compact header — nav buttons only */}
+              {/* Compact header — keep control access visible in PIP mode */}
               <div className="pe-pip-header">
                 <button
                   className={`pe-drawer-toggle ${drawerOpen ? "active" : ""}`}
@@ -2271,6 +2276,14 @@ export function PresentationLayout({
                   {Icons.menu}
                 </button>
                 <div style={{ flex: 1 }} />
+                <button
+                  className="pe-control-btn pe-control-btn-icon"
+                  onClick={openControlWindow}
+                  title="Open control panel in a new window"
+                  aria-label="Control"
+                >
+                  {Icons.panel}
+                </button>
                 <button
                   className="pe-nav-btn"
                   onClick={goPrev}
