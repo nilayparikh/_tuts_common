@@ -755,6 +755,11 @@ const ENGINE_CSS = `
     border-color: var(--tf-color-primary, #6366f1);
     background: var(--tf-bg-elevated, #191c23);
   }
+  .pe-control-btn.pe-control-btn-icon {
+    width: 28px;
+    min-width: 28px;
+    padding: 0;
+  }
 
   /* ── Progress bar ──────────────────── */
   .pe-progress {
@@ -1136,6 +1141,73 @@ const ENGINE_CSS = `
     flex-direction: column;
     gap: 12px;
   }
+  .pc-transcript-current {
+    margin-bottom: 16px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(99,102,241,0.45);
+    background:
+      linear-gradient(180deg, rgba(19,23,36,0.96), rgba(12,15,24,0.92)),
+      linear-gradient(135deg, rgba(99,102,241,0.12), rgba(0,245,255,0.08));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 0 0 1px rgba(99,102,241,0.12),
+      0 16px 30px rgba(0,0,0,0.18);
+    animation: pc-active-transcript-enter 220ms ease;
+  }
+  .pc-transcript-current-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .pc-transcript-current-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tf-color-primary-light, #818cf8);
+  }
+  .pc-transcript-current-step {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tf-text-muted, #8892a8);
+  }
+  .pc-transcript-current-heading {
+    font-size: 20px;
+    line-height: 1.35;
+    font-weight: 700;
+    color: var(--tf-text-primary, #e2e6f0);
+    margin-bottom: 10px;
+  }
+  .pc-transcript-current-text {
+    color: var(--tf-text-secondary, #bfc5d4);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: calc(15px * var(--pc-transcript-font-scale, 1.1));
+    line-height: 1.75;
+    white-space: pre-wrap;
+  }
+  .pc-transcript-steps-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .pc-transcript-steps-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tf-text-muted, #8892a8);
+  }
+  .pc-transcript-steps-hint {
+    font-size: 11px;
+    color: var(--tf-text-muted, #8892a8);
+  }
   .pc-transcript-step {
     width: 100%;
     text-align: left;
@@ -1143,11 +1215,11 @@ const ENGINE_CSS = `
     -webkit-appearance: none;
     font: inherit;
     color: var(--tf-text-secondary, #bfc5d4);
-    padding: 14px 16px;
+    padding: 12px 14px;
     border-radius: 12px;
     border: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
     background: var(--tf-bg-surface, #111318);
-    opacity: 0.55;
+    opacity: 0.68;
     transition: all 180ms ease;
     cursor: pointer;
   }
@@ -1159,6 +1231,9 @@ const ENGINE_CSS = `
     opacity: 1;
     border-color: var(--tf-color-primary, #6366f1);
     box-shadow: 0 0 0 1px rgba(99,102,241,0.22);
+    background:
+      linear-gradient(180deg, rgba(24,28,42,0.92), rgba(14,18,28,0.86)),
+      linear-gradient(135deg, rgba(99,102,241,0.10), rgba(0,245,255,0.06));
   }
   .pc-transcript-step.complete {
     opacity: 0.82;
@@ -1185,8 +1260,8 @@ const ENGINE_CSS = `
   .pc-transcript-step-text {
     color: var(--tf-text-secondary, #bfc5d4);
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: calc(14px * var(--pc-transcript-font-scale, 1.1));
-    line-height: 1.7;
+    font-size: calc(12px * var(--pc-transcript-font-scale, 1.1));
+    line-height: 1.55;
   }
   .pc-transcript-step-text,
   .pc-transcript-text {
@@ -1195,6 +1270,16 @@ const ENGINE_CSS = `
   .pc-transcript-empty {
     color: var(--tf-text-muted, #8892a8);
     font-style: italic;
+  }
+  @keyframes pc-active-transcript-enter {
+    0% {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   /* ── PIP Mode ──────────────────────── */
@@ -2181,7 +2266,7 @@ export function PresentationLayout({
           {/* ── PIP Column (visible in PIP mode) ── */}
           {pipMode && (
             <div className="pe-pip-column">
-              {/* Compact header — nav buttons only */}
+              {/* Compact header — keep control access visible in PIP mode */}
               <div className="pe-pip-header">
                 <button
                   className={`pe-drawer-toggle ${drawerOpen ? "active" : ""}`}
@@ -2191,6 +2276,14 @@ export function PresentationLayout({
                   {Icons.menu}
                 </button>
                 <div style={{ flex: 1 }} />
+                <button
+                  className="pe-control-btn pe-control-btn-icon"
+                  onClick={openControlWindow}
+                  title="Open control panel in a new window"
+                  aria-label="Control"
+                >
+                  {Icons.panel}
+                </button>
                 <button
                   className="pe-nav-btn"
                   onClick={goPrev}
@@ -2793,35 +2886,68 @@ export function PresentationControlPanel({
             </div>
             <div className="pc-transcript-body">
               {state.stepCount > 0 && state.steps?.length ? (
-                <div className="pc-transcript-steps">
-                  {state.steps.map((step, index) => (
-                    <button
-                      key={step.id}
-                      type="button"
-                      className={`pc-transcript-step ${index === state.stepIndex ? "active" : ""} ${index < state.stepIndex ? "complete" : ""}`}
-                      onClick={() =>
-                        send({
-                          type: "command",
-                          deckId: deck.id,
-                          action: "step-goto",
-                          index,
-                        })
-                      }
-                    >
-                      <div className="pc-transcript-step-title">
-                        <span className="pc-transcript-step-index">
-                          Step {index + 1}
-                        </span>
-                        <span className="pc-transcript-step-label">
-                          {step.title}
-                        </span>
-                      </div>
-                      <div className="pc-transcript-step-text">
-                        {step.transcript}
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                <>
+                  <div
+                    className="pc-transcript-current"
+                    key={
+                      state.steps[state.stepIndex]?.id ??
+                      `step-${state.stepIndex}`
+                    }
+                  >
+                    <div className="pc-transcript-current-title">
+                      <span className="pc-transcript-current-label">
+                        Active Transcript
+                      </span>
+                      <span className="pc-transcript-current-step">
+                        Step {Math.min(state.stepIndex + 1, state.stepCount)} /{" "}
+                        {state.stepCount}
+                      </span>
+                    </div>
+                    <div className="pc-transcript-current-heading">
+                      {state.steps[state.stepIndex]?.title}
+                    </div>
+                    <div className="pc-transcript-current-text">
+                      {state.steps[state.stepIndex]?.transcript}
+                    </div>
+                  </div>
+
+                  <div className="pc-transcript-steps-header">
+                    <span className="pc-transcript-steps-label">All Steps</span>
+                    <span className="pc-transcript-steps-hint">
+                      Click any step to jump
+                    </span>
+                  </div>
+
+                  <div className="pc-transcript-steps">
+                    {state.steps.map((step, index) => (
+                      <button
+                        key={step.id}
+                        type="button"
+                        className={`pc-transcript-step ${index === state.stepIndex ? "active" : ""} ${index < state.stepIndex ? "complete" : ""}`}
+                        onClick={() =>
+                          send({
+                            type: "command",
+                            deckId: deck.id,
+                            action: "step-goto",
+                            index,
+                          })
+                        }
+                      >
+                        <div className="pc-transcript-step-title">
+                          <span className="pc-transcript-step-index">
+                            Step {index + 1}
+                          </span>
+                          <span className="pc-transcript-step-label">
+                            {step.title}
+                          </span>
+                        </div>
+                        <div className="pc-transcript-step-text">
+                          {step.transcript}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </>
               ) : state.narration ? (
                 <div className="pc-transcript-text">{state.narration}</div>
               ) : (
