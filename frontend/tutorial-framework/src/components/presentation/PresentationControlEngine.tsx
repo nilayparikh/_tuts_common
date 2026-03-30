@@ -13,8 +13,15 @@
  *   • Per-slide timer with desired duration
  */
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { BrandLockup } from "../layout/BrandLockup";
+import { ShortsTitleStack } from "./ShortsTitleStack";
 
 export interface PresentationSlide {
   id: string;
@@ -31,10 +38,13 @@ export interface PresentationStep {
   transcript: string;
 }
 
+export type DeckType = "course" | "mono" | "short";
+
 export interface PresentationDeck {
   id: string;
   number: string;
   title: string;
+  deckType?: DeckType;
   slides: PresentationSlide[];
 }
 
@@ -1487,6 +1497,305 @@ const ENGINE_CSS = `
     border-color: var(--tf-color-primary, #6366f1);
     background: var(--tf-bg-elevated, #191c23);
   }
+
+  /* ── Shorts Mode (9:16) ────────────── */
+  .pe-shorts-root {
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--tf-text-primary, #e2e6f0);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .pe-shorts-frame {
+    height: 100vh;
+    aspect-ratio: 2048 / 3640;
+    max-width: 100vw;
+    display: grid;
+    grid-template-rows: 1fr auto auto;
+    background:
+      radial-gradient(circle at top, rgba(0,245,255,0.10), transparent 32%),
+      radial-gradient(circle at bottom, rgba(168,56,255,0.08), transparent 34%),
+      linear-gradient(180deg, #090b12, var(--tf-bg-surface, #111318) 20%, var(--tf-bg-surface, #111318) 80%, #0b0b0f);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Content area at the top — renders actual slide content (flex: 1fr) */
+  .pe-shorts-header {
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 0;
+    border-bottom: 1px solid rgba(202,211,230,0.06);
+    background:
+      radial-gradient(circle at 30% 40%, rgba(0,245,255,0.08), transparent 50%),
+      radial-gradient(circle at 70% 60%, rgba(168,56,255,0.06), transparent 50%),
+      linear-gradient(180deg, rgba(11,13,18,0.80), var(--tf-bg-surface, #111318));
+    overflow: hidden;
+    box-sizing: border-box;
+    position: relative;
+  }
+  /* Scale slide content to fit the available content area */
+  .pe-shorts-slide-content {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .pe-shorts-slide-content > * {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .pe-shorts-slide-content .lm-slide-frame {
+    padding: 12px 16px 14px;
+    font-size: clamp(8px, 1.45vh, 13px);
+  }
+  .pe-shorts-slide-content.with-title-stack .lm-slide-frame {
+    padding-top: 8px;
+  }
+  .pe-shorts-slide-content .lm-slide-hero-title {
+    font-size: clamp(14px, 2.6vh, 26px);
+    margin-bottom: 4px;
+  }
+  .pe-shorts-slide-content .lm-slide-title {
+    font-size: clamp(12px, 2.15vh, 20px);
+    margin-bottom: 4px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .pe-shorts-slide-content.with-title-stack .lm-slide-title {
+    display: none;
+  }
+  .pe-shorts-slide-content .lm-slide-body {
+    gap: 5px;
+  }
+  /* Compact bullet sub-text within shorts */
+  .pe-shorts-slide-content .bullet-sub {
+    font-size: 0.85em;
+    line-height: 1.25;
+  }
+  /* Compact stat cards within shorts */
+  .pe-shorts-slide-content .sr-card {
+    padding: 5px 8px;
+  }
+  .pe-shorts-slide-content .sr-value {
+    font-size: clamp(10px, 1.6vh, 15px);
+  }
+  .pe-shorts-slide-content .sr-label {
+    font-size: clamp(6px, 0.9vh, 9px);
+  }
+  /* Compact comparison tables within shorts */
+  .pe-shorts-slide-content table {
+    font-size: 0.85em;
+  }
+  .pe-shorts-slide-content th,
+  .pe-shorts-slide-content td {
+    padding: 4px 8px;
+  }
+  /* InfoBox within shorts */
+  .pe-shorts-slide-content .info-box {
+    padding: 7px 10px;
+    font-size: 0.8em;
+  }
+  /* Mermaid diagrams within shorts */
+  .pe-shorts-slide-content .mermaid-widget {
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .pe-shorts-video {
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at top, var(--tf-secondary-container-high, rgba(0,245,255,0.14)), transparent 34%),
+      radial-gradient(circle at bottom, var(--tf-accent-container-high, rgba(168,56,255,0.10)), transparent 36%),
+      linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
+  }
+
+  .pe-shorts-guide {
+    position: absolute;
+    z-index: 10;
+    background: rgba(0,245,255,0.5);
+    pointer-events: none;
+  }
+  .pe-shorts-guide.top,
+  .pe-shorts-guide.bottom {
+    left: 50%;
+    width: 1px;
+    height: 12px;
+    transform: translateX(-50%);
+  }
+  .pe-shorts-guide.top { top: 0; }
+  .pe-shorts-guide.bottom { bottom: 0; }
+  .pe-shorts-guide.left,
+  .pe-shorts-guide.right {
+    top: 50%;
+    width: 12px;
+    height: 1px;
+    transform: translateY(-50%);
+  }
+  .pe-shorts-guide.left { left: 0; }
+  .pe-shorts-guide.right { right: 0; }
+
+  .pe-shorts-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(4px, 0.6vh, 8px);
+    padding: clamp(8px, 1.2vh, 16px) 22px;
+    border-top: 1px solid rgba(202,211,230,0.08);
+    background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
+  }
+  .pe-shorts-footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    width: 100%;
+    text-align: center;
+  }
+  .pe-shorts-footer .pe-footer-copy {
+    font-size: clamp(10px, 1.2vh, 13px);
+    color: var(--tf-text-muted, #64748b);
+  }
+
+  /* Inline subscribe row: bell + "Subscribe to" + [brand] + "for ..." */
+  .pe-shorts-footer-row.subscribe {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+  .pe-shorts-subscribe-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--tf-color-danger, #ef4444);
+    transform-origin: 50% 10%;
+    animation: pe-shorts-bell-ring 4.8s ease-in-out infinite;
+  }
+  .pe-shorts-subscribe-icon svg {
+    width: clamp(14px, 1.8vh, 20px);
+    height: clamp(14px, 1.8vh, 20px);
+  }
+  @keyframes pe-shorts-bell-ring {
+    0%, 72%, 100% { transform: rotate(0deg) scale(1); }
+    76% { transform: rotate(16deg) scale(1.04); }
+    80% { transform: rotate(-14deg) scale(1.06); }
+    84% { transform: rotate(12deg) scale(1.04); }
+    88% { transform: rotate(-8deg) scale(1.02); }
+    92% { transform: rotate(0deg) scale(1); }
+  }
+  .pe-shorts-subscribe-text {
+    font-size: clamp(11px, 1.4vh, 15px);
+    color: var(--tf-text-secondary, #bfc5d4);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .pe-shorts-subscribe-brand {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    zoom: 0.72;
+  }
+  .pe-shorts-promo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    font-size: clamp(10px, 1.2vh, 13px);
+    color: var(--tf-text-muted, #8892a8);
+    white-space: nowrap;
+  }
+  .pe-shorts-promo-label {
+    color: var(--tf-text-secondary, #bfc5d4);
+    font-weight: 500;
+  }
+  .pe-shorts-promo-site {
+    color: var(--tf-color-primary-light, #818cf8);
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  /* Deck-type filter & badge styles in control panel */
+  .pc-deck-type-row {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .pc-deck-type-btn {
+    flex: 1;
+    padding: 3px 0;
+    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
+    border-radius: 6px;
+    background: transparent;
+    color: var(--tf-text-muted, #8892a8);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: all 150ms ease;
+  }
+  .pc-deck-type-btn:hover {
+    border-color: var(--tf-color-primary, #6366f1);
+    color: var(--tf-text-primary, #e2e6f0);
+  }
+  .pc-deck-type-btn.active {
+    background: var(--tf-color-primary, #6366f1);
+    border-color: var(--tf-color-primary, #6366f1);
+    color: #fff;
+  }
+
+  /* Shorts toggle button */
+  .pe-shorts-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
+    color: var(--tf-text-muted, #8892a8);
+    cursor: pointer;
+    padding: 0;
+    transition: all 150ms;
+  }
+  .pe-shorts-btn:hover {
+    color: var(--tf-text-primary, #e2e6f0);
+    border-color: var(--tf-color-primary, #6366f1);
+  }
+  .pe-shorts-btn.active {
+    color: var(--tf-color-primary-light, #818cf8);
+    border-color: var(--tf-color-primary, #6366f1);
+    background: var(--tf-bg-elevated, #191c23);
+  }
 `;
 
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -1659,6 +1968,36 @@ const Icons = {
         fill="currentColor"
         opacity="0.25"
       />
+    </svg>
+  ),
+  shorts: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="7" y="2" width="10" height="20" rx="2" />
+      <line x1="10" y1="6" x2="14" y2="6" />
+    </svg>
+  ),
+  bell: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
     </svg>
   ),
 };
@@ -2085,6 +2424,18 @@ export function PresentationLayout({
     }
   }, [postControlState, controlWindowName]);
 
+  const openShortsWindow = useCallback(() => {
+    const shortsUrl = `${window.location.pathname}?shorts=1${window.location.hash}`;
+    const popup = window.open(
+      shortsUrl,
+      `${controlWindowName}-shorts`,
+      "popup=yes,width=560,height=1000,resizable=yes,scrollbars=yes",
+    );
+    if (popup) {
+      popup.focus();
+    }
+  }, [controlWindowName]);
+
   /* ── Drawer navigation ── */
   const handleDrawerNav = useCallback(
     (idx: number) => {
@@ -2191,6 +2542,15 @@ export function PresentationLayout({
             >
               {Icons.pip}
             </button>
+            {deck.deckType === "short" && (
+              <button
+                className="pe-shorts-btn"
+                onClick={openShortsWindow}
+                title="Open Shorts (9:16) view"
+              >
+                {Icons.shorts}
+              </button>
+            )}
             <button className="pe-fs-btn" onClick={toggleFs} title="Fullscreen">
               {Icons.fullscreen}
             </button>
@@ -2490,6 +2850,344 @@ export function PresentationLayout({
   );
 }
 
+/* ═══════════════════════════════════════════════════════════════════════ */
+/*  ShortsLayout — 9:16 portrait recording view (2048 × 3640)             */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+interface ShortsLayoutProps {
+  courseTitle: string;
+  deck: PresentationDeck;
+  branding?: PresentationBranding;
+  controlChannelId?: string;
+  /** Hash prefix for navigation (e.g. "#/my-show"). goTo writes `{hashPrefix}/{deckId}/{slide}`. */
+  hashPrefix?: string;
+}
+
+/** Truncate narration to ~300 chars at a sentence boundary for 3-4 line descriptions. */
+function shortsDescription(narration?: string): string {
+  if (!narration) return "";
+  const clean = narration.replace(/\s+/g, " ").trim();
+  if (clean.length <= 300) return clean;
+  const cut = clean.slice(0, 300);
+  const dot = cut.lastIndexOf(".");
+  const comma = cut.lastIndexOf(",");
+  const boundary = Math.max(dot, comma);
+  if (boundary > 120) return cut.slice(0, boundary + 1).trim();
+  return cut.trim() + "…";
+}
+
+export function ShortsLayout({
+  courseTitle,
+  deck,
+  branding,
+  controlChannelId = DEFAULT_CONTROL_CHANNEL,
+  hashPrefix,
+}: ShortsLayoutProps) {
+  const brandIconUrl = branding?.brandIconUrl;
+  const brandLabel = branding?.brandLabel ?? "Tutorial";
+  const siteUrl = branding?.siteUrl ?? "tuts.localm.dev";
+  const copyrightText =
+    branding?.copyright ?? `\u00A9 ${new Date().getFullYear()} ${brandLabel}`;
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const controlChannelRef = useRef<BroadcastChannel | null>(null);
+  const stateStorageKey = getControlStorageKey(controlChannelId, "state");
+  const commandStorageKey = getControlStorageKey(controlChannelId, "command");
+
+  /* ── Parse initial slide from hash ── */
+  const getIndexFromHash = useCallback((): number => {
+    const hash = window.location.hash;
+    const m = hash.match(/\/(\d+)$/);
+    return m ? parseInt(m[1], 10) : 0;
+  }, []);
+
+  const [slideIndex, setSlideIndex] = useState(getIndexFromHash);
+  const [stepIndex, setStepIndex] = useState(0);
+  const slideCount = deck.slides.length;
+  const elapsed = useSlideTimer(slideIndex);
+
+  const currentSlide = deck.slides[slideIndex];
+  const currentSteps = currentSlide?.steps ?? [];
+  const currentStepCount = currentSteps.length;
+  const activeStepIndex =
+    currentStepCount > 0 ? Math.min(stepIndex, currentStepCount - 1) : 0;
+  const activeStep = currentSteps[activeStepIndex] ?? null;
+  const shortTitle = sanitizePresentationTitle(deck.title);
+  const slideTitle = sanitizePresentationTitle(currentSlide?.title);
+  const showTitleStack = slideIndex > 0;
+
+  const stepContextValue: PresentationStepContextValue = {
+    stepIndex: activeStepIndex,
+    stepCount: currentStepCount,
+    activeStep,
+    steps: currentSteps,
+  };
+
+  /* ── Navigation ── */
+  const goTo = useCallback(
+    (idx: number) => {
+      const clamped = Math.max(0, Math.min(idx, slideCount - 1));
+      setSlideIndex(clamped);
+      setStepIndex(0);
+      window.location.hash = hashPrefix
+        ? `${hashPrefix}/${deck.id}/${clamped}`
+        : `#/${deck.id}/${clamped}`;
+    },
+    [slideCount, deck.id, hashPrefix],
+  );
+
+  const goPrev = useCallback(() => {
+    if (currentStepCount > 0 && activeStepIndex > 0) {
+      setStepIndex((v) => Math.max(0, v - 1));
+      return;
+    }
+    goTo(slideIndex - 1);
+  }, [activeStepIndex, currentStepCount, goTo, slideIndex]);
+
+  const goNext = useCallback(() => {
+    if (currentStepCount > 0 && activeStepIndex < currentStepCount - 1) {
+      setStepIndex((v) => Math.min(currentStepCount - 1, v + 1));
+      return;
+    }
+    goTo(slideIndex + 1);
+  }, [activeStepIndex, currentStepCount, goTo, slideIndex]);
+
+  const stepBack = useCallback(() => {
+    if (currentStepCount <= 0) return;
+    setStepIndex((v) => Math.max(0, v - 1));
+  }, [currentStepCount]);
+
+  const stepForward = useCallback(() => {
+    if (currentStepCount <= 0) return;
+    setStepIndex((v) => Math.min(currentStepCount - 1, v + 1));
+  }, [currentStepCount]);
+
+  const resetStep = useCallback(() => {
+    setStepIndex(0);
+  }, []);
+
+  /* ── Broadcast state ── */
+  const postControlState = useCallback(() => {
+    const channel = controlChannelRef.current;
+    if (!channel) return;
+    const slide = deck.slides[slideIndex];
+    const message: ControlState = {
+      type: "state",
+      deckId: deck.id,
+      deckTitle: deck.title,
+      slideIndex,
+      slideCount,
+      elapsed,
+      duration: slide?.duration,
+      zoom: 1,
+      slideTitle: slide?.title,
+      narration: slide?.narration,
+      steps: slide?.steps,
+      stepIndex: slide?.steps?.length ? activeStepIndex : 0,
+      stepCount: slide?.steps?.length ?? 0,
+    };
+    channel.postMessage(message);
+    localStorage.setItem(stateStorageKey, JSON.stringify(message));
+  }, [deck, slideIndex, slideCount, elapsed, activeStepIndex, stateStorageKey]);
+
+  /* ── Keyboard ── */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.repeat) {
+        const nav =
+          e.key === "ArrowLeft" ||
+          e.key === "ArrowRight" ||
+          e.key === " " ||
+          e.key === "PageUp" ||
+          e.key === "PageDown";
+        if (nav) {
+          e.preventDefault();
+          return;
+        }
+      }
+      if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        goPrev();
+      } else if (
+        e.key === "ArrowRight" ||
+        e.key === " " ||
+        e.key === "PageDown"
+      ) {
+        e.preventDefault();
+        goNext();
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        goTo(0);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        goTo(slideCount - 1);
+      } else if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        if (!document.fullscreenElement) rootRef.current?.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [goPrev, goNext, goTo, slideCount]);
+
+  /* ── Hash sync ── */
+  useEffect(() => {
+    const onHash = () => {
+      setSlideIndex(getIndexFromHash());
+      setStepIndex(0);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, [getIndexFromHash]);
+
+  /* ── Control-window sync (receive commands) ── */
+  useEffect(() => {
+    const channel = new BroadcastChannel(controlChannelId);
+    controlChannelRef.current = channel;
+
+    const handleCommand = (msg: ControlCommand) => {
+      if (!msg) return;
+      if (msg.type === "request-state") {
+        if (msg.deckId !== deck.id) return;
+        postControlState();
+        return;
+      }
+      if (msg.type !== "command") return;
+      if (msg.action === "switch-deck") {
+        if (msg.deckId !== deck.id || !msg.targetDeckId) return;
+        window.location.hash = hashPrefix
+          ? `${hashPrefix}/${msg.targetDeckId}/0`
+          : `#/${msg.targetDeckId}/0`;
+        return;
+      }
+      if (msg.deckId !== deck.id) return;
+      if (msg.action === "prev") goPrev();
+      else if (msg.action === "next") goNext();
+      else if (msg.action === "goto") goTo(msg.index);
+      else if (msg.action === "step-prev") stepBack();
+      else if (msg.action === "step-next") stepForward();
+      else if (msg.action === "step-reset") resetStep();
+      else if (msg.action === "step-goto") {
+        if (typeof msg.index !== "number") return;
+        setStepIndex(Math.max(0, Math.min(msg.index, currentStepCount - 1)));
+      }
+    };
+
+    const onMessage = (ev: MessageEvent<ControlCommand>) => {
+      handleCommand(ev.data);
+    };
+    const onStorage = (ev: StorageEvent) => {
+      if (ev.key !== commandStorageKey || !ev.newValue) return;
+      try {
+        handleCommand(JSON.parse(ev.newValue) as ControlCommand);
+      } catch {
+        /* ignore */
+      }
+    };
+
+    channel.addEventListener("message", onMessage);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      channel.removeEventListener("message", onMessage);
+      window.removeEventListener("storage", onStorage);
+      channel.close();
+      controlChannelRef.current = null;
+    };
+  }, [
+    commandStorageKey,
+    controlChannelId,
+    currentStepCount,
+    deck.id,
+    goPrev,
+    goNext,
+    goTo,
+    hashPrefix,
+    postControlState,
+    resetStep,
+    stepBack,
+    stepForward,
+  ]);
+
+  useEffect(() => {
+    postControlState();
+  }, [postControlState]);
+
+  useEffect(() => {
+    setStepIndex(0);
+  }, [deck.id, slideIndex]);
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
+      <div className="pe-shorts-root" ref={rootRef} aria-label={courseTitle}>
+        <div className="pe-shorts-frame">
+          {/* ── Slide content area ── */}
+          <div className="pe-shorts-header">
+            {showTitleStack ? (
+              <ShortsTitleStack
+                shortTitle={shortTitle}
+                slideTitle={slideTitle}
+              />
+            ) : null}
+            <div
+              className={`pe-shorts-slide-content${showTitleStack ? " with-title-stack" : ""}`}
+            >
+              <PresentationStepContext.Provider
+                key={`${deck.id}:${currentSlide?.id ?? slideIndex}`}
+                value={stepContextValue}
+              >
+                {currentSlide?.content}
+              </PresentationStepContext.Provider>
+            </div>
+          </div>
+
+          {/* ── Video capture area (plain 1:1 host) ── */}
+          <div className="pe-shorts-video" aria-label="Video capture area">
+            <span className="pe-shorts-guide top" aria-hidden="true" />
+            <span className="pe-shorts-guide right" aria-hidden="true" />
+            <span className="pe-shorts-guide bottom" aria-hidden="true" />
+            <span className="pe-shorts-guide left" aria-hidden="true" />
+          </div>
+
+          {/* ── Footer ── */}
+          <div className="pe-shorts-footer">
+            <div className="pe-shorts-footer-row subscribe">
+              <span className="pe-shorts-subscribe-icon">{Icons.bell}</span>
+              <span className="pe-shorts-subscribe-text">Subscribe to</span>
+              <span className="pe-shorts-subscribe-brand">
+                {brandIconUrl ? (
+                  <BrandLockup
+                    iconUrl={brandIconUrl}
+                    size="sm"
+                    label={brandLabel}
+                  />
+                ) : (
+                  <strong>{brandLabel}</strong>
+                )}
+              </span>
+              <span className="pe-shorts-subscribe-text">
+                for more videos, interview tips & tutorials
+              </span>
+            </div>
+            <div className="pe-shorts-footer-row">
+              <span className="pe-shorts-promo">
+                <span className="pe-shorts-promo-label">
+                  Explore free interactive tutorials at
+                </span>
+                <span className="pe-shorts-promo-site">{siteUrl}</span>
+              </span>
+            </div>
+            <div className="pe-shorts-footer-row copy">
+              <span className="pe-footer-copy">{copyrightText}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 interface PresentationControlPanelProps {
   deck: PresentationDeck;
   decks: PresentationDeck[];
@@ -2533,6 +3231,16 @@ export function PresentationControlPanel({
     stepIndex: 0,
     stepCount: deck.slides[0]?.steps?.length ?? 0,
   });
+  const [deckTypeFilter, setDeckTypeFilter] = useState<DeckType | "all">("all");
+  const availableDeckTypes = useMemo(() => {
+    const types = new Set(decks.map((d) => d.deckType ?? "course"));
+    return Array.from(types) as DeckType[];
+  }, [decks]);
+  const showFilter = availableDeckTypes.length > 1;
+  const filteredDecks =
+    deckTypeFilter === "all"
+      ? decks
+      : decks.filter((d) => (d.deckType ?? "course") === deckTypeFilter);
   const [transcriptScaleIndex, setTranscriptScaleIndex] = useState<number>(
     () => {
       try {
@@ -2700,6 +3408,32 @@ export function PresentationControlPanel({
           <aside className="pc-sidebar">
             <div className="pc-lessons">
               {headerSlot}
+              {showFilter && (
+                <>
+                  <span className="pc-section-label">Deck Type</span>
+                  <div className="pc-deck-type-row">
+                    <button
+                      className={`pc-deck-type-btn${deckTypeFilter === "all" ? " active" : ""}`}
+                      onClick={() => setDeckTypeFilter("all")}
+                    >
+                      All
+                    </button>
+                    {availableDeckTypes.map((dt) => (
+                      <button
+                        key={dt}
+                        className={`pc-deck-type-btn${deckTypeFilter === dt ? " active" : ""}`}
+                        onClick={() => setDeckTypeFilter(dt)}
+                      >
+                        {dt === "short"
+                          ? "📱 Short"
+                          : dt === "mono"
+                            ? "▶ Mono"
+                            : "📚 Course"}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
               <span className="pc-section-label">Jump Lesson</span>
               <select
                 className="pc-lesson-select"
@@ -2707,12 +3441,20 @@ export function PresentationControlPanel({
                 onChange={(e) => handleSelectDeck(e.target.value)}
                 aria-label="Jump to lesson"
               >
-                {decks.map((lessonDeck) => (
-                  <option key={lessonDeck.id} value={lessonDeck.id}>
-                    {lessonDeck.number}.{" "}
-                    {sanitizePresentationTitle(lessonDeck.title)}
-                  </option>
-                ))}
+                {filteredDecks.map((lessonDeck) => {
+                  const typeMarker =
+                    lessonDeck.deckType === "short"
+                      ? "📱 "
+                      : lessonDeck.deckType === "mono"
+                        ? "▶ "
+                        : "";
+                  return (
+                    <option key={lessonDeck.id} value={lessonDeck.id}>
+                      {lessonDeck.number}. {typeMarker}
+                      {sanitizePresentationTitle(lessonDeck.title)}
+                    </option>
+                  );
+                })}
               </select>
 
               <span className="pc-section-label" style={{ marginTop: 8 }}>

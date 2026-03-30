@@ -20,7 +20,9 @@ export {
 export {
   PresentationLayout,
   PresentationControlPanel,
+  ShortsLayout,
   usePresentationStep,
+  type DeckType,
   type PresentationDeck,
   type PresentationSlide,
   type PresentationStep,
@@ -29,6 +31,10 @@ export {
 export { SlideDrawer } from "./SlideDrawer";
 export { SlideFooter } from "./SlideFooter";
 export { SlideNavButtons } from "./SlideNavButtons";
+export {
+  ShortsTitleStack,
+  type ShortsTitleStackProps,
+} from "./ShortsTitleStack";
 
 // Base slide wrappers
 export {
