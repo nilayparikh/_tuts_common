@@ -1401,9 +1401,10 @@ const ENGINE_CSS = `
     min-height: 0;
     overflow: hidden;
     background:
-      radial-gradient(circle at top, var(--tf-secondary-container-high, rgba(0,245,255,0.18)), transparent 34%),
-      radial-gradient(circle at bottom, var(--tf-accent-container-high, rgba(168,56,255,0.14)), transparent 36%),
-      linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
+      radial-gradient(ellipse at 30% 20%, rgba(99,102,241,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 80%, rgba(168,56,255,0.08) 0%, transparent 60%),
+      linear-gradient(135deg, #262a3d 0%, #2e3350 50%, #232740 100%);
+    border-top: 1px solid rgba(99,102,241,0.12);
   }
   .pe-pip-guide {
     position: absolute;
