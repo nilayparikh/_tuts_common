@@ -3043,78 +3043,78 @@ export function PresentationLayout({
               <div className="pe-pip-upper">
                 {/* Compact header — keep control access visible in 16:9 mode */}
                 <div className="pe-pip-header">
-                <button
-                  className={`pe-drawer-toggle ${drawerOpen ? "active" : ""}`}
-                  onClick={() => setDrawerOpen(!drawerOpen)}
-                  title="Slide navigator"
-                >
-                  {Icons.menu}
-                </button>
-                <div style={{ flex: 1 }} />
-                <button
-                  className="pe-control-btn pe-control-btn-icon"
-                  onClick={openControlWindow}
-                  title="Open control panel in a new window"
-                  aria-label="Control"
-                >
-                  {Icons.panel}
-                </button>
-                <button
-                  className="pe-nav-btn"
-                  onClick={goPrev}
-                  disabled={
-                    slideIndex <= 0 &&
-                    (currentStepCount === 0 || activeStepIndex <= 0)
-                  }
-                  aria-label="Previous"
-                >
-                  {Icons.chevLeft}
-                </button>
-                <button
-                  className="pe-nav-btn"
-                  onClick={goNext}
-                  disabled={
-                    slideIndex >= slideCount - 1 &&
-                    (currentStepCount === 0 ||
-                      activeStepIndex >= currentStepCount - 1)
-                  }
-                  aria-label="Next"
-                >
-                  {Icons.chevRight}
-                </button>
-                <button
-                  className="pe-pip-btn active"
-                  onClick={() => setPipMode(false)}
-                  title="Exit 16:9 mode (P)"
-                >
-                  {Icons.pip}
-                </button>
-                <button
-                  className="pe-fs-btn"
-                  onClick={toggleFs}
-                  title="Fullscreen"
-                >
-                  {Icons.fullscreen}
-                </button>
-              </div>
+                  <button
+                    className={`pe-drawer-toggle ${drawerOpen ? "active" : ""}`}
+                    onClick={() => setDrawerOpen(!drawerOpen)}
+                    title="Slide navigator"
+                  >
+                    {Icons.menu}
+                  </button>
+                  <div style={{ flex: 1 }} />
+                  <button
+                    className="pe-control-btn pe-control-btn-icon"
+                    onClick={openControlWindow}
+                    title="Open control panel in a new window"
+                    aria-label="Control"
+                  >
+                    {Icons.panel}
+                  </button>
+                  <button
+                    className="pe-nav-btn"
+                    onClick={goPrev}
+                    disabled={
+                      slideIndex <= 0 &&
+                      (currentStepCount === 0 || activeStepIndex <= 0)
+                    }
+                    aria-label="Previous"
+                  >
+                    {Icons.chevLeft}
+                  </button>
+                  <button
+                    className="pe-nav-btn"
+                    onClick={goNext}
+                    disabled={
+                      slideIndex >= slideCount - 1 &&
+                      (currentStepCount === 0 ||
+                        activeStepIndex >= currentStepCount - 1)
+                    }
+                    aria-label="Next"
+                  >
+                    {Icons.chevRight}
+                  </button>
+                  <button
+                    className="pe-pip-btn active"
+                    onClick={() => setPipMode(false)}
+                    title="Exit 16:9 mode (P)"
+                  >
+                    {Icons.pip}
+                  </button>
+                  <button
+                    className="pe-fs-btn"
+                    onClick={toggleFs}
+                    title="Fullscreen"
+                  >
+                    {Icons.fullscreen}
+                  </button>
+                </div>
 
-              <div className="pe-pip-meta">
-                <span className="pe-pip-meta-course">{courseTitle}</span>
-                <span className="pe-pip-meta-lesson">
-                  {deck.number}. {sanitizePresentationTitle(deck.title)}
-                </span>
-                <span className="pe-pip-meta-slide">
-                  Slide {slideIndex + 1} of {slideCount}
-                </span>
-              </div>
+                <div className="pe-pip-meta">
+                  <span className="pe-pip-meta-course">{courseTitle}</span>
+                  <span className="pe-pip-meta-lesson">
+                    {deck.number}. {sanitizePresentationTitle(deck.title)}
+                  </span>
+                  <span className="pe-pip-meta-slide">
+                    Slide {slideIndex + 1} of {slideCount}
+                  </span>
+                </div>
 
-              {/* 16:9 video area (middle) */}
-              <div className="pe-pip-inset" aria-label="16:9 video area">
-                <span className="pe-pip-guide top" aria-hidden="true" />
-                <span className="pe-pip-guide right" aria-hidden="true" />
-                <span className="pe-pip-guide bottom" aria-hidden="true" />
-                <span className="pe-pip-guide left" aria-hidden="true" />
-              </div>
+                {/* 16:9 video area (middle) */}
+                <div className="pe-pip-inset" aria-label="16:9 video area">
+                  <span className="pe-pip-guide top" aria-hidden="true" />
+                  <span className="pe-pip-guide right" aria-hidden="true" />
+                  <span className="pe-pip-guide bottom" aria-hidden="true" />
+                  <span className="pe-pip-guide left" aria-hidden="true" />
+                </div>
               </div>
 
               <div className="pe-pip-footer">
