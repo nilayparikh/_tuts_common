@@ -4,6 +4,7 @@ import { TutorialGlobalStyles } from "../../src/index";
 import {
   PresentationControlPanel,
   PresentationLayout,
+  ShortsLayout,
   usePresentationStep,
 } from "../../src/components/presentation";
 
@@ -60,6 +61,11 @@ const deck = {
   ],
 } as any;
 
+const shortDeck = {
+  ...deck,
+  deckType: "short",
+};
+
 function StepAwareContent() {
   const { activeStep } = usePresentationStep();
 
@@ -96,6 +102,7 @@ deck.slides[0].content = <StepAwareContent />;
 function App() {
   const params = new URLSearchParams(window.location.search);
   const control = params.get("control") === "1";
+  const shortsMode = params.get("shorts");
 
   return (
     <>
@@ -104,6 +111,12 @@ function App() {
         <PresentationControlPanel
           deck={deck}
           decks={[deck]}
+          controlChannelId={CHANNEL_ID}
+        />
+      ) : shortsMode === "1" ? (
+        <ShortsLayout
+          courseTitle="Harness"
+          deck={shortDeck}
           controlChannelId={CHANNEL_ID}
         />
       ) : (

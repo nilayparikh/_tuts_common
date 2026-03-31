@@ -20,7 +20,7 @@ export function ShortsTitleStack({
         display: "flex",
         flexDirection: "column",
         gap: "4px",
-        padding: "12px 16px 10px",
+        padding: "14px 28px 12px",
         borderBottom: "1px solid rgba(202,211,230,0.08)",
         background:
           "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)), radial-gradient(circle at top left, rgba(96,165,250,0.16), transparent 52%)",

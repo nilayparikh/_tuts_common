@@ -111,6 +111,8 @@ function sanitizePresentationTitle(title: string | undefined): string {
 const ENGINE_CSS = `
   /* ── Reset ─────────────────────────── */
   .pe-root {
+    --pe-slide-stage-ratio: 1.4;
+    --pe-standard-stage-height: calc(100vh - 134px);
     display: flex;
     flex-direction: column;
     width: 100vw;
@@ -327,16 +329,26 @@ const ENGINE_CSS = `
     padding: 8px;
   }
   .pe-slide-box {
-    width: 100%;
-    height: 100%;
+    position: relative;
+    width: calc(var(--pe-standard-stage-height) * var(--pe-slide-stage-ratio));
+    height: var(--pe-standard-stage-height);
     max-width: 100%;
     max-height: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 7 / 5;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 0;
     background: var(--tf-bg-base, #0b0d12);
     box-shadow: 0 4px 24px rgba(0,0,0,0.4);
     zoom: 1.05;
+  }
+  .pe-slide-stage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .pe-nav-btn {
@@ -1300,23 +1312,32 @@ const ENGINE_CSS = `
   }
   .pe-root.pe-pip-mode {
     --pe-pip-column-width: calc((100vh * 9 / 16) - 40px);
-    --pe-pip-header-height: 44px;
-    --pe-pip-info-height: 100px;
-    --pe-pip-footer-height: 300px;
   }
   .pe-root.pe-pip-mode .pe-body {
     display: grid;
     grid-template-columns: minmax(0, 1fr) var(--pe-pip-column-width);
+    height: 100%;
+  }
+  .pe-root.pe-pip-mode .pe-viewport {
+    padding: 0;
   }
 
   .pe-pip-column {
     position: relative;
     width: var(--pe-pip-column-width);
-    height: 100vh;
+    height: 100%;
     display: grid;
-    grid-template-rows: var(--pe-pip-header-height) var(--pe-pip-info-height) 1fr var(--pe-pip-footer-height);
+    grid-template-rows: 1fr auto;
     border-left: 1px solid rgba(202,211,230,0.10);
     background: var(--tf-bg-surface, #111318);
+    overflow: hidden;
+  }
+
+  /* Wrapper holding header + meta + video as a single flex column */
+  .pe-pip-upper {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
     overflow: hidden;
   }
 
@@ -1324,7 +1345,7 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     padding: 0 10px;
-    height: var(--pe-pip-header-height);
+    height: 44px;
     gap: 6px;
     border-bottom: 1px solid rgba(202,211,230,0.08);
     background: linear-gradient(180deg, rgba(15,18,28,0.82), rgba(11,13,18,0.62));
@@ -1332,25 +1353,27 @@ const ENGINE_CSS = `
     flex-shrink: 0;
   }
 
-  .pe-pip-info {
+  .pe-pip-meta {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 14px 22px;
-    gap: 6px;
-    height: var(--pe-pip-info-height);
+    padding: 10px 16px;
+    gap: 4px;
     border-bottom: 1px solid rgba(202,211,230,0.06);
     background: linear-gradient(180deg, rgba(11,13,18,0.62), var(--tf-bg-surface, #111318));
     overflow: hidden;
+    flex-shrink: 0;
   }
-  .pe-pip-info-course {
+
+  .pe-pip-meta-course {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--tf-color-primary-light, #818cf8);
     font-weight: 600;
   }
-  .pe-pip-info-lesson {
+
+  .pe-pip-meta-lesson {
     font-size: 20px;
     font-weight: 700;
     color: var(--tf-text-primary, #e2e6f0);
@@ -1359,7 +1382,8 @@ const ENGINE_CSS = `
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .pe-pip-info-slide {
+
+  .pe-pip-meta-slide {
     font-size: 13px;
     color: var(--tf-text-muted, #8892a8);
     font-family: 'JetBrains Mono', monospace;
@@ -1371,6 +1395,10 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
+    flex: 1;
+    align-self: stretch;
+    height: 100%;
+    min-height: 0;
     overflow: hidden;
     background:
       radial-gradient(ellipse at 30% 20%, rgba(99,102,241,0.10) 0%, transparent 60%),
@@ -1416,61 +1444,103 @@ const ENGINE_CSS = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 18px;
-    padding: 28px 22px;
-    height: var(--pe-pip-footer-height);
+    gap: clamp(0.25rem, 0.6vh, 0.5rem);
+    padding: clamp(0.5rem, 1.2vh, 1rem) 2.2vw;
+    min-height: fit-content;
+    flex-shrink: 0;
     overflow: hidden;
+    background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
     border-top: 1px solid rgba(202,211,230,0.08);
-    background:
-      linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
   }
   .pe-pip-footer-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 0.5em;
     flex-wrap: wrap;
     width: 100%;
     text-align: center;
   }
-  .pe-pip-footer-row.brand {
-    margin-bottom: 2px;
+  .pe-pip-footer-row.subscribe {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    flex-wrap: nowrap;
+    white-space: nowrap;
   }
-  .pe-pip-footer-row.instructor {
-    margin-bottom: 0;
+  .pe-pip-subscribe-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--tf-color-danger, #ef4444);
+    transform-origin: 50% 10%;
+    animation: pe-shorts-bell-ring 4.8s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  .pe-pip-subscribe-icon svg {
+    width: clamp(0.875rem, 1.8vh, 1.25rem);
+    height: clamp(0.875rem, 1.8vh, 1.25rem);
+  }
+  .pe-pip-subscribe-text {
+    font-size: clamp(0.6875rem, 1.4vh, 0.9375rem);
+    color: var(--tf-text-secondary, #bfc5d4);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .pe-pip-subscribe-brand {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    zoom: 0.72;
+  }
+  .pe-pip-promo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    width: 100%;
+    min-width: 0;
+    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
+    color: var(--tf-text-muted, #8892a8);
+    white-space: nowrap;
+  }
+  .pe-pip-promo-site {
+    color: var(--tf-color-primary-light, #818cf8);
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-weight: 700;
+    letter-spacing: 0.01em;
   }
   .pe-pip-footer-row.socials {
-    gap: 16px;
+    gap: 0.5em;
   }
   .pe-pip-footer-row.copy {
     gap: 0;
   }
   .pe-pip-footer .pe-footer-social-link {
-    gap: 10px;
-    font-size: 17px;
+    gap: 0.3em;
+    font-size: clamp(0.6875rem, 1.4vh, 0.9375rem);
     color: var(--tf-text-secondary, #bfc5d4);
   }
   .pe-pip-footer .pe-footer-social-link svg {
-    width: 28px;
-    height: 28px;
+    width: clamp(0.875rem, 1.8vh, 1.25rem);
+    height: clamp(0.875rem, 1.8vh, 1.25rem);
   }
   .pe-pip-footer .pe-footer-social-text {
     line-height: 1;
   }
-  .pe-pip-footer .pe-footer-logo {
-    height: 48px;
-  }
   .pe-pip-footer .pe-footer-copy {
-    font-size: 14px;
+    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
     color: var(--tf-text-muted, #64748b);
   }
   .pe-pip-footer .pe-footer-instructor {
-    font-size: 18px;
+    font-size: clamp(0.6875rem, 1.4vh, 0.9375rem);
     color: var(--tf-text-primary, #ffffff);
     font-weight: 500;
   }
   .pe-pip-footer .brand-lockup {
-    transform: scale(1.4);
+    transform: scale(1);
     transform-origin: center;
   }
 
@@ -1524,17 +1594,14 @@ const ENGINE_CSS = `
   .pe-root.pe-headless:not(.pe-pip-mode) .pe-viewport {
     height: 100%;
   }
-  /* Headless + PIP: hide the PIP header row entirely (all controls come from
-     the control panel). Collapse its grid row so info/video/footer shift up. */
-  .pe-root.pe-headless.pe-pip-mode .pe-pip-column {
-    grid-template-rows: 0px var(--pe-pip-info-height) 1fr var(--pe-pip-footer-height);
-  }
+  /* Headless + PIP: hide the header controls; keep the column layout. */
   .pe-root.pe-headless.pe-pip-mode .pe-pip-header {
     display: none;
   }
 
   /* ── Shorts Mode (9:16) ────────────── */
   .pe-shorts-root {
+    --pe-slide-stage-ratio: 1.4;
     width: 100vw;
     height: 100vh;
     background: #000;
@@ -1548,11 +1615,13 @@ const ENGINE_CSS = `
   }
 
   .pe-shorts-frame {
+    --pe-shorts-frame-width: min(calc(100vh * 2048 / 3640), 100vw);
+    --pe-shorts-stage-height: calc(var(--pe-shorts-frame-width) / var(--pe-slide-stage-ratio));
     height: 100vh;
     aspect-ratio: 2048 / 3640;
     max-width: 100vw;
     display: grid;
-    grid-template-rows: 1fr auto auto;
+    grid-template-rows: var(--pe-shorts-stage-height) minmax(0, 1fr) auto;
     background:
       radial-gradient(circle at top, rgba(0,245,255,0.10), transparent 32%),
       radial-gradient(circle at bottom, rgba(168,56,255,0.08), transparent 34%),
@@ -1563,6 +1632,8 @@ const ENGINE_CSS = `
 
   /* Content area at the top — renders actual slide content (flex: 1fr) */
   .pe-shorts-header {
+    min-height: 0;
+    height: var(--pe-shorts-stage-height);
     min-height: 0;
     width: 100%;
     display: flex;
@@ -1649,8 +1720,9 @@ const ENGINE_CSS = `
   }
 
   .pe-shorts-video {
-    aspect-ratio: 1 / 1;
     width: 100%;
+    height: 100%;
+    min-height: 0;
     position: relative;
     display: flex;
     align-items: center;
@@ -1696,6 +1768,8 @@ const ENGINE_CSS = `
     justify-content: center;
     gap: clamp(0.25rem, 0.6vh, 0.5rem);
     padding: clamp(0.5rem, 1.2vh, 1rem) 2.2vw;
+    min-height: fit-content;
+    flex-shrink: 0;
     border-top: 1px solid rgba(202,211,230,0.08);
     background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
   }
@@ -1848,6 +1922,7 @@ const ENGINE_CSS = `
 
   /* ── Feed Mode (4:5) — full-page aspect with PIP inset ── */
   .pe-feed-root {
+    --pe-slide-stage-ratio: 1.4;
     width: 100vw;
     height: 100vh;
     background: #000;
@@ -1862,11 +1937,13 @@ const ENGINE_CSS = `
 
   /* 4:5 aspect frame — the whole page viewport */
   .pe-feed-frame {
+    --pe-feed-frame-width: min(calc(100vh * 4 / 5), 100vw);
+    --pe-feed-stage-height: calc(var(--pe-feed-frame-width) / var(--pe-slide-stage-ratio));
     height: 100vh;
     aspect-ratio: 4 / 5;
     max-width: 100vw;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: var(--pe-feed-stage-height) minmax(0, 1fr);
     background:
       radial-gradient(circle at top, rgba(0,245,255,0.10), transparent 32%),
       radial-gradient(circle at bottom, rgba(168,56,255,0.08), transparent 34%),
@@ -1877,13 +1954,36 @@ const ENGINE_CSS = `
 
   /* Slide content area — fills most of the frame */
   .pe-feed-slide-area {
-    flex: 1;
+    min-height: 0;
+    height: var(--pe-feed-stage-height);
     min-height: 0;
     width: 100%;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow: hidden;
+  }
+
+  .pe-feed-media-area {
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
+    background: transparent;
+    height: 100%;
+  }
+
+  .pe-feed-lower {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 80% 60% at 30% 30%, rgba(129,140,248,0.12), transparent),
+      radial-gradient(ellipse 70% 50% at 70% 70%, rgba(192,132,252,0.10), transparent),
+      linear-gradient(180deg, rgba(17,19,24,0.92), rgba(11,11,15,0.96));
   }
 
   .pe-feed-slide-content {
@@ -1952,74 +2052,46 @@ const ENGINE_CSS = `
 
   /* PIP inset — overlaid on bottom-right of the slide area */
   .pe-feed-pip {
-    position: absolute;
-    bottom: 1.5vh;
-    right: 1.5vw;
-    width: min(38%, 35vh);
-    aspect-ratio: 16 / 9;
-    border-radius: 0.6em;
+    position: relative;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     z-index: 10;
-    box-shadow: 0 0.4vh 2vh rgba(0,0,0,0.5), 0 0 0 1px rgba(148,163,184,0.15);
-    background:
-      radial-gradient(ellipse 80% 60% at 30% 30%, rgba(129,140,248,0.22), transparent),
-      radial-gradient(ellipse 70% 50% at 70% 70%, rgba(192,132,252,0.18), transparent),
-      radial-gradient(ellipse 60% 40% at 50% 50%, rgba(56,189,248,0.10), transparent),
-      linear-gradient(160deg, #262a3d 0%, #2e3350 40%, #232740 100%);
+    box-shadow: none;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-
-  /* Cross-hair guides inside feed PIP */
-  .pe-feed-pip .pe-shorts-guide.top,
-  .pe-feed-pip .pe-shorts-guide.bottom {
-    left: 50%;
-    width: 1px;
-    height: 0.8vh;
-    transform: translateX(-50%);
-  }
-  .pe-feed-pip .pe-shorts-guide.top { top: 0; }
-  .pe-feed-pip .pe-shorts-guide.bottom { bottom: 0; }
-  .pe-feed-pip .pe-shorts-guide.left,
-  .pe-feed-pip .pe-shorts-guide.right {
-    top: 50%;
-    width: 0.8vh;
-    height: 1px;
-    transform: translateY(-50%);
-  }
-  .pe-feed-pip .pe-shorts-guide.left { left: 0; }
-  .pe-feed-pip .pe-shorts-guide.right { right: 0; }
 
   /* Footer bar at the bottom of the 4:5 frame */
   .pe-feed-footer {
-    flex-shrink: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1em;
-    padding: 0.4vh 1.6vw;
-    border-top: 1px solid rgba(202,211,230,0.08);
-    background: linear-gradient(180deg, rgba(17,19,24,0.92), rgba(11,11,15,0.96));
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-end;
+    gap: clamp(0.4rem, 0.9vh, 0.8rem);
+    padding: 0;
+    background: transparent;
     min-height: 0;
-    flex-wrap: wrap;
+    height: 100%;
   }
   .pe-feed-footer-row {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.4em;
-    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 0.5em;
+    flex-wrap: wrap;
+    width: 100%;
+    text-align: left;
   }
   .pe-feed-footer .pe-footer-copy {
-    font-size: clamp(0.5rem, 0.9vh, 0.6875rem);
+    font-size: clamp(0.6875rem, 1.1vh, 0.875rem);
     color: var(--tf-text-muted, #64748b);
   }
   .pe-feed-footer-row.subscribe {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.3em;
+    gap: 0.45em;
+    align-self: flex-start;
   }
   .pe-feed-subscribe-icon {
     display: flex;
@@ -2034,7 +2106,7 @@ const ENGINE_CSS = `
     height: clamp(0.75rem, 1.4vh, 1rem);
   }
   .pe-feed-subscribe-text {
-    font-size: clamp(0.5625rem, 1.1vh, 0.75rem);
+    font-size: clamp(0.75rem, 1.3vh, 0.9375rem);
     color: var(--tf-text-secondary, #bfc5d4);
     font-weight: 500;
     letter-spacing: 0.01em;
@@ -2043,44 +2115,10 @@ const ENGINE_CSS = `
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
-    zoom: 0.62;
+    zoom: 0.8;
   }
-  .pe-feed-promo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.25em;
-    min-width: 0;
-    font-size: clamp(0.5rem, 1vh, 0.6875rem);
-    color: var(--tf-text-muted, #8892a8);
-  }
-  .pe-feed-promo-label {
-    color: var(--tf-text-secondary, #bfc5d4);
-    font-weight: 500;
-  }
-  .pe-feed-promo-site {
-    color: var(--tf-color-primary-light, #818cf8);
-    font-family: 'JetBrains Mono', 'Consolas', monospace;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-  }
-  .pe-feed-footer-row.socials {
-    display: flex;
-    align-items: center;
-    gap: 1em;
-  }
-  .pe-feed-footer .pe-footer-social-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3em;
-    font-size: clamp(0.5625rem, 1.1vh, 0.75rem);
-    color: var(--tf-text-secondary, #bfc5d4);
-    text-decoration: none;
-    white-space: nowrap;
-  }
-  .pe-feed-footer .pe-footer-social-link svg {
-    width: clamp(0.75rem, 1.4vh, 1rem);
-    height: clamp(0.75rem, 1.4vh, 1rem);
+  .pe-feed-footer-row.copy {
+    align-self: flex-start;
   }
 `;
 
@@ -2450,7 +2488,6 @@ export function PresentationLayout({
   const brandLabel = branding?.brandLabel ?? "Tutorial";
   const showBrandLabel =
     branding?.brandLabel != null && !brandLogoSrc.includes("og-image-template");
-  const instructorName = branding?.instructorName;
   const linkedinUrl = branding?.linkedinUrl;
   const twitterUrl = branding?.twitterUrl;
   const twitterHandle = branding?.twitterHandle;
@@ -2988,12 +3025,14 @@ export function PresentationLayout({
             {/* Slide viewport */}
             <div className="pe-viewport">
               <div className="pe-slide-box" style={{ zoom: slideZoom }}>
-                <PresentationStepContext.Provider
-                  key={`${deck.id}:${currentSlide?.id ?? slideIndex}`}
-                  value={stepContextValue}
-                >
-                  {currentSlide?.content}
-                </PresentationStepContext.Provider>
+                <div className="pe-slide-stage">
+                  <PresentationStepContext.Provider
+                    key={`${deck.id}:${currentSlide?.id ?? slideIndex}`}
+                    value={stepContextValue}
+                  >
+                    {currentSlide?.content}
+                  </PresentationStepContext.Provider>
+                </div>
               </div>
             </div>
           </div>
@@ -3001,8 +3040,9 @@ export function PresentationLayout({
           {/* ── 16:9 Column (visible in 16:9 mode) ── */}
           {pipMode && (
             <div className="pe-pip-column">
-              {/* Compact header — keep control access visible in 16:9 mode */}
-              <div className="pe-pip-header">
+              <div className="pe-pip-upper">
+                {/* Compact header — keep control access visible in 16:9 mode */}
+                <div className="pe-pip-header">
                 <button
                   className={`pe-drawer-toggle ${drawerOpen ? "active" : ""}`}
                   onClick={() => setDrawerOpen(!drawerOpen)}
@@ -3058,13 +3098,12 @@ export function PresentationLayout({
                 </button>
               </div>
 
-              {/* Course / lesson info section */}
-              <div className="pe-pip-info">
-                <span className="pe-pip-info-course">{courseTitle}</span>
-                <span className="pe-pip-info-lesson">
+              <div className="pe-pip-meta">
+                <span className="pe-pip-meta-course">{courseTitle}</span>
+                <span className="pe-pip-meta-lesson">
                   {deck.number}. {sanitizePresentationTitle(deck.title)}
                 </span>
-                <span className="pe-pip-info-slide">
+                <span className="pe-pip-meta-slide">
                   Slide {slideIndex + 1} of {slideCount}
                 </span>
               </div>
@@ -3076,30 +3115,37 @@ export function PresentationLayout({
                 <span className="pe-pip-guide bottom" aria-hidden="true" />
                 <span className="pe-pip-guide left" aria-hidden="true" />
               </div>
+              </div>
 
               <div className="pe-pip-footer">
-                <div className="pe-pip-footer-row brand">
-                  {brandIconUrl ? (
-                    <BrandLockup
-                      iconUrl={brandIconUrl}
-                      size="lg"
-                      label={brandLabel}
-                    />
-                  ) : (
-                    <img
-                      className="pe-footer-logo"
-                      src={brandLogoSrc}
-                      alt={brandLabel}
-                    />
-                  )}
+                <div className="pe-pip-footer-row subscribe">
+                  <span className="pe-pip-subscribe-icon">{Icons.bell}</span>
+                  <span className="pe-pip-subscribe-text">Subscribe to</span>
+                  <span className="pe-pip-subscribe-brand">
+                    {brandIconUrl ? (
+                      <BrandLockup
+                        iconUrl={brandIconUrl}
+                        size="sm"
+                        label={brandLabel}
+                      />
+                    ) : (
+                      <img
+                        className="pe-footer-logo"
+                        src={brandLogoSrc}
+                        alt={brandLabel}
+                      />
+                    )}
+                  </span>
+                  <span className="pe-pip-subscribe-text">
+                    for more videos & tutorials
+                  </span>
                 </div>
-                {instructorName ? (
-                  <div className="pe-pip-footer-row instructor">
-                    <span className="pe-footer-instructor">
-                      {instructorName}
-                    </span>
-                  </div>
-                ) : null}
+                <div className="pe-pip-footer-row">
+                  <span className="pe-pip-promo">
+                    <span>Explore free interactive tutorials at</span>
+                    <span className="pe-pip-promo-site">{siteUrl}</span>
+                  </span>
+                </div>
                 <div className="pe-pip-footer-row socials">
                   {youtubeUrl ? (
                     <a
@@ -3238,19 +3284,6 @@ interface ShortsLayoutProps {
   commandChannelId?: string;
   /** Hash prefix for navigation (e.g. "#/my-show"). goTo writes `{hashPrefix}/{deckId}/{slide}`. */
   hashPrefix?: string;
-}
-
-/** Truncate narration to ~300 chars at a sentence boundary for 3-4 line descriptions. */
-function shortsDescription(narration?: string): string {
-  if (!narration) return "";
-  const clean = narration.replace(/\s+/g, " ").trim();
-  if (clean.length <= 300) return clean;
-  const cut = clean.slice(0, 300);
-  const dot = cut.lastIndexOf(".");
-  const comma = cut.lastIndexOf(",");
-  const boundary = Math.max(dot, comma);
-  if (boundary > 120) return cut.slice(0, boundary + 1).trim();
-  return cut.trim() + "…";
 }
 
 export function ShortsLayout({
@@ -3621,26 +3654,8 @@ export function ShortsFeedLayout({
 }: ShortsFeedLayoutProps) {
   const brandIconUrl = branding?.brandIconUrl;
   const brandLabel = branding?.brandLabel ?? "Tutorial";
-  const siteUrl = branding?.siteUrl ?? "tuts.localm.dev";
   const copyrightText =
     branding?.copyright ?? `\u00A9 ${new Date().getFullYear()} ${brandLabel}`;
-  const youtubeUrl = branding?.youtubeUrl;
-  const youtubeHandle = branding?.youtubeHandle;
-  const twitterUrl = branding?.twitterUrl;
-  const twitterHandle = branding?.twitterHandle;
-  const linkedinUrl = branding?.linkedinUrl;
-  const linkedinHandle = branding?.linkedinHandle;
-  const youtubeLabel = youtubeHandle
-    ? `yt/${youtubeHandle.replace(/^@/, "")}`
-    : "YouTube";
-  const twitterLabel = twitterHandle
-    ? `x/${twitterHandle.replace(/^@/, "")}`
-    : "X";
-  const linkedinLabel = linkedinHandle
-    ? linkedinHandle.startsWith("in/")
-      ? linkedinHandle
-      : `in/${linkedinHandle.replace(/^@/, "")}`
-    : "LinkedIn";
 
   const rootRef = useRef<HTMLDivElement>(null);
   const stateChannelRef = useRef<BroadcastChannel | null>(null);
@@ -3922,84 +3937,35 @@ export function ShortsFeedLayout({
                 {currentSlide?.content}
               </PresentationStepContext.Provider>
             </div>
-
-            {/* PIP inset — overlaid on the slide area */}
-            <div className="pe-feed-pip" aria-label="Video capture area">
-              <span className="pe-shorts-guide top" aria-hidden="true" />
-              <span className="pe-shorts-guide right" aria-hidden="true" />
-              <span className="pe-shorts-guide bottom" aria-hidden="true" />
-              <span className="pe-shorts-guide left" aria-hidden="true" />
-            </div>
           </div>
 
-          {/* ── Footer bar (bottom of 4:5 frame) ── */}
-          <div className="pe-feed-footer">
-            <div className="pe-feed-footer-row subscribe">
-              <span className="pe-feed-subscribe-icon">{Icons.bell}</span>
-              <span className="pe-feed-subscribe-text">Subscribe to</span>
-              <span className="pe-feed-subscribe-brand">
-                {brandIconUrl ? (
-                  <BrandLockup
-                    iconUrl={brandIconUrl}
-                    size="sm"
-                    label={brandLabel}
-                  />
-                ) : (
-                  <strong>{brandLabel}</strong>
-                )}
-              </span>
-              <span className="pe-feed-subscribe-text">
-                for more videos & tutorials
-              </span>
+          <div className="pe-feed-lower">
+            <div className="pe-feed-media-area">
+              <div className="pe-feed-pip" aria-label="Video capture area" />
             </div>
-            <div className="pe-feed-footer-row socials">
-              {youtubeUrl ? (
-                <a
-                  className="pe-footer-social-link"
-                  href={youtubeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="YouTube"
-                >
-                  {Icons.youtube}
-                  <span className="pe-footer-social-text">{youtubeLabel}</span>
-                </a>
-              ) : null}
-              {twitterUrl ? (
-                <a
-                  className="pe-footer-social-link"
-                  href={twitterUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="X"
-                >
-                  {Icons.twitter}
-                  <span className="pe-footer-social-text">{twitterLabel}</span>
-                </a>
-              ) : null}
-              {linkedinUrl ? (
-                <a
-                  className="pe-footer-social-link"
-                  href={linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn"
-                >
-                  {Icons.linkedin}
-                  <span className="pe-footer-social-text">{linkedinLabel}</span>
-                </a>
-              ) : null}
-            </div>
-            <div className="pe-feed-footer-row">
-              <span className="pe-feed-promo">
-                <span className="pe-feed-promo-label">
-                  Free interactive tutorials at
+
+            <div className="pe-feed-footer">
+              <div className="pe-feed-footer-row subscribe">
+                <span className="pe-feed-subscribe-icon">{Icons.bell}</span>
+                <span className="pe-feed-subscribe-text">Subscribe to</span>
+                <span className="pe-feed-subscribe-brand">
+                  {brandIconUrl ? (
+                    <BrandLockup
+                      iconUrl={brandIconUrl}
+                      size="sm"
+                      label={brandLabel}
+                    />
+                  ) : (
+                    <strong>{brandLabel}</strong>
+                  )}
                 </span>
-                <span className="pe-feed-promo-site">{siteUrl}</span>
-              </span>
-            </div>
-            <div className="pe-feed-footer-row">
-              <span className="pe-footer-copy">{copyrightText}</span>
+                <span className="pe-feed-subscribe-text">
+                  for more videos & tutorials
+                </span>
+              </div>
+              <div className="pe-feed-footer-row copy">
+                <span className="pe-footer-copy">{copyrightText}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -4011,6 +3977,7 @@ export function ShortsFeedLayout({
 interface PresentationControlPanelProps {
   deck: PresentationDeck;
   decks: PresentationDeck[];
+  onExplore?: () => void;
   onSelectDeck?: (deckId: string) => void;
   onOpenPresenter?: () => void;
   /** Open the 9:16 shorts view for the current deck */
@@ -4026,6 +3993,7 @@ interface PresentationControlPanelProps {
 export function PresentationControlPanel({
   deck,
   decks,
+  onExplore,
   onSelectDeck,
   onOpenPresenter,
   onOpenShorts,
@@ -4223,6 +4191,11 @@ export function PresentationControlPanel({
             <span className="pc-meta-item">Zoom {state.zoom.toFixed(2)}x</span>
           </div>
           <div className="pc-header-spacer" />
+          {onExplore && (
+            <button className="pc-btn pc-btn-header" onClick={onExplore}>
+              Explore
+            </button>
+          )}
           <span className="pc-header-separator" aria-hidden="true" />
           {brandIconUrl ? (
             <BrandLockup iconUrl={brandIconUrl} size="sm" label={brandLabel} />

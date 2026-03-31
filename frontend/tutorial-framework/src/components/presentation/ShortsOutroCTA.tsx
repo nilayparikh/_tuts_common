@@ -107,9 +107,27 @@ export function ShortsOutroCTA({
         {/* ── Floating gradient orbs (decorative BG — small, subtle) ── */}
         {(
           [
-            { top: "5%", left: "8%", size: "clamp(50px,12vw,110px)", color: "rgba(99,102,241,0.12)", delay: "0s" },
-            { top: "55%", right: "6%", size: "clamp(40px,10vw,80px)", color: "rgba(168,56,255,0.10)", delay: "1.5s" },
-            { bottom: "10%", left: "18%", size: "clamp(30px,8vw,60px)", color: "rgba(245,158,11,0.06)", delay: "3s" },
+            {
+              top: "5%",
+              left: "8%",
+              size: "clamp(50px,12vw,110px)",
+              color: "rgba(99,102,241,0.12)",
+              delay: "0s",
+            },
+            {
+              top: "55%",
+              right: "6%",
+              size: "clamp(40px,10vw,80px)",
+              color: "rgba(168,56,255,0.10)",
+              delay: "1.5s",
+            },
+            {
+              bottom: "10%",
+              left: "18%",
+              size: "clamp(30px,8vw,60px)",
+              color: "rgba(245,158,11,0.06)",
+              delay: "3s",
+            },
           ] as Array<{
             top?: string;
             left?: string;
@@ -200,11 +218,9 @@ export function ShortsOutroCTA({
             display: "flex",
             alignItems: "center",
             gap: "clamp(5px, 0.8vw, 8px)",
-            padding:
-              "clamp(7px, 1.1vh, 12px) clamp(16px, 3vw, 26px)",
+            padding: "clamp(7px, 1.1vh, 12px) clamp(16px, 3vw, 26px)",
             borderRadius: "9999px",
-            background:
-              "linear-gradient(135deg, #dc2626, #ef4444, #f87171)",
+            background: "linear-gradient(135deg, #dc2626, #ef4444, #f87171)",
             animation: "scta-btn-glow 3s ease-in-out infinite",
             cursor: "default",
             position: "relative",
@@ -254,8 +270,7 @@ export function ShortsOutroCTA({
               display: "flex",
               alignItems: "center",
               gap: "clamp(6px, 1vw, 10px)",
-              padding:
-                "clamp(7px, 1vh, 12px) clamp(10px, 2vw, 16px)",
+              padding: "clamp(7px, 1vh, 12px) clamp(10px, 2vw, 16px)",
               borderRadius: "clamp(8px, 1vh, 12px)",
               background:
                 "linear-gradient(135deg, rgba(25,28,35,0.95), rgba(30,33,42,0.95))",
