@@ -1415,63 +1415,35 @@ const ENGINE_CSS = `
     pointer-events: none;
     width: var(--pe-pip-guide-length);
     height: var(--pe-pip-guide-length);
-    background: transparent;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-    outline: none;
-  }
-  .pe-pip-corner-line {
-    position: absolute;
-    background: currentColor;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-    display: block;
-  }
-  .pe-pip-corner-line.h {
-    width: 100%;
-    height: var(--pe-pip-guide-thickness);
-  }
-  .pe-pip-corner-line.v {
-    width: var(--pe-pip-guide-thickness);
-    height: 100%;
+    background: none !important;
+    border: 0 solid rgba(226,230,240,0.55);
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
   }
   .pe-pip-corner.tl {
     top: var(--pe-pip-guide-inset);
     left: var(--pe-pip-guide-inset);
-  }
-  .pe-pip-corner.tl .pe-pip-corner-line.h,
-  .pe-pip-corner.tl .pe-pip-corner-line.v {
-    top: 0;
-    left: 0;
+    border-top-width: var(--pe-pip-guide-thickness);
+    border-left-width: var(--pe-pip-guide-thickness);
   }
   .pe-pip-corner.tr {
     top: var(--pe-pip-guide-inset);
     right: var(--pe-pip-guide-inset);
-  }
-  .pe-pip-corner.tr .pe-pip-corner-line.h,
-  .pe-pip-corner.tr .pe-pip-corner-line.v {
-    top: 0;
-    right: 0;
+    border-top-width: var(--pe-pip-guide-thickness);
+    border-right-width: var(--pe-pip-guide-thickness);
   }
   .pe-pip-corner.br {
     right: var(--pe-pip-guide-inset);
     bottom: var(--pe-pip-guide-inset);
-  }
-  .pe-pip-corner.br .pe-pip-corner-line.h,
-  .pe-pip-corner.br .pe-pip-corner-line.v {
-    right: 0;
-    bottom: 0;
+    border-bottom-width: var(--pe-pip-guide-thickness);
+    border-right-width: var(--pe-pip-guide-thickness);
   }
   .pe-pip-corner.bl {
     bottom: var(--pe-pip-guide-inset);
     left: var(--pe-pip-guide-inset);
-  }
-  .pe-pip-corner.bl .pe-pip-corner-line.h,
-  .pe-pip-corner.bl .pe-pip-corner-line.v {
-    bottom: 0;
-    left: 0;
+    border-bottom-width: var(--pe-pip-guide-thickness);
+    border-left-width: var(--pe-pip-guide-thickness);
   }
 
   .pe-pip-footer {
@@ -3161,22 +3133,10 @@ export function PresentationLayout({
 
                 {/* 16:9 video area (middle) */}
                 <div className="pe-pip-inset" aria-label="16:9 video area">
-                  <span className="pe-pip-corner tl" aria-hidden="true">
-                    <span className="pe-pip-corner-line h" />
-                    <span className="pe-pip-corner-line v" />
-                  </span>
-                  <span className="pe-pip-corner tr" aria-hidden="true">
-                    <span className="pe-pip-corner-line h" />
-                    <span className="pe-pip-corner-line v" />
-                  </span>
-                  <span className="pe-pip-corner br" aria-hidden="true">
-                    <span className="pe-pip-corner-line h" />
-                    <span className="pe-pip-corner-line v" />
-                  </span>
-                  <span className="pe-pip-corner bl" aria-hidden="true">
-                    <span className="pe-pip-corner-line h" />
-                    <span className="pe-pip-corner-line v" />
-                  </span>
+                  <span className="pe-pip-corner tl" aria-hidden="true" />
+                  <span className="pe-pip-corner tr" aria-hidden="true" />
+                  <span className="pe-pip-corner br" aria-hidden="true" />
+                  <span className="pe-pip-corner bl" aria-hidden="true" />
                 </div>
               </div>
 
