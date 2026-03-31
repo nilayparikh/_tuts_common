@@ -350,6 +350,14 @@ const ENGINE_CSS = `
     min-height: 0;
     overflow: hidden;
   }
+  .pe-viewport-guide-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none;
+  }
 
   .pe-nav-btn {
     display: flex;
@@ -1391,9 +1399,6 @@ const ENGINE_CSS = `
   }
 
   .pe-pip-inset {
-    --pe-pip-guide-inset: clamp(12px, 2.2vh, 18px);
-    --pe-pip-guide-length: clamp(18px, 3vh, 24px);
-    --pe-pip-guide-thickness: 2px;
     color: rgba(226,230,240,0.88);
     position: relative;
     display: flex;
@@ -1409,41 +1414,13 @@ const ENGINE_CSS = `
       radial-gradient(ellipse at 70% 80%, rgba(168,56,255,0.08) 0%, transparent 60%),
       linear-gradient(135deg, #262a3d 0%, #2e3350 50%, #232740 100%);
   }
-  .pe-pip-corner {
+  .pe-pip-guide-svg {
     position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     z-index: 10;
     pointer-events: none;
-    width: var(--pe-pip-guide-length);
-    height: var(--pe-pip-guide-length);
-    background: none !important;
-    border: 0 solid rgba(226,230,240,0.55);
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    outline: none !important;
-  }
-  .pe-pip-corner.tl {
-    top: var(--pe-pip-guide-inset);
-    left: var(--pe-pip-guide-inset);
-    border-top-width: var(--pe-pip-guide-thickness);
-    border-left-width: var(--pe-pip-guide-thickness);
-  }
-  .pe-pip-corner.tr {
-    top: var(--pe-pip-guide-inset);
-    right: var(--pe-pip-guide-inset);
-    border-top-width: var(--pe-pip-guide-thickness);
-    border-right-width: var(--pe-pip-guide-thickness);
-  }
-  .pe-pip-corner.br {
-    right: var(--pe-pip-guide-inset);
-    bottom: var(--pe-pip-guide-inset);
-    border-bottom-width: var(--pe-pip-guide-thickness);
-    border-right-width: var(--pe-pip-guide-thickness);
-  }
-  .pe-pip-corner.bl {
-    bottom: var(--pe-pip-guide-inset);
-    left: var(--pe-pip-guide-inset);
-    border-bottom-width: var(--pe-pip-guide-thickness);
-    border-left-width: var(--pe-pip-guide-thickness);
   }
 
   .pe-pip-footer {
@@ -1727,8 +1704,6 @@ const ENGINE_CSS = `
   }
 
   .pe-shorts-video {
-    --pe-shorts-video-guide-inset: clamp(0.8rem, 2vh, 1.4rem);
-    --pe-shorts-video-corner-size: clamp(1.1rem, 2.8vh, 1.8rem);
     width: 100%;
     height: 100%;
     min-height: 0;
@@ -1745,43 +1720,13 @@ const ENGINE_CSS = `
     border-top: 1px solid rgba(148,163,184,0.12);
   }
 
-  .pe-shorts-corner {
+  .pe-shorts-guide-svg {
     position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     z-index: 10;
-    width: var(--pe-shorts-video-corner-size);
-    height: var(--pe-shorts-video-corner-size);
-    border-color: rgba(82, 243, 255, 0.78);
-    border-style: solid;
-    border-width: 0;
-    border-radius: 0.7rem;
-    box-shadow:
-      0 0 0 1px rgba(8, 12, 24, 0.32) inset,
-      0 0 14px rgba(82, 243, 255, 0.16);
     pointer-events: none;
-  }
-  .pe-shorts-corner.top-left {
-    top: var(--pe-shorts-video-guide-inset);
-    left: var(--pe-shorts-video-guide-inset);
-    border-top-width: 2px;
-    border-left-width: 2px;
-  }
-  .pe-shorts-corner.top-right {
-    top: var(--pe-shorts-video-guide-inset);
-    right: var(--pe-shorts-video-guide-inset);
-    border-top-width: 2px;
-    border-right-width: 2px;
-  }
-  .pe-shorts-corner.bottom-right {
-    right: var(--pe-shorts-video-guide-inset);
-    bottom: var(--pe-shorts-video-guide-inset);
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-  }
-  .pe-shorts-corner.bottom-left {
-    bottom: var(--pe-shorts-video-guide-inset);
-    left: var(--pe-shorts-video-guide-inset);
-    border-bottom-width: 2px;
-    border-left-width: 2px;
   }
 
   .pe-shorts-footer {
@@ -3056,6 +3001,42 @@ export function PresentationLayout({
                     {currentSlide?.content}
                   </PresentationStepContext.Provider>
                 </div>
+                <svg
+                  className="pe-viewport-guide-svg"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <polyline
+                    points="2,5 2,2 5,2"
+                    fill="none"
+                    stroke="rgba(226,230,240,0.85)"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <polyline
+                    points="95,2 98,2 98,5"
+                    fill="none"
+                    stroke="rgba(226,230,240,0.85)"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <polyline
+                    points="98,95 98,98 95,98"
+                    fill="none"
+                    stroke="rgba(226,230,240,0.85)"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <polyline
+                    points="5,98 2,98 2,95"
+                    fill="none"
+                    stroke="rgba(226,230,240,0.85)"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </svg>
               </div>
             </div>
           </div>
@@ -3133,10 +3114,47 @@ export function PresentationLayout({
 
                 {/* 16:9 video area (middle) */}
                 <div className="pe-pip-inset" aria-label="16:9 video area">
-                  <span className="pe-pip-corner tl" aria-hidden="true" />
-                  <span className="pe-pip-corner tr" aria-hidden="true" />
-                  <span className="pe-pip-corner br" aria-hidden="true" />
-                  <span className="pe-pip-corner bl" aria-hidden="true" />
+                  {/* SVG L-corner guides — pure geometry, no CSS borders */}
+                  <svg
+                    className="pe-pip-guide-svg"
+                    viewBox="0 0 100 100"
+                    preserveAspectRatio="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    {/* Top-left L */}
+                    <polyline
+                      points="3,8 3,3 8,3"
+                      fill="none"
+                      stroke="rgba(226,230,240,0.85)"
+                      strokeWidth="1.5"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    {/* Top-right L */}
+                    <polyline
+                      points="92,3 97,3 97,8"
+                      fill="none"
+                      stroke="rgba(226,230,240,0.85)"
+                      strokeWidth="1.5"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    {/* Bottom-right L */}
+                    <polyline
+                      points="97,92 97,97 92,97"
+                      fill="none"
+                      stroke="rgba(226,230,240,0.85)"
+                      strokeWidth="1.5"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    {/* Bottom-left L */}
+                    <polyline
+                      points="8,97 3,97 3,92"
+                      fill="none"
+                      stroke="rgba(226,230,240,0.85)"
+                      strokeWidth="1.5"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </svg>
                 </div>
               </div>
 
@@ -3610,13 +3628,42 @@ export function ShortsLayout({
 
           {/* ── Video capture area (plain 1:1 host) ── */}
           <div className="pe-shorts-video" aria-label="Video capture area">
-            <span className="pe-shorts-corner top-left" aria-hidden="true" />
-            <span className="pe-shorts-corner top-right" aria-hidden="true" />
-            <span
-              className="pe-shorts-corner bottom-right"
+            <svg
+              className="pe-shorts-guide-svg"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              xmlns="http://www.w3.org/2000/svg"
               aria-hidden="true"
-            />
-            <span className="pe-shorts-corner bottom-left" aria-hidden="true" />
+            >
+              <polyline
+                points="3,8 3,3 8,3"
+                fill="none"
+                stroke="rgba(226,230,240,0.85)"
+                strokeWidth="1.5"
+                vectorEffect="non-scaling-stroke"
+              />
+              <polyline
+                points="92,3 97,3 97,8"
+                fill="none"
+                stroke="rgba(226,230,240,0.85)"
+                strokeWidth="1.5"
+                vectorEffect="non-scaling-stroke"
+              />
+              <polyline
+                points="97,92 97,97 92,97"
+                fill="none"
+                stroke="rgba(226,230,240,0.85)"
+                strokeWidth="1.5"
+                vectorEffect="non-scaling-stroke"
+              />
+              <polyline
+                points="8,97 3,97 3,92"
+                fill="none"
+                stroke="rgba(226,230,240,0.85)"
+                strokeWidth="1.5"
+                vectorEffect="non-scaling-stroke"
+              />
+            </svg>
           </div>
 
           {/* ── Footer ── */}
