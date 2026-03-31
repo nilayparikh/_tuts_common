@@ -2108,6 +2108,25 @@ function getControlStorageKey(channelId: string, kind: "command" | "state") {
   return `${channelId}:${kind}`;
 }
 
+function getZoomStorageKey(channelId: string, deckId: string) {
+  return `${channelId}:${deckId}:zoom`;
+}
+
+function readStoredSlideZoom(storageKey: string): number {
+  try {
+    const cachedValue = localStorage.getItem(storageKey);
+    if (cachedValue != null) {
+      const parsedValue = Number(cachedValue);
+      if (!Number.isNaN(parsedValue)) {
+        return Math.max(0.85, Math.min(parsedValue, 1.4));
+      }
+    }
+  } catch {
+    // Ignore localStorage access issues.
+  }
+  return DEFAULT_SLIDE_ZOOM;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════ */
 /*  PresentationLayout                                                    */
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -2154,6 +2173,7 @@ export function PresentationLayout({
   const siteUrlPhrases = branding?.siteUrlPhrases ?? [];
   const rootRef = useRef<HTMLDivElement>(null);
   const controlChannelRef = useRef<BroadcastChannel | null>(null);
+  const zoomStorageKey = getZoomStorageKey(controlChannelId, deck.id);
   const stateStorageKey = getControlStorageKey(controlChannelId, "state");
   const commandStorageKey = getControlStorageKey(controlChannelId, "command");
   const youtubeLabel = youtubeHandle
@@ -2175,7 +2195,9 @@ export function PresentationLayout({
 
   const [slideIndex, setSlideIndex] = useState(getIndexFromHash);
   const [stepIndex, setStepIndex] = useState(0);
-  const [slideZoom, setSlideZoom] = useState<number>(DEFAULT_SLIDE_ZOOM);
+  const [slideZoom, setSlideZoom] = useState<number>(() =>
+    readStoredSlideZoom(zoomStorageKey),
+  );
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [pipMode, setPipMode] = useState(false);
   const slideCount = deck.slides.length;
@@ -2234,6 +2256,14 @@ export function PresentationLayout({
   const resetStep = useCallback(() => {
     setStepIndex(0);
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(zoomStorageKey, String(slideZoom));
+    } catch {
+      // Ignore localStorage access issues.
+    }
+  }, [slideZoom, zoomStorageKey]);
 
   const postControlState = useCallback(() => {
     const channel = controlChannelRef.current;
@@ -2859,6 +2889,7 @@ interface ShortsLayoutProps {
   deck: PresentationDeck;
   branding?: PresentationBranding;
   controlChannelId?: string;
+  commandChannelId?: string;
   /** Hash prefix for navigation (e.g. "#/my-show"). goTo writes `{hashPrefix}/{deckId}/{slide}`. */
   hashPrefix?: string;
 }
@@ -2881,6 +2912,7 @@ export function ShortsLayout({
   deck,
   branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
+  commandChannelId = controlChannelId,
   hashPrefix,
 }: ShortsLayoutProps) {
   const brandIconUrl = branding?.brandIconUrl;
@@ -2890,9 +2922,10 @@ export function ShortsLayout({
     branding?.copyright ?? `\u00A9 ${new Date().getFullYear()} ${brandLabel}`;
 
   const rootRef = useRef<HTMLDivElement>(null);
-  const controlChannelRef = useRef<BroadcastChannel | null>(null);
+  const stateChannelRef = useRef<BroadcastChannel | null>(null);
+  const commandChannelRef = useRef<BroadcastChannel | null>(null);
   const stateStorageKey = getControlStorageKey(controlChannelId, "state");
-  const commandStorageKey = getControlStorageKey(controlChannelId, "command");
+  const commandStorageKey = getControlStorageKey(commandChannelId, "command");
 
   /* ── Parse initial slide from hash ── */
   const getIndexFromHash = useCallback((): number => {
@@ -2968,7 +3001,7 @@ export function ShortsLayout({
 
   /* ── Broadcast state ── */
   const postControlState = useCallback(() => {
-    const channel = controlChannelRef.current;
+    const channel = stateChannelRef.current;
     if (!channel) return;
     const slide = deck.slides[slideIndex];
     const message: ControlState = {
@@ -2989,6 +3022,16 @@ export function ShortsLayout({
     channel.postMessage(message);
     localStorage.setItem(stateStorageKey, JSON.stringify(message));
   }, [deck, slideIndex, slideCount, elapsed, activeStepIndex, stateStorageKey]);
+
+  useEffect(() => {
+    const channel = new BroadcastChannel(controlChannelId);
+    stateChannelRef.current = channel;
+
+    return () => {
+      channel.close();
+      stateChannelRef.current = null;
+    };
+  }, [controlChannelId]);
 
   /* ── Keyboard ── */
   useEffect(() => {
@@ -3043,8 +3086,8 @@ export function ShortsLayout({
 
   /* ── Control-window sync (receive commands) ── */
   useEffect(() => {
-    const channel = new BroadcastChannel(controlChannelId);
-    controlChannelRef.current = channel;
+    const channel = new BroadcastChannel(commandChannelId);
+    commandChannelRef.current = channel;
 
     const handleCommand = (msg: ControlCommand) => {
       if (!msg) return;
@@ -3092,11 +3135,11 @@ export function ShortsLayout({
       channel.removeEventListener("message", onMessage);
       window.removeEventListener("storage", onStorage);
       channel.close();
-      controlChannelRef.current = null;
+      commandChannelRef.current = null;
     };
   }, [
     commandStorageKey,
-    controlChannelId,
+    commandChannelId,
     currentStepCount,
     deck.id,
     goPrev,
@@ -3215,6 +3258,7 @@ export function PresentationControlPanel({
   const channelRef = useRef<BroadcastChannel | null>(null);
   const stateStorageKey = getControlStorageKey(controlChannelId, "state");
   const commandStorageKey = getControlStorageKey(controlChannelId, "command");
+  const zoomStorageKey = getZoomStorageKey(controlChannelId, deck.id);
   const transcriptScaleStorageKey = `${controlChannelId}:transcript-scale`;
   const [state, setState] = useState<ControlState>({
     type: "state",
@@ -3224,7 +3268,7 @@ export function PresentationControlPanel({
     slideCount: deck.slides.length,
     elapsed: 0,
     duration: deck.slides[0]?.duration,
-    zoom: DEFAULT_SLIDE_ZOOM,
+    zoom: readStoredSlideZoom(zoomStorageKey),
     slideTitle: deck.slides[0]?.title,
     narration: deck.slides[0]?.narration,
     steps: deck.slides[0]?.steps,
@@ -3463,14 +3507,24 @@ export function PresentationControlPanel({
               <select
                 className="pc-lesson-select"
                 value={state.zoom.toFixed(2)}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const nextZoom = parseFloat(e.target.value);
+                  setState((current) => ({
+                    ...current,
+                    zoom: nextZoom,
+                  }));
+                  try {
+                    localStorage.setItem(zoomStorageKey, String(nextZoom));
+                  } catch {
+                    // Ignore localStorage access issues.
+                  }
                   send({
                     type: "command",
                     deckId: deck.id,
                     action: "set-zoom",
-                    zoom: parseFloat(e.target.value),
-                  })
-                }
+                    zoom: nextZoom,
+                  });
+                }}
                 aria-label="Slide zoom"
               >
                 <option value="1.00">1.00x</option>
