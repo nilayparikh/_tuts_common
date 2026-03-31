@@ -35,6 +35,7 @@ export {
   ShortsTitleStack,
   type ShortsTitleStackProps,
 } from "./ShortsTitleStack";
+export { ShortsOutroCTA, type ShortsOutroCTAProps } from "./ShortsOutroCTA";
 
 // Base slide wrappers
 export {
