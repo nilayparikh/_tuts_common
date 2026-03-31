@@ -3228,12 +3228,6 @@ export function PresentationLayout({
             )}
           </div>
           <div className="pe-footer-center">
-            {instructorName ? (
-              <span className="pe-footer-instructor">{instructorName}</span>
-            ) : null}
-            {instructorName && (youtubeUrl || twitterUrl || linkedinUrl) ? (
-              <span className="pe-footer-divider" aria-hidden="true" />
-            ) : null}
             {youtubeUrl ? (
               <a
                 className="pe-footer-social-link"
