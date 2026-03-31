@@ -1391,6 +1391,10 @@ const ENGINE_CSS = `
   }
 
   .pe-pip-inset {
+    --pe-pip-guide-inset: clamp(12px, 2.2vh, 18px);
+    --pe-pip-guide-length: clamp(18px, 3vh, 24px);
+    --pe-pip-guide-thickness: 2px;
+    color: rgba(226,230,240,0.88);
     position: relative;
     display: flex;
     align-items: center;
@@ -1404,39 +1408,70 @@ const ENGINE_CSS = `
       radial-gradient(ellipse at 30% 20%, rgba(99,102,241,0.10) 0%, transparent 60%),
       radial-gradient(ellipse at 70% 80%, rgba(168,56,255,0.08) 0%, transparent 60%),
       linear-gradient(135deg, #262a3d 0%, #2e3350 50%, #232740 100%);
-    border-top: 1px solid rgba(99,102,241,0.12);
   }
-  .pe-pip-guide {
+  .pe-pip-corner {
     position: absolute;
     z-index: 10;
-    background: rgba(0,245,255,0.75);
     pointer-events: none;
+    width: var(--pe-pip-guide-length);
+    height: var(--pe-pip-guide-length);
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    outline: none;
   }
-  .pe-pip-guide.top,
-  .pe-pip-guide.bottom {
-    left: 50%;
-    width: 1px;
-    height: 12px;
-    transform: translateX(-50%);
+  .pe-pip-corner-line {
+    position: absolute;
+    background: currentColor;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    display: block;
   }
-  .pe-pip-guide.top {
+  .pe-pip-corner-line.h {
+    width: 100%;
+    height: var(--pe-pip-guide-thickness);
+  }
+  .pe-pip-corner-line.v {
+    width: var(--pe-pip-guide-thickness);
+    height: 100%;
+  }
+  .pe-pip-corner.tl {
+    top: var(--pe-pip-guide-inset);
+    left: var(--pe-pip-guide-inset);
+  }
+  .pe-pip-corner.tl .pe-pip-corner-line.h,
+  .pe-pip-corner.tl .pe-pip-corner-line.v {
     top: 0;
-  }
-  .pe-pip-guide.bottom {
-    bottom: 0;
-  }
-  .pe-pip-guide.left,
-  .pe-pip-guide.right {
-    top: 50%;
-    width: 12px;
-    height: 1px;
-    transform: translateY(-50%);
-  }
-  .pe-pip-guide.left {
     left: 0;
   }
-  .pe-pip-guide.right {
+  .pe-pip-corner.tr {
+    top: var(--pe-pip-guide-inset);
+    right: var(--pe-pip-guide-inset);
+  }
+  .pe-pip-corner.tr .pe-pip-corner-line.h,
+  .pe-pip-corner.tr .pe-pip-corner-line.v {
+    top: 0;
     right: 0;
+  }
+  .pe-pip-corner.br {
+    right: var(--pe-pip-guide-inset);
+    bottom: var(--pe-pip-guide-inset);
+  }
+  .pe-pip-corner.br .pe-pip-corner-line.h,
+  .pe-pip-corner.br .pe-pip-corner-line.v {
+    right: 0;
+    bottom: 0;
+  }
+  .pe-pip-corner.bl {
+    bottom: var(--pe-pip-guide-inset);
+    left: var(--pe-pip-guide-inset);
+  }
+  .pe-pip-corner.bl .pe-pip-corner-line.h,
+  .pe-pip-corner.bl .pe-pip-corner-line.v {
+    bottom: 0;
+    left: 0;
   }
 
   .pe-pip-footer {
@@ -1720,6 +1755,8 @@ const ENGINE_CSS = `
   }
 
   .pe-shorts-video {
+    --pe-shorts-video-guide-inset: clamp(0.8rem, 2vh, 1.4rem);
+    --pe-shorts-video-corner-size: clamp(1.1rem, 2.8vh, 1.8rem);
     width: 100%;
     height: 100%;
     min-height: 0;
@@ -1736,30 +1773,44 @@ const ENGINE_CSS = `
     border-top: 1px solid rgba(148,163,184,0.12);
   }
 
-  .pe-shorts-guide {
+  .pe-shorts-corner {
     position: absolute;
     z-index: 10;
-    background: rgba(0,245,255,0.5);
+    width: var(--pe-shorts-video-corner-size);
+    height: var(--pe-shorts-video-corner-size);
+    border-color: rgba(82, 243, 255, 0.78);
+    border-style: solid;
+    border-width: 0;
+    border-radius: 0.7rem;
+    box-shadow:
+      0 0 0 1px rgba(8, 12, 24, 0.32) inset,
+      0 0 14px rgba(82, 243, 255, 0.16);
     pointer-events: none;
   }
-  .pe-shorts-guide.top,
-  .pe-shorts-guide.bottom {
-    left: 50%;
-    width: 1px;
-    height: 1.2vh;
-    transform: translateX(-50%);
+  .pe-shorts-corner.top-left {
+    top: var(--pe-shorts-video-guide-inset);
+    left: var(--pe-shorts-video-guide-inset);
+    border-top-width: 2px;
+    border-left-width: 2px;
   }
-  .pe-shorts-guide.top { top: 0; }
-  .pe-shorts-guide.bottom { bottom: 0; }
-  .pe-shorts-guide.left,
-  .pe-shorts-guide.right {
-    top: 50%;
-    width: 1.2vh;
-    height: 1px;
-    transform: translateY(-50%);
+  .pe-shorts-corner.top-right {
+    top: var(--pe-shorts-video-guide-inset);
+    right: var(--pe-shorts-video-guide-inset);
+    border-top-width: 2px;
+    border-right-width: 2px;
   }
-  .pe-shorts-guide.left { left: 0; }
-  .pe-shorts-guide.right { right: 0; }
+  .pe-shorts-corner.bottom-right {
+    right: var(--pe-shorts-video-guide-inset);
+    bottom: var(--pe-shorts-video-guide-inset);
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+  }
+  .pe-shorts-corner.bottom-left {
+    bottom: var(--pe-shorts-video-guide-inset);
+    left: var(--pe-shorts-video-guide-inset);
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+  }
 
   .pe-shorts-footer {
     display: flex;
@@ -3110,10 +3161,22 @@ export function PresentationLayout({
 
                 {/* 16:9 video area (middle) */}
                 <div className="pe-pip-inset" aria-label="16:9 video area">
-                  <span className="pe-pip-guide top" aria-hidden="true" />
-                  <span className="pe-pip-guide right" aria-hidden="true" />
-                  <span className="pe-pip-guide bottom" aria-hidden="true" />
-                  <span className="pe-pip-guide left" aria-hidden="true" />
+                  <span className="pe-pip-corner tl" aria-hidden="true">
+                    <span className="pe-pip-corner-line h" />
+                    <span className="pe-pip-corner-line v" />
+                  </span>
+                  <span className="pe-pip-corner tr" aria-hidden="true">
+                    <span className="pe-pip-corner-line h" />
+                    <span className="pe-pip-corner-line v" />
+                  </span>
+                  <span className="pe-pip-corner br" aria-hidden="true">
+                    <span className="pe-pip-corner-line h" />
+                    <span className="pe-pip-corner-line v" />
+                  </span>
+                  <span className="pe-pip-corner bl" aria-hidden="true">
+                    <span className="pe-pip-corner-line h" />
+                    <span className="pe-pip-corner-line v" />
+                  </span>
                 </div>
               </div>
 
@@ -3587,10 +3650,13 @@ export function ShortsLayout({
 
           {/* ── Video capture area (plain 1:1 host) ── */}
           <div className="pe-shorts-video" aria-label="Video capture area">
-            <span className="pe-shorts-guide top" aria-hidden="true" />
-            <span className="pe-shorts-guide right" aria-hidden="true" />
-            <span className="pe-shorts-guide bottom" aria-hidden="true" />
-            <span className="pe-shorts-guide left" aria-hidden="true" />
+            <span className="pe-shorts-corner top-left" aria-hidden="true" />
+            <span className="pe-shorts-corner top-right" aria-hidden="true" />
+            <span
+              className="pe-shorts-corner bottom-right"
+              aria-hidden="true"
+            />
+            <span className="pe-shorts-corner bottom-left" aria-hidden="true" />
           </div>
 
           {/* ── Footer ── */}
