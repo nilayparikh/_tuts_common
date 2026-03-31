@@ -111,6 +111,8 @@ function sanitizePresentationTitle(title: string | undefined): string {
 const ENGINE_CSS = `
   /* ── Reset ─────────────────────────── */
   .pe-root {
+    --pe-slide-stage-ratio: 1.4;
+    --pe-standard-stage-height: calc(100vh - 134px);
     display: flex;
     flex-direction: column;
     width: 100vw;
@@ -327,16 +329,26 @@ const ENGINE_CSS = `
     padding: 8px;
   }
   .pe-slide-box {
-    width: 100%;
-    height: 100%;
+    position: relative;
+    width: calc(var(--pe-standard-stage-height) * var(--pe-slide-stage-ratio));
+    height: var(--pe-standard-stage-height);
     max-width: 100%;
     max-height: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 7 / 5;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 0;
     background: var(--tf-bg-base, #0b0d12);
     box-shadow: 0 4px 24px rgba(0,0,0,0.4);
     zoom: 1.05;
+  }
+  .pe-slide-stage {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .pe-nav-btn {
@@ -1292,7 +1304,7 @@ const ENGINE_CSS = `
     }
   }
 
-  /* ── PIP Mode ──────────────────────── */
+  /* ── 16:9 Mode ─────────────────────── */
   .pe-root.pe-pip-mode > .pe-header,
   .pe-root.pe-pip-mode > .pe-footer,
   .pe-root.pe-pip-mode > .pe-progress {
@@ -1300,23 +1312,32 @@ const ENGINE_CSS = `
   }
   .pe-root.pe-pip-mode {
     --pe-pip-column-width: calc((100vh * 9 / 16) - 40px);
-    --pe-pip-header-height: 44px;
-    --pe-pip-info-height: 100px;
-    --pe-pip-footer-height: 300px;
   }
   .pe-root.pe-pip-mode .pe-body {
     display: grid;
     grid-template-columns: minmax(0, 1fr) var(--pe-pip-column-width);
+    height: 100%;
+  }
+  .pe-root.pe-pip-mode .pe-viewport {
+    padding: 0;
   }
 
   .pe-pip-column {
     position: relative;
     width: var(--pe-pip-column-width);
-    height: 100vh;
+    height: 100%;
     display: grid;
-    grid-template-rows: var(--pe-pip-header-height) var(--pe-pip-info-height) 1fr var(--pe-pip-footer-height);
+    grid-template-rows: 1fr auto;
     border-left: 1px solid rgba(202,211,230,0.10);
     background: var(--tf-bg-surface, #111318);
+    overflow: hidden;
+  }
+
+  /* Wrapper holding header + meta + video as a single flex column */
+  .pe-pip-upper {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
     overflow: hidden;
   }
 
@@ -1324,7 +1345,7 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     padding: 0 10px;
-    height: var(--pe-pip-header-height);
+    height: 44px;
     gap: 6px;
     border-bottom: 1px solid rgba(202,211,230,0.08);
     background: linear-gradient(180deg, rgba(15,18,28,0.82), rgba(11,13,18,0.62));
@@ -1332,25 +1353,27 @@ const ENGINE_CSS = `
     flex-shrink: 0;
   }
 
-  .pe-pip-info {
+  .pe-pip-meta {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 14px 22px;
-    gap: 6px;
-    height: var(--pe-pip-info-height);
+    padding: 10px 16px;
+    gap: 4px;
     border-bottom: 1px solid rgba(202,211,230,0.06);
     background: linear-gradient(180deg, rgba(11,13,18,0.62), var(--tf-bg-surface, #111318));
     overflow: hidden;
+    flex-shrink: 0;
   }
-  .pe-pip-info-course {
+
+  .pe-pip-meta-course {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--tf-color-primary-light, #818cf8);
     font-weight: 600;
   }
-  .pe-pip-info-lesson {
+
+  .pe-pip-meta-lesson {
     font-size: 20px;
     font-weight: 700;
     color: var(--tf-text-primary, #e2e6f0);
@@ -1359,7 +1382,8 @@ const ENGINE_CSS = `
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .pe-pip-info-slide {
+
+  .pe-pip-meta-slide {
     font-size: 13px;
     color: var(--tf-text-muted, #8892a8);
     font-family: 'JetBrains Mono', monospace;
@@ -1371,6 +1395,10 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
+    flex: 1;
+    align-self: stretch;
+    height: 100%;
+    min-height: 0;
     overflow: hidden;
     background:
       radial-gradient(circle at top, var(--tf-secondary-container-high, rgba(0,245,255,0.18)), transparent 34%),
@@ -1415,61 +1443,103 @@ const ENGINE_CSS = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 18px;
-    padding: 28px 22px;
-    height: var(--pe-pip-footer-height);
+    gap: clamp(0.25rem, 0.6vh, 0.5rem);
+    padding: clamp(0.5rem, 1.2vh, 1rem) 2.2vw;
+    min-height: fit-content;
+    flex-shrink: 0;
     overflow: hidden;
+    background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
     border-top: 1px solid rgba(202,211,230,0.08);
-    background:
-      linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
   }
   .pe-pip-footer-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 0.5em;
     flex-wrap: wrap;
     width: 100%;
     text-align: center;
   }
-  .pe-pip-footer-row.brand {
-    margin-bottom: 2px;
+  .pe-pip-footer-row.subscribe {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    flex-wrap: nowrap;
+    white-space: nowrap;
   }
-  .pe-pip-footer-row.instructor {
-    margin-bottom: 0;
+  .pe-pip-subscribe-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--tf-color-danger, #ef4444);
+    transform-origin: 50% 10%;
+    animation: pe-shorts-bell-ring 4.8s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  .pe-pip-subscribe-icon svg {
+    width: clamp(0.875rem, 1.8vh, 1.25rem);
+    height: clamp(0.875rem, 1.8vh, 1.25rem);
+  }
+  .pe-pip-subscribe-text {
+    font-size: clamp(0.6875rem, 1.4vh, 0.9375rem);
+    color: var(--tf-text-secondary, #bfc5d4);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .pe-pip-subscribe-brand {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    zoom: 0.72;
+  }
+  .pe-pip-promo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    width: 100%;
+    min-width: 0;
+    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
+    color: var(--tf-text-muted, #8892a8);
+    white-space: nowrap;
+  }
+  .pe-pip-promo-site {
+    color: var(--tf-color-primary-light, #818cf8);
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-weight: 700;
+    letter-spacing: 0.01em;
   }
   .pe-pip-footer-row.socials {
-    gap: 16px;
+    gap: 0.5em;
   }
   .pe-pip-footer-row.copy {
     gap: 0;
   }
   .pe-pip-footer .pe-footer-social-link {
-    gap: 10px;
-    font-size: 17px;
+    gap: 0.3em;
+    font-size: clamp(0.6875rem, 1.4vh, 0.9375rem);
     color: var(--tf-text-secondary, #bfc5d4);
   }
   .pe-pip-footer .pe-footer-social-link svg {
-    width: 28px;
-    height: 28px;
+    width: clamp(0.875rem, 1.8vh, 1.25rem);
+    height: clamp(0.875rem, 1.8vh, 1.25rem);
   }
   .pe-pip-footer .pe-footer-social-text {
     line-height: 1;
   }
-  .pe-pip-footer .pe-footer-logo {
-    height: 48px;
-  }
   .pe-pip-footer .pe-footer-copy {
-    font-size: 14px;
+    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
     color: var(--tf-text-muted, #64748b);
   }
   .pe-pip-footer .pe-footer-instructor {
-    font-size: 18px;
+    font-size: clamp(0.6875rem, 1.4vh, 0.9375rem);
     color: var(--tf-text-primary, #ffffff);
     font-weight: 500;
   }
   .pe-pip-footer .brand-lockup {
-    transform: scale(1.4);
+    transform: scale(1);
     transform-origin: center;
   }
 
@@ -1498,8 +1568,39 @@ const ENGINE_CSS = `
     background: var(--tf-bg-elevated, #191c23);
   }
 
+  /* ── Headless Mode ─────────────────── */
+  /* When headless, strip ALL chrome — the slide fills the viewport.
+     Controlled entirely via BroadcastChannel from the control panel.
+     When combined with pe-pip-mode, the PIP grid layout takes precedence. */
+  .pe-root.pe-headless > .pe-header,
+  .pe-root.pe-headless > .pe-footer,
+  .pe-root.pe-headless > .pe-progress {
+    display: none;
+  }
+  .pe-root.pe-headless {
+    /* slide viewport takes the full window */
+    grid-template-rows: 1fr;
+  }
+  /* Headless-only (NOT combined with pip-mode): slide fills all space */
+  .pe-root.pe-headless:not(.pe-pip-mode) .pe-body {
+    display: block;
+    height: 100vh;
+  }
+  .pe-root.pe-headless:not(.pe-pip-mode) .pe-left {
+    width: 100%;
+    height: 100%;
+  }
+  .pe-root.pe-headless:not(.pe-pip-mode) .pe-viewport {
+    height: 100%;
+  }
+  /* Headless + PIP: hide the header controls; keep the column layout. */
+  .pe-root.pe-headless.pe-pip-mode .pe-pip-header {
+    display: none;
+  }
+
   /* ── Shorts Mode (9:16) ────────────── */
   .pe-shorts-root {
+    --pe-slide-stage-ratio: 1.4;
     width: 100vw;
     height: 100vh;
     background: #000;
@@ -1513,11 +1614,13 @@ const ENGINE_CSS = `
   }
 
   .pe-shorts-frame {
+    --pe-shorts-frame-width: min(calc(100vh * 2048 / 3640), 100vw);
+    --pe-shorts-stage-height: calc(var(--pe-shorts-frame-width) / var(--pe-slide-stage-ratio));
     height: 100vh;
     aspect-ratio: 2048 / 3640;
     max-width: 100vw;
     display: grid;
-    grid-template-rows: 1fr auto auto;
+    grid-template-rows: var(--pe-shorts-stage-height) minmax(0, 1fr) auto;
     background:
       radial-gradient(circle at top, rgba(0,245,255,0.10), transparent 32%),
       radial-gradient(circle at bottom, rgba(168,56,255,0.08), transparent 34%),
@@ -1528,6 +1631,8 @@ const ENGINE_CSS = `
 
   /* Content area at the top — renders actual slide content (flex: 1fr) */
   .pe-shorts-header {
+    min-height: 0;
+    height: var(--pe-shorts-stage-height);
     min-height: 0;
     width: 100%;
     display: flex;
@@ -1557,19 +1662,19 @@ const ENGINE_CSS = `
     overflow: hidden;
   }
   .pe-shorts-slide-content .lm-slide-frame {
-    padding: 12px 16px 14px;
-    font-size: clamp(8px, 1.45vh, 13px);
+    padding: 1.4vh 3.5vw 1.4vh;
+    font-size: clamp(0.5rem, 1.45vh, 0.8125rem);
   }
   .pe-shorts-slide-content.with-title-stack .lm-slide-frame {
-    padding-top: 8px;
+    padding-top: 0.8vh;
   }
   .pe-shorts-slide-content .lm-slide-hero-title {
-    font-size: clamp(14px, 2.6vh, 26px);
-    margin-bottom: 4px;
+    font-size: clamp(0.875rem, 2.6vh, 1.625rem);
+    margin-bottom: 0.4vh;
   }
   .pe-shorts-slide-content .lm-slide-title {
-    font-size: clamp(12px, 2.15vh, 20px);
-    margin-bottom: 4px;
+    font-size: clamp(0.75rem, 2.15vh, 1.25rem);
+    margin-bottom: 0.4vh;
     font-weight: 800;
     letter-spacing: -0.01em;
   }
@@ -1577,7 +1682,7 @@ const ENGINE_CSS = `
     display: none;
   }
   .pe-shorts-slide-content .lm-slide-body {
-    gap: 5px;
+    gap: 0.5vh;
   }
   /* Compact bullet sub-text within shorts */
   .pe-shorts-slide-content .bullet-sub {
@@ -1586,13 +1691,13 @@ const ENGINE_CSS = `
   }
   /* Compact stat cards within shorts */
   .pe-shorts-slide-content .sr-card {
-    padding: 5px 8px;
+    padding: 0.5vh 0.8vw;
   }
   .pe-shorts-slide-content .sr-value {
-    font-size: clamp(10px, 1.6vh, 15px);
+    font-size: clamp(0.625rem, 1.6vh, 0.9375rem);
   }
   .pe-shorts-slide-content .sr-label {
-    font-size: clamp(6px, 0.9vh, 9px);
+    font-size: clamp(0.375rem, 0.9vh, 0.5625rem);
   }
   /* Compact comparison tables within shorts */
   .pe-shorts-slide-content table {
@@ -1600,11 +1705,11 @@ const ENGINE_CSS = `
   }
   .pe-shorts-slide-content th,
   .pe-shorts-slide-content td {
-    padding: 4px 8px;
+    padding: 0.4vh 0.8vw;
   }
   /* InfoBox within shorts */
   .pe-shorts-slide-content .info-box {
-    padding: 7px 10px;
+    padding: 0.7vh 1vw;
     font-size: 0.8em;
   }
   /* Mermaid diagrams within shorts */
@@ -1614,17 +1719,20 @@ const ENGINE_CSS = `
   }
 
   .pe-shorts-video {
-    aspect-ratio: 1 / 1;
     width: 100%;
+    height: 100%;
+    min-height: 0;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     background:
-      radial-gradient(circle at top, var(--tf-secondary-container-high, rgba(0,245,255,0.14)), transparent 34%),
-      radial-gradient(circle at bottom, var(--tf-accent-container-high, rgba(168,56,255,0.10)), transparent 36%),
-      linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
+      radial-gradient(ellipse 80% 60% at 30% 30%, rgba(129,140,248,0.22), transparent),
+      radial-gradient(ellipse 70% 50% at 70% 70%, rgba(192,132,252,0.18), transparent),
+      radial-gradient(ellipse 60% 40% at 50% 50%, rgba(56,189,248,0.10), transparent),
+      linear-gradient(160deg, #262a3d 0%, #2e3350 40%, #232740 100%);
+    border-top: 1px solid rgba(148,163,184,0.12);
   }
 
   .pe-shorts-guide {
@@ -1637,7 +1745,7 @@ const ENGINE_CSS = `
   .pe-shorts-guide.bottom {
     left: 50%;
     width: 1px;
-    height: 12px;
+    height: 1.2vh;
     transform: translateX(-50%);
   }
   .pe-shorts-guide.top { top: 0; }
@@ -1645,7 +1753,7 @@ const ENGINE_CSS = `
   .pe-shorts-guide.left,
   .pe-shorts-guide.right {
     top: 50%;
-    width: 12px;
+    width: 1.2vh;
     height: 1px;
     transform: translateY(-50%);
   }
@@ -1657,8 +1765,10 @@ const ENGINE_CSS = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(4px, 0.6vh, 8px);
-    padding: clamp(8px, 1.2vh, 16px) 22px;
+    gap: clamp(0.25rem, 0.6vh, 0.5rem);
+    padding: clamp(0.5rem, 1.2vh, 1rem) 2.2vw;
+    min-height: fit-content;
+    flex-shrink: 0;
     border-top: 1px solid rgba(202,211,230,0.08);
     background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
   }
@@ -1666,13 +1776,13 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 0.5em;
     flex-wrap: wrap;
     width: 100%;
     text-align: center;
   }
   .pe-shorts-footer .pe-footer-copy {
-    font-size: clamp(10px, 1.2vh, 13px);
+    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
     color: var(--tf-text-muted, #64748b);
   }
 
@@ -1681,7 +1791,7 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 0.4em;
     flex-wrap: nowrap;
     white-space: nowrap;
   }
@@ -1694,8 +1804,8 @@ const ENGINE_CSS = `
     animation: pe-shorts-bell-ring 4.8s ease-in-out infinite;
   }
   .pe-shorts-subscribe-icon svg {
-    width: clamp(14px, 1.8vh, 20px);
-    height: clamp(14px, 1.8vh, 20px);
+    width: clamp(0.875rem, 1.8vh, 1.25rem);
+    height: clamp(0.875rem, 1.8vh, 1.25rem);
   }
   @keyframes pe-shorts-bell-ring {
     0%, 72%, 100% { transform: rotate(0deg) scale(1); }
@@ -1706,7 +1816,7 @@ const ENGINE_CSS = `
     92% { transform: rotate(0deg) scale(1); }
   }
   .pe-shorts-subscribe-text {
-    font-size: clamp(11px, 1.4vh, 15px);
+    font-size: clamp(0.6875rem, 1.4vh, 0.9375rem);
     color: var(--tf-text-secondary, #bfc5d4);
     font-weight: 500;
     letter-spacing: 0.01em;
@@ -1723,10 +1833,10 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 0.4em;
     width: 100%;
     min-width: 0;
-    font-size: clamp(10px, 1.2vh, 13px);
+    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
     color: var(--tf-text-muted, #8892a8);
     white-space: nowrap;
   }
@@ -1749,12 +1859,12 @@ const ENGINE_CSS = `
   }
   .pc-deck-type-btn {
     flex: 1;
-    padding: 3px 0;
+    padding: 0.2em 0;
     border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
-    border-radius: 6px;
+    border-radius: 0.375em;
     background: transparent;
     color: var(--tf-text-muted, #8892a8);
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
@@ -1777,15 +1887,27 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
+    width: 1.75em;
+    height: 1.75em;
+    border-radius: 0.375em;
     background: transparent;
     border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
     color: var(--tf-text-muted, #8892a8);
     cursor: pointer;
     padding: 0;
     transition: all 150ms;
+  }
+  .pe-shorts-btn.ratio {
+    width: auto;
+    min-width: 2.75em;
+    gap: 0.3em;
+    padding: 0 0.5em;
+  }
+  .pe-shorts-btn-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.02em;
   }
   .pe-shorts-btn:hover {
     color: var(--tf-text-primary, #e2e6f0);
@@ -1795,6 +1917,207 @@ const ENGINE_CSS = `
     color: var(--tf-color-primary-light, #818cf8);
     border-color: var(--tf-color-primary, #6366f1);
     background: var(--tf-bg-elevated, #191c23);
+  }
+
+  /* ── Feed Mode (4:5) — full-page aspect with PIP inset ── */
+  .pe-feed-root {
+    --pe-slide-stage-ratio: 1.4;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--tf-text-primary, #e2e6f0);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* 4:5 aspect frame — the whole page viewport */
+  .pe-feed-frame {
+    --pe-feed-frame-width: min(calc(100vh * 4 / 5), 100vw);
+    --pe-feed-stage-height: calc(var(--pe-feed-frame-width) / var(--pe-slide-stage-ratio));
+    height: 100vh;
+    aspect-ratio: 4 / 5;
+    max-width: 100vw;
+    display: grid;
+    grid-template-rows: var(--pe-feed-stage-height) minmax(0, 1fr);
+    background:
+      radial-gradient(circle at top, rgba(0,245,255,0.10), transparent 32%),
+      radial-gradient(circle at bottom, rgba(168,56,255,0.08), transparent 34%),
+      linear-gradient(180deg, #090b12, var(--tf-bg-surface, #111318) 20%, var(--tf-bg-surface, #111318) 80%, #0b0b0f);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Slide content area — fills most of the frame */
+  .pe-feed-slide-area {
+    min-height: 0;
+    height: var(--pe-feed-stage-height);
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pe-feed-media-area {
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
+    background: transparent;
+    height: 100%;
+  }
+
+  .pe-feed-lower {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 80% 60% at 30% 30%, rgba(129,140,248,0.12), transparent),
+      radial-gradient(ellipse 70% 50% at 70% 70%, rgba(192,132,252,0.10), transparent),
+      linear-gradient(180deg, rgba(17,19,24,0.92), rgba(11,11,15,0.96));
+  }
+
+  .pe-feed-slide-content {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .pe-feed-slide-content > * {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .pe-feed-slide-content .lm-slide-frame {
+    padding: 1.6vh 3.2vw 1.6vh;
+    font-size: clamp(0.625rem, 1.8vh, 0.9375rem);
+  }
+  .pe-feed-slide-content.with-title-stack .lm-slide-frame {
+    padding-top: 1vh;
+  }
+  .pe-feed-slide-content .lm-slide-hero-title {
+    font-size: clamp(1.0625rem, 3vh, 1.875rem);
+    margin-bottom: 0.8vh;
+  }
+  .pe-feed-slide-content .lm-slide-title {
+    font-size: clamp(0.875rem, 2.4vh, 1.5rem);
+    margin-bottom: 0.8vh;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+  .pe-feed-slide-content.with-title-stack .lm-slide-title {
+    display: none;
+  }
+  .pe-feed-slide-content .lm-slide-body {
+    gap: 0.6vh;
+  }
+  .pe-feed-slide-content .bullet-sub {
+    font-size: 0.88em;
+    line-height: 1.28;
+  }
+  .pe-feed-slide-content .sr-card {
+    padding: 0.6vh 1vw;
+  }
+  .pe-feed-slide-content .sr-value {
+    font-size: clamp(0.6875rem, 1.75vh, 1rem);
+  }
+  .pe-feed-slide-content .sr-label {
+    font-size: clamp(0.4375rem, 1vh, 0.625rem);
+  }
+  .pe-feed-slide-content table {
+    font-size: 0.88em;
+  }
+  .pe-feed-slide-content th,
+  .pe-feed-slide-content td {
+    padding: 0.5vh 1vw;
+  }
+  .pe-feed-slide-content .info-box {
+    padding: 0.8vh 1.2vw;
+    font-size: 0.82em;
+  }
+  .pe-feed-slide-content .mermaid-widget {
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  /* PIP inset — overlaid on bottom-right of the slide area */
+  .pe-feed-pip {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 10;
+    box-shadow: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Footer bar at the bottom of the 4:5 frame */
+  .pe-feed-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-end;
+    gap: clamp(0.4rem, 0.9vh, 0.8rem);
+    padding: 0;
+    background: transparent;
+    min-height: 0;
+    height: 100%;
+  }
+  .pe-feed-footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em;
+    flex-wrap: wrap;
+    width: 100%;
+    text-align: left;
+  }
+  .pe-feed-footer .pe-footer-copy {
+    font-size: clamp(0.6875rem, 1.1vh, 0.875rem);
+    color: var(--tf-text-muted, #64748b);
+  }
+  .pe-feed-footer-row.subscribe {
+    gap: 0.45em;
+    align-self: flex-start;
+  }
+  .pe-feed-subscribe-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--tf-color-danger, #ef4444);
+    transform-origin: 50% 10%;
+    animation: pe-shorts-bell-ring 4.8s ease-in-out infinite;
+  }
+  .pe-feed-subscribe-icon svg {
+    width: clamp(0.75rem, 1.4vh, 1rem);
+    height: clamp(0.75rem, 1.4vh, 1rem);
+  }
+  .pe-feed-subscribe-text {
+    font-size: clamp(0.75rem, 1.3vh, 0.9375rem);
+    color: var(--tf-text-secondary, #bfc5d4);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .pe-feed-subscribe-brand {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    zoom: 0.8;
+  }
+  .pe-feed-footer-row.copy {
+    align-self: flex-start;
   }
 `;
 
@@ -2080,6 +2403,7 @@ type ControlCommand =
       action: "switch-deck";
       targetDeckId: string;
     }
+  | { type: "command"; deckId: string; action: "toggle-fullscreen" }
   | { type: "request-state"; deckId: string };
 
 type ControlState = {
@@ -2142,6 +2466,8 @@ interface PresentationLayoutProps {
   hideHeaderNav?: boolean;
   /** Hash prefix for navigation (e.g. "#/my-show"). goTo writes `{hashPrefix}/{deckId}/{slide}`. */
   hashPrefix?: string;
+  /** Headless mode — hides all chrome (header, footer, progress bar). Slides fill the window and are controlled entirely via BroadcastChannel from the control panel. */
+  headless?: boolean;
 }
 
 export function PresentationLayout({
@@ -2153,6 +2479,7 @@ export function PresentationLayout({
   controlWindowName = DEFAULT_CONTROL_WINDOW_NAME,
   hideHeaderNav = false,
   hashPrefix,
+  headless = false,
 }: PresentationLayoutProps) {
   const brandLogoSrc =
     branding?.logoSrc ?? "/brand/og-image-template-1200x630.png";
@@ -2183,7 +2510,9 @@ export function PresentationLayout({
     ? `x/${twitterHandle.replace(/^@/, "")}`
     : "X";
   const linkedinLabel = linkedinHandle
-    ? `in/${linkedinHandle.replace(/^@/, "")}`
+    ? linkedinHandle.startsWith("in/")
+      ? linkedinHandle
+      : `in/${linkedinHandle.replace(/^@/, "")}`
     : "LinkedIn";
 
   /* ── Parse initial slide from hash ── */
@@ -2199,7 +2528,7 @@ export function PresentationLayout({
     readStoredSlideZoom(zoomStorageKey),
   );
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [pipMode, setPipMode] = useState(false);
+  const [pipMode, setPipMode] = useState(!!headless);
   const slideCount = deck.slides.length;
   const elapsed = useSlideTimer(slideIndex);
 
@@ -2296,6 +2625,25 @@ export function PresentationLayout({
     stateStorageKey,
   ]);
 
+  /* ── Stable refs for BroadcastChannel handler (avoids effect teardown on step change) ── */
+  const goPrevRef = useRef(goPrev);
+  const goNextRef = useRef(goNext);
+  const goToRef = useRef(goTo);
+  const stepBackRef = useRef(stepBack);
+  const stepForwardRef = useRef(stepForward);
+  const resetStepRef = useRef(resetStep);
+  const postControlStateRef = useRef(postControlState);
+  const currentStepCountRef = useRef(currentStepCount);
+  goPrevRef.current = goPrev;
+  goNextRef.current = goNext;
+  goToRef.current = goTo;
+  stepBackRef.current = stepBack;
+  stepForwardRef.current = stepForward;
+  resetStepRef.current = resetStep;
+  postControlStateRef.current = postControlState;
+  currentStepCountRef.current = currentStepCount;
+  const lastCmdRef = useRef({ sig: "", ts: 0 });
+
   /* ── Keyboard ── */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -2336,7 +2684,7 @@ export function PresentationLayout({
       } else if (e.key === "End") {
         e.preventDefault();
         goTo(slideCount - 1);
-      } else if (e.key === "p" || e.key === "P") {
+      } else if ((e.key === "p" || e.key === "P") && !headless) {
         e.preventDefault();
         setPipMode((v) => !v);
       }
@@ -2362,9 +2710,16 @@ export function PresentationLayout({
 
     const handleCommand = (msg: ControlCommand) => {
       if (!msg) return;
+      /* Dedup: both BroadcastChannel and localStorage fire for cross-window commands */
+      const now = Date.now();
+      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}`;
+      if (sig === lastCmdRef.current.sig && now - lastCmdRef.current.ts < 80)
+        return;
+      lastCmdRef.current = { sig, ts: now };
+
       if (msg.type === "request-state") {
         if (msg.deckId !== deck.id) return;
-        postControlState();
+        postControlStateRef.current();
         return;
       }
       if (msg.type !== "command") return;
@@ -2376,18 +2731,26 @@ export function PresentationLayout({
         return;
       }
       if (msg.deckId !== deck.id) return;
-      if (msg.action === "prev") goPrev();
-      else if (msg.action === "next") goNext();
-      else if (msg.action === "goto") goTo(msg.index);
-      else if (msg.action === "step-prev") stepBack();
-      else if (msg.action === "step-next") stepForward();
-      else if (msg.action === "step-reset") resetStep();
+      if (msg.action === "prev") goPrevRef.current();
+      else if (msg.action === "next") goNextRef.current();
+      else if (msg.action === "goto") goToRef.current(msg.index);
+      else if (msg.action === "step-prev") stepBackRef.current();
+      else if (msg.action === "step-next") stepForwardRef.current();
+      else if (msg.action === "step-reset") resetStepRef.current();
       else if (msg.action === "step-goto") {
         if (typeof msg.index !== "number") return;
-        setStepIndex(Math.max(0, Math.min(msg.index, currentStepCount - 1)));
+        setStepIndex(
+          Math.max(0, Math.min(msg.index, currentStepCountRef.current - 1)),
+        );
       } else if (msg.action === "set-zoom") {
         const nextZoom = Math.max(0.85, Math.min(msg.zoom, 1.4));
         setSlideZoom(nextZoom);
+      } else if (msg.action === "toggle-fullscreen") {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
       }
     };
 
@@ -2412,20 +2775,7 @@ export function PresentationLayout({
       channel.close();
       controlChannelRef.current = null;
     };
-  }, [
-    commandStorageKey,
-    controlChannelId,
-    currentStepCount,
-    deck.id,
-    goPrev,
-    goNext,
-    goTo,
-    hashPrefix,
-    postControlState,
-    resetStep,
-    stepBack,
-    stepForward,
-  ]);
+  }, [controlChannelId, deck.id, commandStorageKey, hashPrefix]);
 
   useEffect(() => {
     postControlState();
@@ -2466,6 +2816,18 @@ export function PresentationLayout({
     }
   }, [controlWindowName]);
 
+  const openFeedWindow = useCallback(() => {
+    const feedUrl = `${window.location.pathname}?shorts=45${window.location.hash}`;
+    const popup = window.open(
+      feedUrl,
+      `${controlWindowName}-feed`,
+      "popup=yes,width=900,height=1125,resizable=yes,scrollbars=yes",
+    );
+    if (popup) {
+      popup.focus();
+    }
+  }, [controlWindowName]);
+
   /* ── Drawer navigation ── */
   const handleDrawerNav = useCallback(
     (idx: number) => {
@@ -2488,7 +2850,7 @@ export function PresentationLayout({
     <>
       <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
       <div
-        className={`pe-root${pipMode ? " pe-pip-mode" : ""}`}
+        className={`pe-root${headless ? " pe-headless" : ""}${pipMode ? " pe-pip-mode" : ""}`}
         ref={rootRef}
         aria-label={courseTitle}
       >
@@ -2518,7 +2880,10 @@ export function PresentationLayout({
                 <button
                   className="pe-nav-btn"
                   onClick={goPrev}
-                  disabled={slideIndex <= 0}
+                  disabled={
+                    slideIndex <= 0 &&
+                    (currentStepCount === 0 || activeStepIndex <= 0)
+                  }
                   aria-label="Previous"
                 >
                   {Icons.chevLeft}
@@ -2544,7 +2909,11 @@ export function PresentationLayout({
                 <button
                   className="pe-nav-btn"
                   onClick={goNext}
-                  disabled={slideIndex >= slideCount - 1}
+                  disabled={
+                    slideIndex >= slideCount - 1 &&
+                    (currentStepCount === 0 ||
+                      activeStepIndex >= currentStepCount - 1)
+                  }
                   aria-label="Next"
                 >
                   {Icons.chevRight}
@@ -2568,18 +2937,31 @@ export function PresentationLayout({
             <button
               className={`pe-pip-btn${pipMode ? " active" : ""}`}
               onClick={() => setPipMode((v) => !v)}
-              title="Toggle PIP mode (P)"
+              title="Toggle 16:9 mode (P)"
             >
               {Icons.pip}
             </button>
             {deck.deckType === "short" && (
-              <button
-                className="pe-shorts-btn"
-                onClick={openShortsWindow}
-                title="Open Shorts (9:16) view"
-              >
-                {Icons.shorts}
-              </button>
+              <>
+                <button
+                  className="pe-shorts-btn ratio"
+                  onClick={openShortsWindow}
+                  title="Open Shorts (9:16) view"
+                  aria-label="Open 9 by 16 shorts view"
+                >
+                  {Icons.shorts}
+                  <span className="pe-shorts-btn-label">9:16</span>
+                </button>
+                <button
+                  className="pe-shorts-btn ratio"
+                  onClick={openFeedWindow}
+                  title="Open Shorts feed (4:5) view"
+                  aria-label="Open 4 by 5 shorts feed view"
+                >
+                  {Icons.shorts}
+                  <span className="pe-shorts-btn-label">4:5</span>
+                </button>
+              </>
             )}
             <button className="pe-fs-btn" onClick={toggleFs} title="Fullscreen">
               {Icons.fullscreen}
@@ -2643,21 +3025,24 @@ export function PresentationLayout({
             {/* Slide viewport */}
             <div className="pe-viewport">
               <div className="pe-slide-box" style={{ zoom: slideZoom }}>
-                <PresentationStepContext.Provider
-                  key={`${deck.id}:${currentSlide?.id ?? slideIndex}`}
-                  value={stepContextValue}
-                >
-                  {currentSlide?.content}
-                </PresentationStepContext.Provider>
+                <div className="pe-slide-stage">
+                  <PresentationStepContext.Provider
+                    key={`${deck.id}:${currentSlide?.id ?? slideIndex}`}
+                    value={stepContextValue}
+                  >
+                    {currentSlide?.content}
+                  </PresentationStepContext.Provider>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* ── PIP Column (visible in PIP mode) ── */}
+          {/* ── 16:9 Column (visible in 16:9 mode) ── */}
           {pipMode && (
             <div className="pe-pip-column">
-              {/* Compact header — keep control access visible in PIP mode */}
-              <div className="pe-pip-header">
+              <div className="pe-pip-upper">
+                {/* Compact header — keep control access visible in 16:9 mode */}
+                <div className="pe-pip-header">
                 <button
                   className={`pe-drawer-toggle ${drawerOpen ? "active" : ""}`}
                   onClick={() => setDrawerOpen(!drawerOpen)}
@@ -2677,7 +3062,10 @@ export function PresentationLayout({
                 <button
                   className="pe-nav-btn"
                   onClick={goPrev}
-                  disabled={slideIndex <= 0}
+                  disabled={
+                    slideIndex <= 0 &&
+                    (currentStepCount === 0 || activeStepIndex <= 0)
+                  }
                   aria-label="Previous"
                 >
                   {Icons.chevLeft}
@@ -2685,7 +3073,11 @@ export function PresentationLayout({
                 <button
                   className="pe-nav-btn"
                   onClick={goNext}
-                  disabled={slideIndex >= slideCount - 1}
+                  disabled={
+                    slideIndex >= slideCount - 1 &&
+                    (currentStepCount === 0 ||
+                      activeStepIndex >= currentStepCount - 1)
+                  }
                   aria-label="Next"
                 >
                   {Icons.chevRight}
@@ -2693,7 +3085,7 @@ export function PresentationLayout({
                 <button
                   className="pe-pip-btn active"
                   onClick={() => setPipMode(false)}
-                  title="Exit PIP mode (P)"
+                  title="Exit 16:9 mode (P)"
                 >
                   {Icons.pip}
                 </button>
@@ -2706,40 +3098,53 @@ export function PresentationLayout({
                 </button>
               </div>
 
-              {/* Course / lesson info section */}
-              <div className="pe-pip-info">
-                <span className="pe-pip-info-course">{courseTitle}</span>
-                <span className="pe-pip-info-lesson">
+              <div className="pe-pip-meta">
+                <span className="pe-pip-meta-course">{courseTitle}</span>
+                <span className="pe-pip-meta-lesson">
                   {deck.number}. {sanitizePresentationTitle(deck.title)}
                 </span>
-                <span className="pe-pip-info-slide">
+                <span className="pe-pip-meta-slide">
                   Slide {slideIndex + 1} of {slideCount}
                 </span>
               </div>
 
-              {/* PIP video area (middle) */}
-              <div className="pe-pip-inset" aria-label="9:16 PIP video area">
+              {/* 16:9 video area (middle) */}
+              <div className="pe-pip-inset" aria-label="16:9 video area">
                 <span className="pe-pip-guide top" aria-hidden="true" />
                 <span className="pe-pip-guide right" aria-hidden="true" />
                 <span className="pe-pip-guide bottom" aria-hidden="true" />
                 <span className="pe-pip-guide left" aria-hidden="true" />
               </div>
+              </div>
 
               <div className="pe-pip-footer">
-                <div className="pe-pip-footer-row brand">
-                  {brandIconUrl ? (
-                    <BrandLockup
-                      iconUrl={brandIconUrl}
-                      size="lg"
-                      label={brandLabel}
-                    />
-                  ) : (
-                    <img
-                      className="pe-footer-logo"
-                      src={brandLogoSrc}
-                      alt={brandLabel}
-                    />
-                  )}
+                <div className="pe-pip-footer-row subscribe">
+                  <span className="pe-pip-subscribe-icon">{Icons.bell}</span>
+                  <span className="pe-pip-subscribe-text">Subscribe to</span>
+                  <span className="pe-pip-subscribe-brand">
+                    {brandIconUrl ? (
+                      <BrandLockup
+                        iconUrl={brandIconUrl}
+                        size="sm"
+                        label={brandLabel}
+                      />
+                    ) : (
+                      <img
+                        className="pe-footer-logo"
+                        src={brandLogoSrc}
+                        alt={brandLabel}
+                      />
+                    )}
+                  </span>
+                  <span className="pe-pip-subscribe-text">
+                    for more videos & tutorials
+                  </span>
+                </div>
+                <div className="pe-pip-footer-row">
+                  <span className="pe-pip-promo">
+                    <span>Explore free interactive tutorials at</span>
+                    <span className="pe-pip-promo-site">{siteUrl}</span>
+                  </span>
                 </div>
                 {instructorName ? (
                   <div className="pe-pip-footer-row instructor">
@@ -2894,19 +3299,6 @@ interface ShortsLayoutProps {
   hashPrefix?: string;
 }
 
-/** Truncate narration to ~300 chars at a sentence boundary for 3-4 line descriptions. */
-function shortsDescription(narration?: string): string {
-  if (!narration) return "";
-  const clean = narration.replace(/\s+/g, " ").trim();
-  if (clean.length <= 300) return clean;
-  const cut = clean.slice(0, 300);
-  const dot = cut.lastIndexOf(".");
-  const comma = cut.lastIndexOf(",");
-  const boundary = Math.max(dot, comma);
-  if (boundary > 120) return cut.slice(0, boundary + 1).trim();
-  return cut.trim() + "…";
-}
-
 export function ShortsLayout({
   courseTitle,
   deck,
@@ -3023,6 +3415,25 @@ export function ShortsLayout({
     localStorage.setItem(stateStorageKey, JSON.stringify(message));
   }, [deck, slideIndex, slideCount, elapsed, activeStepIndex, stateStorageKey]);
 
+  /* ── Stable refs for BroadcastChannel handler (avoids effect teardown on step change) ── */
+  const sGoPrevRef = useRef(goPrev);
+  const sGoNextRef = useRef(goNext);
+  const sGoToRef = useRef(goTo);
+  const sStepBackRef = useRef(stepBack);
+  const sStepForwardRef = useRef(stepForward);
+  const sResetStepRef = useRef(resetStep);
+  const sPostControlStateRef = useRef(postControlState);
+  const sCurrentStepCountRef = useRef(currentStepCount);
+  sGoPrevRef.current = goPrev;
+  sGoNextRef.current = goNext;
+  sGoToRef.current = goTo;
+  sStepBackRef.current = stepBack;
+  sStepForwardRef.current = stepForward;
+  sResetStepRef.current = resetStep;
+  sPostControlStateRef.current = postControlState;
+  sCurrentStepCountRef.current = currentStepCount;
+  const sLastCmdRef = useRef({ sig: "", ts: 0 });
+
   useEffect(() => {
     const channel = new BroadcastChannel(controlChannelId);
     stateChannelRef.current = channel;
@@ -3091,9 +3502,16 @@ export function ShortsLayout({
 
     const handleCommand = (msg: ControlCommand) => {
       if (!msg) return;
+      /* Dedup: both BroadcastChannel and localStorage fire for cross-window commands */
+      const now = Date.now();
+      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}`;
+      if (sig === sLastCmdRef.current.sig && now - sLastCmdRef.current.ts < 80)
+        return;
+      sLastCmdRef.current = { sig, ts: now };
+
       if (msg.type === "request-state") {
         if (msg.deckId !== deck.id) return;
-        postControlState();
+        sPostControlStateRef.current();
         return;
       }
       if (msg.type !== "command") return;
@@ -3105,15 +3523,23 @@ export function ShortsLayout({
         return;
       }
       if (msg.deckId !== deck.id) return;
-      if (msg.action === "prev") goPrev();
-      else if (msg.action === "next") goNext();
-      else if (msg.action === "goto") goTo(msg.index);
-      else if (msg.action === "step-prev") stepBack();
-      else if (msg.action === "step-next") stepForward();
-      else if (msg.action === "step-reset") resetStep();
+      if (msg.action === "prev") sGoPrevRef.current();
+      else if (msg.action === "next") sGoNextRef.current();
+      else if (msg.action === "goto") sGoToRef.current(msg.index);
+      else if (msg.action === "step-prev") sStepBackRef.current();
+      else if (msg.action === "step-next") sStepForwardRef.current();
+      else if (msg.action === "step-reset") sResetStepRef.current();
       else if (msg.action === "step-goto") {
         if (typeof msg.index !== "number") return;
-        setStepIndex(Math.max(0, Math.min(msg.index, currentStepCount - 1)));
+        setStepIndex(
+          Math.max(0, Math.min(msg.index, sCurrentStepCountRef.current - 1)),
+        );
+      } else if (msg.action === "toggle-fullscreen") {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
       }
     };
 
@@ -3137,20 +3563,7 @@ export function ShortsLayout({
       channel.close();
       commandChannelRef.current = null;
     };
-  }, [
-    commandStorageKey,
-    commandChannelId,
-    currentStepCount,
-    deck.id,
-    goPrev,
-    goNext,
-    goTo,
-    hashPrefix,
-    postControlState,
-    resetStep,
-    stepBack,
-    stepForward,
-  ]);
+  }, [commandStorageKey, commandChannelId, deck.id, hashPrefix]);
 
   useEffect(() => {
     postControlState();
@@ -3231,11 +3644,359 @@ export function ShortsLayout({
   );
 }
 
+/* ═══════════════════════════════════════════════════════════════════════ */
+/*  ShortsFeedLayout — 4:5 portrait feed view (slides + video PiP)       */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+interface ShortsFeedLayoutProps {
+  courseTitle: string;
+  deck: PresentationDeck;
+  branding?: PresentationBranding;
+  controlChannelId?: string;
+  commandChannelId?: string;
+  hashPrefix?: string;
+}
+
+export function ShortsFeedLayout({
+  courseTitle,
+  deck,
+  branding,
+  controlChannelId = DEFAULT_CONTROL_CHANNEL,
+  commandChannelId = controlChannelId,
+  hashPrefix,
+}: ShortsFeedLayoutProps) {
+  const brandIconUrl = branding?.brandIconUrl;
+  const brandLabel = branding?.brandLabel ?? "Tutorial";
+  const copyrightText =
+    branding?.copyright ?? `\u00A9 ${new Date().getFullYear()} ${brandLabel}`;
+
+  const rootRef = useRef<HTMLDivElement>(null);
+  const stateChannelRef = useRef<BroadcastChannel | null>(null);
+  const commandChannelRef = useRef<BroadcastChannel | null>(null);
+  const stateStorageKey = getControlStorageKey(controlChannelId, "state");
+  const commandStorageKey = getControlStorageKey(commandChannelId, "command");
+
+  const getIndexFromHash = useCallback((): number => {
+    const hash = window.location.hash;
+    const m = hash.match(/\/(\d+)$/);
+    return m ? parseInt(m[1], 10) : 0;
+  }, []);
+
+  const [slideIndex, setSlideIndex] = useState(getIndexFromHash);
+  const [stepIndex, setStepIndex] = useState(0);
+  const slideCount = deck.slides.length;
+  const elapsed = useSlideTimer(slideIndex);
+
+  const currentSlide = deck.slides[slideIndex];
+  const currentSteps = currentSlide?.steps ?? [];
+  const currentStepCount = currentSteps.length;
+  const activeStepIndex =
+    currentStepCount > 0 ? Math.min(stepIndex, currentStepCount - 1) : 0;
+  const activeStep = currentSteps[activeStepIndex] ?? null;
+  const shortTitle = sanitizePresentationTitle(deck.title);
+  const slideTitle = sanitizePresentationTitle(currentSlide?.title);
+  const showTitleStack = slideIndex > 0;
+
+  const stepContextValue: PresentationStepContextValue = {
+    stepIndex: activeStepIndex,
+    stepCount: currentStepCount,
+    activeStep,
+    steps: currentSteps,
+  };
+
+  /* ── Navigation ── */
+  const goTo = useCallback(
+    (idx: number) => {
+      const clamped = Math.max(0, Math.min(idx, slideCount - 1));
+      setSlideIndex(clamped);
+      setStepIndex(0);
+      window.location.hash = hashPrefix
+        ? `${hashPrefix}/${deck.id}/${clamped}`
+        : `#/${deck.id}/${clamped}`;
+    },
+    [slideCount, deck.id, hashPrefix],
+  );
+
+  const goPrev = useCallback(() => {
+    if (currentStepCount > 0 && activeStepIndex > 0) {
+      setStepIndex((v) => Math.max(0, v - 1));
+      return;
+    }
+    goTo(slideIndex - 1);
+  }, [activeStepIndex, currentStepCount, goTo, slideIndex]);
+
+  const goNext = useCallback(() => {
+    if (currentStepCount > 0 && activeStepIndex < currentStepCount - 1) {
+      setStepIndex((v) => Math.min(currentStepCount - 1, v + 1));
+      return;
+    }
+    goTo(slideIndex + 1);
+  }, [activeStepIndex, currentStepCount, goTo, slideIndex]);
+
+  const stepBack = useCallback(() => {
+    if (currentStepCount <= 0) return;
+    setStepIndex((v) => Math.max(0, v - 1));
+  }, [currentStepCount]);
+
+  const stepForward = useCallback(() => {
+    if (currentStepCount <= 0) return;
+    setStepIndex((v) => Math.min(currentStepCount - 1, v + 1));
+  }, [currentStepCount]);
+
+  const resetStep = useCallback(() => {
+    setStepIndex(0);
+  }, []);
+
+  /* ── Broadcast state ── */
+  const postControlState = useCallback(() => {
+    const channel = stateChannelRef.current;
+    if (!channel) return;
+    const slide = deck.slides[slideIndex];
+    const message: ControlState = {
+      type: "state",
+      deckId: deck.id,
+      deckTitle: deck.title,
+      slideIndex,
+      slideCount,
+      elapsed,
+      duration: slide?.duration,
+      zoom: 1,
+      slideTitle: slide?.title,
+      narration: slide?.narration,
+      steps: slide?.steps,
+      stepIndex: slide?.steps?.length ? activeStepIndex : 0,
+      stepCount: slide?.steps?.length ?? 0,
+    };
+    channel.postMessage(message);
+    localStorage.setItem(stateStorageKey, JSON.stringify(message));
+  }, [deck, slideIndex, slideCount, elapsed, activeStepIndex, stateStorageKey]);
+
+  /* ── Stable refs ── */
+  const fGoPrevRef = useRef(goPrev);
+  const fGoNextRef = useRef(goNext);
+  const fGoToRef = useRef(goTo);
+  const fStepBackRef = useRef(stepBack);
+  const fStepForwardRef = useRef(stepForward);
+  const fResetStepRef = useRef(resetStep);
+  const fPostControlStateRef = useRef(postControlState);
+  const fCurrentStepCountRef = useRef(currentStepCount);
+  fGoPrevRef.current = goPrev;
+  fGoNextRef.current = goNext;
+  fGoToRef.current = goTo;
+  fStepBackRef.current = stepBack;
+  fStepForwardRef.current = stepForward;
+  fResetStepRef.current = resetStep;
+  fPostControlStateRef.current = postControlState;
+  fCurrentStepCountRef.current = currentStepCount;
+  const fLastCmdRef = useRef({ sig: "", ts: 0 });
+
+  useEffect(() => {
+    const channel = new BroadcastChannel(controlChannelId);
+    stateChannelRef.current = channel;
+    return () => {
+      channel.close();
+      stateChannelRef.current = null;
+    };
+  }, [controlChannelId]);
+
+  /* ── Keyboard ── */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.repeat) {
+        const nav =
+          e.key === "ArrowLeft" ||
+          e.key === "ArrowRight" ||
+          e.key === " " ||
+          e.key === "PageUp" ||
+          e.key === "PageDown";
+        if (nav) {
+          e.preventDefault();
+          return;
+        }
+      }
+      if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        goPrev();
+      } else if (
+        e.key === "ArrowRight" ||
+        e.key === " " ||
+        e.key === "PageDown"
+      ) {
+        e.preventDefault();
+        goNext();
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        goTo(0);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        goTo(slideCount - 1);
+      } else if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        if (!document.fullscreenElement) rootRef.current?.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [goPrev, goNext, goTo, slideCount]);
+
+  /* ── Hash sync ── */
+  useEffect(() => {
+    const onHash = () => {
+      setSlideIndex(getIndexFromHash());
+      setStepIndex(0);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, [getIndexFromHash]);
+
+  /* ── Control-window sync ── */
+  useEffect(() => {
+    const channel = new BroadcastChannel(commandChannelId);
+    commandChannelRef.current = channel;
+
+    const handleCommand = (msg: ControlCommand) => {
+      if (!msg) return;
+      const now = Date.now();
+      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}`;
+      if (sig === fLastCmdRef.current.sig && now - fLastCmdRef.current.ts < 80)
+        return;
+      fLastCmdRef.current = { sig, ts: now };
+
+      if (msg.type === "request-state") {
+        if (msg.deckId !== deck.id) return;
+        fPostControlStateRef.current();
+        return;
+      }
+      if (msg.type !== "command") return;
+      if (msg.action === "switch-deck") {
+        if (msg.deckId !== deck.id || !msg.targetDeckId) return;
+        window.location.hash = hashPrefix
+          ? `${hashPrefix}/${msg.targetDeckId}/0`
+          : `#/${msg.targetDeckId}/0`;
+        return;
+      }
+      if (msg.deckId !== deck.id) return;
+      if (msg.action === "prev") fGoPrevRef.current();
+      else if (msg.action === "next") fGoNextRef.current();
+      else if (msg.action === "goto") fGoToRef.current(msg.index);
+      else if (msg.action === "step-prev") fStepBackRef.current();
+      else if (msg.action === "step-next") fStepForwardRef.current();
+      else if (msg.action === "step-reset") fResetStepRef.current();
+      else if (msg.action === "step-goto") {
+        if (typeof msg.index !== "number") return;
+        setStepIndex(
+          Math.max(0, Math.min(msg.index, fCurrentStepCountRef.current - 1)),
+        );
+      } else if (msg.action === "toggle-fullscreen") {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+    };
+
+    const onMessage = (ev: MessageEvent<ControlCommand>) => {
+      handleCommand(ev.data);
+    };
+    const onStorage = (ev: StorageEvent) => {
+      if (ev.key !== commandStorageKey || !ev.newValue) return;
+      try {
+        handleCommand(JSON.parse(ev.newValue) as ControlCommand);
+      } catch {
+        /* ignore */
+      }
+    };
+
+    channel.addEventListener("message", onMessage);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      channel.removeEventListener("message", onMessage);
+      window.removeEventListener("storage", onStorage);
+      channel.close();
+      commandChannelRef.current = null;
+    };
+  }, [commandStorageKey, commandChannelId, deck.id, hashPrefix]);
+
+  useEffect(() => {
+    postControlState();
+  }, [postControlState]);
+
+  useEffect(() => {
+    setStepIndex(0);
+  }, [deck.id, slideIndex]);
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
+      <div className="pe-feed-root" ref={rootRef} aria-label={courseTitle}>
+        <div className="pe-feed-frame">
+          {/* ── Slide content area (fills the frame) ── */}
+          <div className="pe-feed-slide-area">
+            {showTitleStack ? (
+              <ShortsTitleStack
+                shortTitle={shortTitle}
+                slideTitle={slideTitle}
+              />
+            ) : null}
+            <div
+              className={`pe-feed-slide-content${showTitleStack ? " with-title-stack" : ""}`}
+            >
+              <PresentationStepContext.Provider
+                key={`${deck.id}:${currentSlide?.id ?? slideIndex}`}
+                value={stepContextValue}
+              >
+                {currentSlide?.content}
+              </PresentationStepContext.Provider>
+            </div>
+          </div>
+
+          <div className="pe-feed-lower">
+            <div className="pe-feed-media-area">
+              <div className="pe-feed-pip" aria-label="Video capture area" />
+            </div>
+
+            <div className="pe-feed-footer">
+              <div className="pe-feed-footer-row subscribe">
+                <span className="pe-feed-subscribe-icon">{Icons.bell}</span>
+                <span className="pe-feed-subscribe-text">Subscribe to</span>
+                <span className="pe-feed-subscribe-brand">
+                  {brandIconUrl ? (
+                    <BrandLockup
+                      iconUrl={brandIconUrl}
+                      size="sm"
+                      label={brandLabel}
+                    />
+                  ) : (
+                    <strong>{brandLabel}</strong>
+                  )}
+                </span>
+                <span className="pe-feed-subscribe-text">
+                  for more videos & tutorials
+                </span>
+              </div>
+              <div className="pe-feed-footer-row copy">
+                <span className="pe-footer-copy">{copyrightText}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 interface PresentationControlPanelProps {
   deck: PresentationDeck;
   decks: PresentationDeck[];
+  onExplore?: () => void;
   onSelectDeck?: (deckId: string) => void;
   onOpenPresenter?: () => void;
+  /** Open the 9:16 shorts view for the current deck */
+  onOpenShorts?: () => void;
+  /** Open the 4:5 feed view for the current deck */
+  onOpenFeed?: () => void;
   branding?: PresentationBranding;
   controlChannelId?: string;
   /** Optional React node rendered above the "Jump Lesson" section in the sidebar */
@@ -3245,8 +4006,11 @@ interface PresentationControlPanelProps {
 export function PresentationControlPanel({
   deck,
   decks,
+  onExplore,
   onSelectDeck,
   onOpenPresenter,
+  onOpenShorts,
+  onOpenFeed,
   branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   headerSlot,
@@ -3260,6 +4024,8 @@ export function PresentationControlPanel({
   const commandStorageKey = getControlStorageKey(controlChannelId, "command");
   const zoomStorageKey = getZoomStorageKey(controlChannelId, deck.id);
   const transcriptScaleStorageKey = `${controlChannelId}:transcript-scale`;
+  /** True once a presenter/shorts/feed window has responded with state. */
+  const [connected, setConnected] = useState(false);
   const [state, setState] = useState<ControlState>({
     type: "state",
     deckId: deck.id,
@@ -3324,6 +4090,7 @@ export function PresentationControlPanel({
     const onMessage = (ev: MessageEvent<ControlState>) => {
       const msg = ev.data;
       if (!msg || msg.type !== "state" || msg.deckId !== deck.id) return;
+      setConnected(true);
       setState(msg);
     };
 
@@ -3332,6 +4099,7 @@ export function PresentationControlPanel({
       try {
         const msg = JSON.parse(ev.newValue) as ControlState;
         if (!msg || msg.type !== "state" || msg.deckId !== deck.id) return;
+        setConnected(true);
         setState(msg);
       } catch {
         // Ignore malformed sync payloads.
@@ -3341,6 +4109,13 @@ export function PresentationControlPanel({
     channel.addEventListener("message", onMessage);
     window.addEventListener("storage", onStorage);
     channel.postMessage({ type: "request-state", deckId: deck.id });
+
+    /* Periodically ping for state until a presenter window connects.
+       This covers the case where the control panel sends request-state
+       before the presenter popup has finished initialising. */
+    const pingInterval = setInterval(() => {
+      channel.postMessage({ type: "request-state", deckId: deck.id });
+    }, 1500);
 
     const cachedState = localStorage.getItem(stateStorageKey);
     if (cachedState) {
@@ -3355,6 +4130,7 @@ export function PresentationControlPanel({
     }
 
     return () => {
+      clearInterval(pingInterval);
       channel.removeEventListener("message", onMessage);
       window.removeEventListener("storage", onStorage);
       channel.close();
@@ -3384,8 +4160,11 @@ export function PresentationControlPanel({
     [deck.id, onSelectDeck, send],
   );
 
-  const atStart = state.slideIndex <= 0;
-  const atEnd = state.slideIndex >= state.slideCount - 1;
+  const atStart =
+    state.slideIndex <= 0 && (state.stepCount === 0 || state.stepIndex <= 0);
+  const atEnd =
+    state.slideIndex >= state.slideCount - 1 &&
+    (state.stepCount === 0 || state.stepIndex >= state.stepCount - 1);
   const timerOver =
     state.duration != null ? state.elapsed > state.duration : false;
   const transcriptFontScale =
@@ -3425,6 +4204,11 @@ export function PresentationControlPanel({
             <span className="pc-meta-item">Zoom {state.zoom.toFixed(2)}x</span>
           </div>
           <div className="pc-header-spacer" />
+          {onExplore && (
+            <button className="pc-btn pc-btn-header" onClick={onExplore}>
+              Explore
+            </button>
+          )}
           <span className="pc-header-separator" aria-hidden="true" />
           {brandIconUrl ? (
             <BrandLockup iconUrl={brandIconUrl} size="sm" label={brandLabel} />
@@ -3442,10 +4226,56 @@ export function PresentationControlPanel({
                 className="pc-btn pc-btn-header"
                 onClick={onOpenPresenter}
               >
-                Open Presenter
+                ▶ 16:9
               </button>
             </>
           )}
+          {onOpenShorts && deck.deckType === "short" && (
+            <button className="pc-btn pc-btn-header" onClick={onOpenShorts}>
+              📱 9:16
+            </button>
+          )}
+          {onOpenFeed && deck.deckType === "short" && (
+            <button className="pc-btn pc-btn-header" onClick={onOpenFeed}>
+              📱 4:5
+            </button>
+          )}
+          <span className="pc-header-separator" aria-hidden="true" />
+          <button
+            className="pc-btn pc-btn-header"
+            onClick={() =>
+              send({
+                type: "command",
+                deckId: deck.id,
+                action: "toggle-fullscreen",
+              })
+            }
+            disabled={!connected}
+            title={
+              connected
+                ? "Toggle fullscreen on slide window"
+                : "No slide window connected"
+            }
+          >
+            ⛶ Fullscreen
+          </button>
+          <span
+            className="pc-connection-dot"
+            style={{
+              display: "inline-block",
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              marginLeft: 8,
+              background: connected ? "#22c55e" : "#6b7280",
+              boxShadow: connected ? "0 0 6px #22c55e88" : "none",
+              transition: "background 0.3s, box-shadow 0.3s",
+            }}
+            title={
+              connected ? "Slide window connected" : "No slide window connected"
+            }
+            aria-label={connected ? "Connected" : "Disconnected"}
+          />
         </div>
 
         <div className="pc-body">
@@ -3545,7 +4375,8 @@ export function PresentationControlPanel({
                 onClick={() =>
                   send({ type: "command", deckId: deck.id, action: "prev" })
                 }
-                disabled={atStart}
+                disabled={!connected || atStart}
+                title={!connected ? "No slide window connected" : undefined}
               >
                 Previous
               </button>
@@ -3554,7 +4385,8 @@ export function PresentationControlPanel({
                 onClick={() =>
                   send({ type: "command", deckId: deck.id, action: "next" })
                 }
-                disabled={atEnd}
+                disabled={!connected || atEnd}
+                title={!connected ? "No slide window connected" : undefined}
               >
                 Next
               </button>
@@ -3564,16 +4396,18 @@ export function PresentationControlPanel({
               {deck.slides.map((slide, idx) => (
                 <button
                   key={slide.id}
-                  className={`pc-jump-item ${idx === state.slideIndex ? "active" : ""}`}
-                  onClick={() =>
+                  className={`pc-jump-item ${idx === state.slideIndex ? "active" : ""}${!connected ? " disabled" : ""}`}
+                  onClick={() => {
+                    if (!connected) return;
                     send({
                       type: "command",
                       deckId: deck.id,
                       action: "goto",
                       index: idx,
-                    })
-                  }
-                  title={slide.title}
+                    });
+                  }}
+                  disabled={!connected}
+                  title={!connected ? "No slide window connected" : slide.title}
                 >
                   <span className="pc-jump-index">{idx + 1}</span>
                   <span className="pc-jump-title">
@@ -3609,7 +4443,7 @@ export function PresentationControlPanel({
                         index: Math.max(0, state.stepIndex - 1),
                       })
                     }
-                    disabled={state.stepIndex <= 0}
+                    disabled={!connected || state.stepIndex <= 0}
                   >
                     Back
                   </button>
@@ -3627,7 +4461,9 @@ export function PresentationControlPanel({
                         ),
                       })
                     }
-                    disabled={state.stepIndex >= state.stepCount - 1}
+                    disabled={
+                      !connected || state.stepIndex >= state.stepCount - 1
+                    }
                   >
                     Step
                   </button>
@@ -3640,7 +4476,7 @@ export function PresentationControlPanel({
                         action: "step-reset",
                       })
                     }
-                    disabled={state.stepIndex <= 0}
+                    disabled={!connected || state.stepIndex <= 0}
                   >
                     Reset
                   </button>

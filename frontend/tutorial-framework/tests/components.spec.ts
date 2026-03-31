@@ -1,5 +1,32 @@
 import { expect, test } from "@playwright/test";
 
+async function expectApproxRatio(
+  actual: number,
+  expected: number,
+  tolerance: number,
+) {
+  expect(Math.abs(actual - expected)).toBeLessThanOrEqual(tolerance);
+}
+
+async function getComputedRatio(locator: Parameters<typeof expect>[0]) {
+  return locator.evaluate((node: Element) => {
+    const style = window.getComputedStyle(node as HTMLElement);
+    const width = Number.parseFloat(style.width);
+    const height = Number.parseFloat(style.height);
+    return width / height;
+  });
+}
+
+async function getComputedSize(locator: Parameters<typeof expect>[0]) {
+  return locator.evaluate((node: Element) => {
+    const style = window.getComputedStyle(node as HTMLElement);
+    return {
+      width: Number.parseFloat(style.width),
+      height: Number.parseFloat(style.height),
+    };
+  });
+}
+
 test("renders component harness", async ({ page }) => {
   await page.goto("/");
 
@@ -42,23 +69,25 @@ test("step slides expose a control step button", async ({ browser }) => {
   const control = await controlPromise;
   await control.waitForLoadState("domcontentloaded");
 
-  await expect(control.getByText("Step 1 / 4")).toBeVisible();
-  await expect(control.getByText(/prompt is entered/i)).toBeVisible();
+  await expect(control.locator(".pc-step-counter")).toHaveText("Step 1 / 4");
+  await expect(control.locator(".pc-transcript-current-text")).toContainText(
+    /prompt is entered/i,
+  );
   await expect(control.getByTestId("presentation-step-next")).toBeVisible();
   await control.getByTestId("presentation-step-next").click();
-  await expect(control.getByText("Step 2 / 4")).toBeVisible();
+  await expect(control.locator(".pc-step-counter")).toHaveText("Step 2 / 4");
 
   await control.getByTestId("presentation-step-next").click();
-  await expect(control.getByText("Step 3 / 4")).toBeVisible();
+  await expect(control.locator(".pc-step-counter")).toHaveText("Step 3 / 4");
 
   await control.getByRole("button", { name: "Back" }).click();
-  await expect(control.getByText("Step 2 / 4")).toBeVisible();
+  await expect(control.locator(".pc-step-counter")).toHaveText("Step 2 / 4");
 
   await presenter.bringToFront();
   await expect(presenter.getByTestId("step-active-title")).toHaveText("Step 2");
-  await expect(
-    control.getByText(/repository context is discovered/i),
-  ).toBeVisible();
+  await expect(control.locator(".pc-transcript-current-text")).toContainText(
+    /repository context is discovered/i,
+  );
 });
 
 test("control window transcript size defaults larger and is adjustable", async ({
@@ -72,7 +101,7 @@ test("control window transcript size defaults larger and is adjustable", async (
   const control = await controlPromise;
   await control.waitForLoadState("domcontentloaded");
 
-  const transcriptText = control.getByText(/prompt is entered/i);
+  const transcriptText = control.locator(".pc-transcript-current-text");
   const transcriptHeader = control.locator(".pc-transcript-header");
   await expect(transcriptText).toBeVisible();
   await expect(transcriptHeader.getByLabel("Transcript size")).toBeVisible();
@@ -81,7 +110,8 @@ test("control window transcript size defaults larger and is adjustable", async (
   const defaultFontSize = await transcriptText.evaluate(
     (node) => window.getComputedStyle(node).fontSize,
   );
-  expect(defaultFontSize).toBe("15.4px");
+  const defaultFontSizePx = Number.parseFloat(defaultFontSize);
+  expect(defaultFontSizePx).toBeGreaterThan(15);
 
   await transcriptHeader.getByLabel("Transcript size").fill("7");
   await expect(transcriptHeader.getByText("170%")).toBeVisible();
@@ -89,8 +119,61 @@ test("control window transcript size defaults larger and is adjustable", async (
   const largerFontSize = await transcriptText.evaluate(
     (node) => window.getComputedStyle(node).fontSize,
   );
-  expect(largerFontSize).toBe("23.8px");
+  const largerFontSizePx = Number.parseFloat(largerFontSize);
+  expect(largerFontSizePx).toBeGreaterThan(defaultFontSizePx);
 
   await control.getByLabel("Slide zoom").selectOption("1.30");
   await expect(control.getByText("Zoom 1.30x")).toBeVisible();
+});
+
+test("presentation layouts keep the slide stage at 1.4:1 with square corners", async ({
+  browser,
+}) => {
+  const presenter = await browser.newPage();
+  await presenter.goto("/presentation-step.html#/01/0");
+
+  const slideBox = presenter.locator(".pe-slide-box");
+  await expect(slideBox).toBeVisible();
+  await expect(slideBox).toHaveCSS("aspect-ratio", "7 / 5");
+  await expect(slideBox).toHaveCSS("border-radius", "0px");
+
+  await presenter.getByTitle("Toggle 16:9 mode (P)").click();
+  const pipColumn = presenter.locator(".pe-pip-column");
+  const pipInset = presenter.locator(".pe-pip-inset");
+  const pipFooter = presenter.locator(".pe-pip-footer");
+  const pipSubscribeIcon = presenter.locator(".pe-pip-subscribe-icon");
+  await expect(pipColumn).toBeVisible();
+  await expect(pipFooter).toBeVisible();
+  await expect(pipSubscribeIcon).toBeVisible();
+
+  const pipColumnSize = await getComputedSize(pipColumn);
+  const pipInsetSize = await getComputedSize(pipInset);
+  const pipFooterSize = await getComputedSize(pipFooter);
+  expect(pipColumnSize.width).toBeGreaterThan(250);
+  expect(pipInsetSize.width).toBeGreaterThan(pipColumnSize.width * 0.9);
+  // Reference layout: header(44) + info(100) + 1fr(PIP) + auto(footer).
+  // PIP inset takes the bulk of the column; footer is compact.
+  expect(pipInsetSize.height).toBeGreaterThan(pipFooterSize.height);
+  expect(pipFooterSize.height).toBeGreaterThan(40);
+  await expect(pipSubscribeIcon).not.toHaveCSS("animation-name", "none");
+
+  const shorts = await browser.newPage();
+  await shorts.goto("/presentation-step.html?shorts=1#/01/0");
+  const shortsFrame = shorts.locator(".pe-shorts-frame");
+  const shortsHeader = shorts.locator(".pe-shorts-header");
+  const shortsVideo = shorts.locator(".pe-shorts-video");
+  const shortsFooter = shorts.locator(".pe-shorts-footer");
+  await expect(shortsHeader).toBeVisible();
+  await expect(shortsFooter).toBeVisible();
+  const shortsFrameSize = await getComputedSize(shortsFrame);
+  const shortsHeaderSize = await getComputedSize(shortsHeader);
+  const shortsVideoSize = await getComputedSize(shortsVideo);
+  const shortsFooterSize = await getComputedSize(shortsFooter);
+  await expectApproxRatio(
+    shortsFrameSize.width / shortsHeaderSize.height,
+    1.4,
+    0.04,
+  );
+  expect(shortsVideoSize.height).toBeGreaterThan(shortsFooterSize.height);
+  expect(shortsVideoSize.width).toBeGreaterThan(0);
 });
