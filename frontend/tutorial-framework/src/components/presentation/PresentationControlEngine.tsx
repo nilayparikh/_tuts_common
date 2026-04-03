@@ -45,6 +45,8 @@ export interface PresentationDeck {
   number: string;
   title: string;
   deckType?: DeckType;
+  /** One-line learning objective shown in 16:9 PIP title area */
+  objective?: string;
   slides: PresentationSlide[];
 }
 
@@ -1329,24 +1331,24 @@ const ENGINE_CSS = `
   .pe-root.pe-pip-mode .pe-viewport {
     padding: 0;
   }
+  .pe-root.pe-pip-mode .pe-viewport-guide-svg {
+    display: none;
+  }
 
   .pe-pip-column {
     position: relative;
     width: var(--pe-pip-column-width);
     height: 100%;
-    display: grid;
-    grid-template-rows: 1fr auto;
+    display: flex;
+    flex-direction: column;
     border-left: 1px solid rgba(202,211,230,0.10);
     background: var(--tf-bg-surface, #111318);
     overflow: hidden;
   }
 
-  /* Wrapper holding header + meta + video as a single flex column */
+  /* Flatten so children are direct flex items of the column */
   .pe-pip-upper {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
+    display: contents;
   }
 
   .pe-pip-header {
@@ -1364,38 +1366,105 @@ const ENGINE_CSS = `
   .pe-pip-meta {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding: 10px 16px;
-    gap: 4px;
+    justify-content: flex-end;
+    padding: 22px 20px 18px;
+    gap: 10px;
     border-bottom: 1px solid rgba(202,211,230,0.06);
-    background: linear-gradient(180deg, rgba(11,13,18,0.62), var(--tf-bg-surface, #111318));
+    background:
+      radial-gradient(circle at top left, rgba(99,102,241,0.12), transparent 54%),
+      linear-gradient(180deg, rgba(12,15,24,0.96), rgba(10,12,19,0.88));
     overflow: hidden;
-    flex-shrink: 0;
+    flex: 2 1 0;
+    min-height: 80px;
+  }
+
+  .pe-pip-meta-topline {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
   }
 
   .pe-pip-meta-course {
-    font-size: 12px;
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.15em;
     color: var(--tf-color-primary-light, #818cf8);
-    font-weight: 600;
+    font-weight: 700;
+    line-height: 1.3;
+    flex: 1 1 auto;
   }
 
   .pe-pip-meta-lesson {
-    font-size: 20px;
+    font-size: clamp(1rem, 2.15vh, 1.35rem);
     font-weight: 700;
     color: var(--tf-text-primary, #e2e6f0);
-    line-height: 1.3;
-    white-space: nowrap;
+    line-height: 1.14;
+    letter-spacing: -0.02em;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .pe-pip-meta-slide {
-    font-size: 13px;
-    color: var(--tf-text-muted, #8892a8);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(129,140,248,0.18);
+    background: rgba(20,24,36,0.84);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    font-size: 12px;
+    color: var(--tf-text-secondary, #bfc5d4);
     font-family: 'JetBrains Mono', monospace;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
+  .pe-pip-meta-objective {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(20,184,166,0.16);
+    background:
+      linear-gradient(180deg, rgba(19,24,35,0.96), rgba(12,16,24,0.88)),
+      linear-gradient(135deg, rgba(20,184,166,0.08), rgba(99,102,241,0.08));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.03),
+      0 8px 24px rgba(0,0,0,0.18);
+  }
+
+  .pe-pip-meta-objective-label {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(20,184,166,0.12);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tf-color-secondary, #14b8a6);
+  }
+
+  .pe-pip-meta-objective-body {
+    font-size: clamp(0.75rem, 1.58vh, 0.92rem);
+    color: var(--tf-text-secondary, #bfc5d4);
+    font-weight: 400;
+    line-height: 1.48;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.94;
   }
 
   .pe-pip-inset {
@@ -1404,15 +1473,18 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 1;
-    align-self: stretch;
-    height: 100%;
-    min-height: 0;
+    flex: 0 0 auto;
     overflow: hidden;
     background:
       radial-gradient(ellipse at 30% 20%, rgba(99,102,241,0.10) 0%, transparent 60%),
       radial-gradient(ellipse at 70% 80%, rgba(168,56,255,0.08) 0%, transparent 60%),
       linear-gradient(135deg, #262a3d 0%, #2e3350 50%, #232740 100%);
+  }
+  .pe-pip-frame {
+    position: relative;
+    width: calc(100% - 48px);
+    margin: 24px;
+    aspect-ratio: 1 / 1.2;
   }
   .pe-pip-guide-svg {
     position: absolute;
@@ -1428,10 +1500,10 @@ const ENGINE_CSS = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(0.25rem, 0.6vh, 0.5rem);
-    padding: clamp(0.5rem, 1.2vh, 1rem) 2.2vw;
-    min-height: fit-content;
-    flex-shrink: 0;
+    gap: clamp(0.5rem, 1.2vh, 0.875rem);
+    padding: clamp(1.2rem, 3vh, 2rem) 20px;
+    flex: 1 1 0;
+    min-height: 100px;
     overflow: hidden;
     background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
     border-top: 1px solid rgba(202,211,230,0.08);
@@ -3103,58 +3175,72 @@ export function PresentationLayout({
                 </div>
 
                 <div className="pe-pip-meta">
-                  <span className="pe-pip-meta-course">{courseTitle}</span>
+                  <div className="pe-pip-meta-topline">
+                    <span className="pe-pip-meta-course">{courseTitle}</span>
+                    <span className="pe-pip-meta-slide">
+                      Slide {slideIndex + 1} of {slideCount}
+                    </span>
+                  </div>
                   <span className="pe-pip-meta-lesson">
                     {deck.number}. {sanitizePresentationTitle(deck.title)}
                   </span>
-                  <span className="pe-pip-meta-slide">
-                    Slide {slideIndex + 1} of {slideCount}
-                  </span>
+                  {deck.objective && (
+                    <div className="pe-pip-meta-objective">
+                      <span className="pe-pip-meta-objective-label">
+                        Objective
+                      </span>
+                      <span className="pe-pip-meta-objective-body">
+                        {deck.objective}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                {/* 16:9 video area (middle) */}
-                <div className="pe-pip-inset" aria-label="16:9 video area">
-                  {/* SVG L-corner guides — pure geometry, no CSS borders */}
-                  <svg
-                    className="pe-pip-guide-svg"
-                    viewBox="0 0 100 100"
-                    preserveAspectRatio="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                  >
-                    {/* Top-left L */}
-                    <polyline
-                      points="3,8 3,3 8,3"
-                      fill="none"
-                      stroke="rgba(226,230,240,0.85)"
-                      strokeWidth="1.5"
-                      vectorEffect="non-scaling-stroke"
-                    />
-                    {/* Top-right L */}
-                    <polyline
-                      points="92,3 97,3 97,8"
-                      fill="none"
-                      stroke="rgba(226,230,240,0.85)"
-                      strokeWidth="1.5"
-                      vectorEffect="non-scaling-stroke"
-                    />
-                    {/* Bottom-right L */}
-                    <polyline
-                      points="97,92 97,97 92,97"
-                      fill="none"
-                      stroke="rgba(226,230,240,0.85)"
-                      strokeWidth="1.5"
-                      vectorEffect="non-scaling-stroke"
-                    />
-                    {/* Bottom-left L */}
-                    <polyline
-                      points="8,97 3,97 3,92"
-                      fill="none"
-                      stroke="rgba(226,230,240,0.85)"
-                      strokeWidth="1.5"
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  </svg>
+                {/* PIP cover area (middle) — portrait 916×1297 frame */}
+                <div className="pe-pip-inset" aria-label="PIP cover area">
+                  <div className="pe-pip-frame">
+                    {/* SVG L-corner guides — sized to the portrait cover frame */}
+                    <svg
+                      className="pe-pip-guide-svg"
+                      viewBox="0 0 100 100"
+                      preserveAspectRatio="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                    >
+                      {/* Top-left L */}
+                      <polyline
+                        points="3,8 3,3 8,3"
+                        fill="none"
+                        stroke="rgba(226,230,240,0.85)"
+                        strokeWidth="1.5"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                      {/* Top-right L */}
+                      <polyline
+                        points="92,3 97,3 97,8"
+                        fill="none"
+                        stroke="rgba(226,230,240,0.85)"
+                        strokeWidth="1.5"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                      {/* Bottom-right L */}
+                      <polyline
+                        points="97,92 97,97 92,97"
+                        fill="none"
+                        stroke="rgba(226,230,240,0.85)"
+                        strokeWidth="1.5"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                      {/* Bottom-left L */}
+                      <polyline
+                        points="8,97 3,97 3,92"
+                        fill="none"
+                        stroke="rgba(226,230,240,0.85)"
+                        strokeWidth="1.5"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+                  </div>
                 </div>
               </div>
 
