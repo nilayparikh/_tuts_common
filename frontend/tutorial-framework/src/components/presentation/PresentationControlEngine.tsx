@@ -38,7 +38,12 @@ export interface PresentationStep {
   transcript: string;
 }
 
-export type DeckType = "course" | "mono" | "short";
+export type DeckType = "course" | "mono" | "short" | "short-single";
+
+/** Returns true for any short-family deck type ("short" or "short-single"). */
+export function isShortDeck(dt?: DeckType): boolean {
+  return dt === "short" || dt === "short-single";
+}
 
 export interface PresentationDeck {
   id: string;
@@ -2981,7 +2986,7 @@ export function PresentationLayout({
             >
               {Icons.pip}
             </button>
-            {deck.deckType === "short" && (
+            {isShortDeck(deck.deckType) && (
               <>
                 <button
                   className="pe-shorts-btn ratio"
@@ -4189,19 +4194,26 @@ export function PresentationControlPanel({
   });
   const [deckTypeFilter, setDeckTypeFilter] = useState<DeckType | "all">("all");
   const availableDeckTypes = useMemo(() => {
-    const types = new Set(decks.map((d) => d.deckType ?? "course"));
+    const types = new Set(
+      decks.map((d) => {
+        const dt = d.deckType ?? "course";
+        return dt === "short-single" ? "short" : dt;
+      }),
+    );
     return Array.from(types) as DeckType[];
   }, [decks]);
   const showFilter = availableDeckTypes.length > 1;
   const filteredDecks =
     deckTypeFilter === "all"
       ? decks
-      : decks.filter((d) => (d.deckType ?? "course") === deckTypeFilter);
+      : deckTypeFilter === "short"
+        ? decks.filter((d) => isShortDeck(d.deckType))
+        : decks.filter((d) => (d.deckType ?? "course") === deckTypeFilter);
   const currentDeckInFilter = filteredDecks.some((d) => d.id === deck.id);
   const filteredDeckTypeLabel =
     deckTypeFilter === "all"
       ? "lesson"
-      : deckTypeFilter === "short"
+      : deckTypeFilter === "short" || deckTypeFilter === "short-single"
         ? "short deck"
         : deckTypeFilter === "mono"
           ? "mono deck"
@@ -4385,12 +4397,12 @@ export function PresentationControlPanel({
               </button>
             </>
           )}
-          {onOpenShorts && deck.deckType === "short" && (
+          {onOpenShorts && isShortDeck(deck.deckType) && (
             <button className="pc-btn pc-btn-header" onClick={onOpenShorts}>
               📱 9:16
             </button>
           )}
-          {onOpenFeed && deck.deckType === "short" && (
+          {onOpenFeed && isShortDeck(deck.deckType) && (
             <button className="pc-btn pc-btn-header" onClick={onOpenFeed}>
               📱 4:5
             </button>
@@ -4453,7 +4465,7 @@ export function PresentationControlPanel({
                         className={`pc-deck-type-btn${deckTypeFilter === dt ? " active" : ""}`}
                         onClick={() => setDeckTypeFilter(dt)}
                       >
-                        {dt === "short"
+                        {dt === "short" || dt === "short-single"
                           ? "📱 Short"
                           : dt === "mono"
                             ? "▶ Mono"
@@ -4476,12 +4488,11 @@ export function PresentationControlPanel({
                   </option>
                 )}
                 {filteredDecks.map((lessonDeck) => {
-                  const typeMarker =
-                    lessonDeck.deckType === "short"
-                      ? "📱 "
-                      : lessonDeck.deckType === "mono"
-                        ? "▶ "
-                        : "";
+                  const typeMarker = isShortDeck(lessonDeck.deckType)
+                    ? "📱 "
+                    : lessonDeck.deckType === "mono"
+                      ? "▶ "
+                      : "";
                   return (
                     <option key={lessonDeck.id} value={lessonDeck.id}>
                       {lessonDeck.number}. {typeMarker}

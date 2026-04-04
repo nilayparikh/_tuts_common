@@ -22,6 +22,7 @@ export {
   PresentationControlPanel,
   ShortsLayout,
   usePresentationStep,
+  isShortDeck,
   type DeckType,
   type PresentationDeck,
   type PresentationSlide,
