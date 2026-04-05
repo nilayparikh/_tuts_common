@@ -126,6 +126,168 @@ test("control window transcript size defaults larger and is adjustable", async (
   await expect(control.getByText("Zoom 1.30x")).toBeVisible();
 });
 
+test("control toolbar defaults guides off and fullscreen hands off to the slide window", async ({
+  browser,
+}) => {
+  const control = await browser.newPage();
+  await control.goto("/presentation-step.html?control=1#/01/0");
+  await control.waitForLoadState("domcontentloaded");
+
+  const fullscreenButton = control.getByRole("button", {
+    name: "Toggle fullscreen on slide window",
+  });
+  const guidesButton = control.getByRole("button", {
+    name: "Toggle L-corner guides",
+  });
+  const crossbarsButton = control.getByRole("button", {
+    name: "Toggle center crossbar alignment marks",
+  });
+
+  await expect(fullscreenButton).toBeVisible();
+  await expect(guidesButton).toBeVisible();
+  await expect(crossbarsButton).toBeVisible();
+  await expect(guidesButton).not.toHaveClass(/active/);
+  await expect(crossbarsButton).not.toHaveClass(/active/);
+  await expect(
+    control.locator(".pc-btn-label", { hasText: "16:9" }),
+  ).toBeVisible();
+  await expect(
+    control.locator(".pc-btn-label", { hasText: "9:16" }),
+  ).toBeVisible();
+
+  const presenterPromise = control.waitForEvent("popup");
+  await control
+    .getByRole("button", { name: "Open or focus 16 by 9 slide window" })
+    .click();
+  const presenter = await presenterPromise;
+  await presenter.waitForLoadState("domcontentloaded");
+
+  await expect(
+    presenter.locator(".pe-viewport-guide-svg polyline"),
+  ).toHaveCount(0);
+
+  const shortsPromise = control.waitForEvent("popup");
+  await control
+    .getByRole("button", { name: "Open or focus 9 by 16 slide window" })
+    .click();
+  const shorts = await shortsPromise;
+  await shorts.waitForLoadState("domcontentloaded");
+
+  await control
+    .getByRole("button", { name: "Open or focus 16 by 9 slide window" })
+    .click();
+  await guidesButton.click();
+  await expect(guidesButton).toHaveClass(/active/);
+  await expect(
+    presenter.locator(".pe-viewport-guide-svg polyline"),
+  ).toHaveCount(4);
+  await expect(shorts.locator(".pe-shorts-guide-svg polyline")).toHaveCount(0);
+
+  await crossbarsButton.click();
+  await expect(crossbarsButton).toHaveClass(/active/);
+  await expect(presenter.locator(".pe-viewport-guide-svg line")).toHaveCount(4);
+  await expect(shorts.locator(".pe-shorts-guide-svg line")).toHaveCount(0);
+
+  await control
+    .getByRole("button", { name: "Open or focus 9 by 16 slide window" })
+    .click();
+  await guidesButton.click();
+  await expect(guidesButton).toHaveClass(/active/);
+  await expect(shorts.locator(".pe-shorts-guide-svg polyline")).toHaveCount(4);
+  await expect(
+    presenter.locator(".pe-viewport-guide-svg polyline"),
+  ).toHaveCount(4);
+
+  await control
+    .getByRole("button", { name: "Open or focus 16 by 9 slide window" })
+    .click();
+  await fullscreenButton.click();
+  await expect
+    .poll(async () =>
+      presenter.evaluate(() => {
+        return (
+          Boolean(document.fullscreenElement) ||
+          Boolean(document.querySelector('[data-testid="fullscreen-prompt"]'))
+        );
+      }),
+    )
+    .toBe(true);
+});
+
+test("control toolbar toggles guides and crossbars for 16:9, 9:16, and 4:5 surfaces", async ({
+  browser,
+}) => {
+  const control = await browser.newPage();
+  await control.goto("/presentation-step.html?control=1#/01/0");
+  await control.waitForLoadState("domcontentloaded");
+
+  const guidesButton = control.getByRole("button", {
+    name: "Toggle L-corner guides",
+  });
+  const crossbarsButton = control.getByRole("button", {
+    name: "Toggle center crossbar alignment marks",
+  });
+
+  await expect(
+    control.locator(".pc-btn-label", { hasText: "4:5" }),
+  ).toBeVisible();
+
+  const presenterPromise = control.waitForEvent("popup");
+  await control
+    .getByRole("button", { name: "Open or focus 16 by 9 slide window" })
+    .click();
+  const presenter = await presenterPromise;
+  await presenter.waitForLoadState("domcontentloaded");
+  await presenter.getByTitle("Toggle 16:9 mode (P)").click();
+
+  await expect(presenter.locator(".pe-pip-guide-svg polyline")).toHaveCount(0);
+  await expect(presenter.locator(".pe-pip-guide-svg line")).toHaveCount(0);
+
+  const shortsPromise = control.waitForEvent("popup");
+  await control
+    .getByRole("button", { name: "Open or focus 9 by 16 slide window" })
+    .click();
+  const shorts = await shortsPromise;
+  await shorts.waitForLoadState("domcontentloaded");
+
+  const feedPromise = control.waitForEvent("popup");
+  await control
+    .getByRole("button", { name: "Open or focus 4 by 5 slide window" })
+    .click();
+  const feed = await feedPromise;
+  await feed.waitForLoadState("domcontentloaded");
+
+  await control
+    .getByRole("button", { name: "Open or focus 16 by 9 slide window" })
+    .click();
+  await guidesButton.click();
+  await crossbarsButton.click();
+  await expect(presenter.locator(".pe-pip-guide-svg polyline")).toHaveCount(4);
+  await expect(presenter.locator(".pe-pip-guide-svg line")).toHaveCount(4);
+  await expect(shorts.locator(".pe-shorts-guide-svg polyline")).toHaveCount(0);
+  await expect(shorts.locator(".pe-shorts-guide-svg line")).toHaveCount(0);
+  await expect(feed.locator(".pe-feed-guide-svg polyline")).toHaveCount(0);
+  await expect(feed.locator(".pe-feed-guide-svg line")).toHaveCount(0);
+
+  await control
+    .getByRole("button", { name: "Open or focus 9 by 16 slide window" })
+    .click();
+  await guidesButton.click();
+  await crossbarsButton.click();
+  await expect(shorts.locator(".pe-shorts-guide-svg polyline")).toHaveCount(4);
+  await expect(shorts.locator(".pe-shorts-guide-svg line")).toHaveCount(4);
+  await expect(feed.locator(".pe-feed-guide-svg polyline")).toHaveCount(0);
+  await expect(feed.locator(".pe-feed-guide-svg line")).toHaveCount(0);
+
+  await control
+    .getByRole("button", { name: "Open or focus 4 by 5 slide window" })
+    .click();
+  await guidesButton.click();
+  await crossbarsButton.click();
+  await expect(feed.locator(".pe-feed-guide-svg polyline")).toHaveCount(4);
+  await expect(feed.locator(".pe-feed-guide-svg line")).toHaveCount(4);
+});
+
 test("presentation layouts keep the slide stage at 1.4:1 with square corners", async ({
   browser,
 }) => {

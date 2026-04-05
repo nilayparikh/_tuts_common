@@ -30,6 +30,8 @@ export interface PresentationSlide {
   narration?: string;
   steps?: PresentationStep[];
   content: React.ReactNode;
+  /** When true, suppresses the ShortsTitleStack header bar for this slide in ShortsLayout/FeedLayout. */
+  hideTitleStack?: boolean;
 }
 
 export interface PresentationStep {
@@ -43,6 +45,11 @@ export type DeckType = "course" | "mono" | "short" | "short-single";
 /** Returns true for any short-family deck type ("short" or "short-single"). */
 export function isShortDeck(dt?: DeckType): boolean {
   return dt === "short" || dt === "short-single";
+}
+
+/** Returns true for deck types that support the 4:5 feed view (shorts + mono). */
+export function isFeedCapable(dt?: DeckType): boolean {
+  return dt === "short" || dt === "short-single" || dt === "mono";
 }
 
 export interface PresentationDeck {
@@ -163,6 +170,63 @@ const ENGINE_CSS = `
     justify-content: center;
     min-width: 0;
     justify-self: center;
+  .pe-fullscreen-prompt {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(6, 8, 14, 0.64);
+    backdrop-filter: blur(8px);
+    z-index: 60;
+  }
+  .pe-fullscreen-prompt-card {
+    width: min(420px, calc(100vw - 40px));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 24px;
+    border-radius: 18px;
+    border: 1px solid rgba(0,245,255,0.28);
+    background:
+      linear-gradient(180deg, rgba(23,28,42,0.94), rgba(12,15,24,0.92)),
+      linear-gradient(135deg, rgba(0,245,255,0.08), rgba(168,56,255,0.12));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 24px 60px rgba(0,0,0,0.36);
+    text-align: center;
+  }
+  .pe-fullscreen-prompt-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--tf-text-primary, #e2e6f0);
+  }
+  .pe-fullscreen-prompt-copy {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--tf-text-secondary, #bfc5d4);
+  }
+  .pe-fullscreen-prompt-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 210px;
+    height: 42px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,245,255,0.38);
+    background: linear-gradient(135deg, rgba(0,245,255,0.22), rgba(168,56,255,0.22));
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .pe-fullscreen-prompt-btn:hover {
+    filter: brightness(1.08);
+  }
   }
   .pe-header:not(:has(.pe-header-center)) {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -270,6 +334,7 @@ const ENGINE_CSS = `
     background:
       linear-gradient(180deg, rgba(24,28,42,0.92), rgba(14,18,28,0.84)),
       linear-gradient(135deg, rgba(0,245,255,0.10), rgba(168,56,255,0.12));
+        targetSurface: state.surface,
     border-radius: 11px;
     border: 1px solid rgba(202,211,230,0.14);
     text-align: center;
@@ -282,6 +347,7 @@ const ENGINE_CSS = `
       0 8px 18px rgba(0,0,0,0.22);
   }
   .pe-title-capsule {
+    aria-label="Toggle fullscreen on slide window"
     display: inline-flex;
     align-items: center;
     padding: 1px 8px;
@@ -293,12 +359,14 @@ const ENGINE_CSS = `
     letter-spacing: 0.06em;
     text-transform: uppercase;
     flex-shrink: 0;
+        targetSurface: state.surface,
     line-height: 1.6;
   }
   .pe-header-nav-prev .pe-title-capsule,
   .pe-header-nav-next .pe-title-capsule {
     font-size: 9px;
     padding: 0px 6px;
+    aria-label="Toggle L-corner guides"
   }
   .pe-drawer-item-title .pe-title-capsule {
     font-size: 9px;
@@ -310,6 +378,7 @@ const ENGINE_CSS = `
   .pe-body {
     flex: 1;
     display: flex;
+        targetSurface: state.surface,
     min-height: 0;
     overflow: hidden;
   }
@@ -318,6 +387,7 @@ const ENGINE_CSS = `
   .pe-left {
     flex: 1;
     display: flex;
+    aria-label="Toggle center crossbar alignment marks"
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
@@ -770,6 +840,64 @@ const ENGINE_CSS = `
     border-color: var(--tf-color-primary, #6366f1);
   }
 
+  .pe-fullscreen-prompt {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(6, 8, 14, 0.64);
+    backdrop-filter: blur(8px);
+    z-index: 60;
+  }
+  .pe-fullscreen-prompt-card {
+    width: min(420px, calc(100vw - 40px));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 22px 24px;
+    border-radius: 18px;
+    border: 1px solid rgba(0,245,255,0.28);
+    background:
+      linear-gradient(180deg, rgba(23,28,42,0.94), rgba(12,15,24,0.92)),
+      linear-gradient(135deg, rgba(0,245,255,0.08), rgba(168,56,255,0.12));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 24px 60px rgba(0,0,0,0.36);
+    text-align: center;
+  }
+  .pe-fullscreen-prompt-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--tf-text-primary, #e2e6f0);
+  }
+  .pe-fullscreen-prompt-copy {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--tf-text-secondary, #bfc5d4);
+  }
+  .pe-fullscreen-prompt-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 210px;
+    height: 42px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,245,255,0.38);
+    background: linear-gradient(135deg, rgba(0,245,255,0.22), rgba(168,56,255,0.22));
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .pe-fullscreen-prompt-btn:hover {
+    filter: brightness(1.08);
+  }
+
   .pe-control-btn {
     display: flex;
     align-items: center;
@@ -973,6 +1101,24 @@ const ENGINE_CSS = `
     font-weight: 700;
     letter-spacing: 0.05em;
     text-transform: uppercase;
+  }
+  .pc-btn-header.pc-btn-icon {
+    width: 34px;
+    min-width: 34px;
+    padding: 0;
+  }
+  .pc-btn-header.pc-btn-ratio {
+    gap: 8px;
+    padding: 0 12px;
+  }
+  .pc-btn-header.pc-btn-ratio .pc-btn-label {
+    line-height: 1;
+  }
+  .pc-btn-header.active {
+    background: linear-gradient(135deg, rgba(0,245,255,0.28), rgba(168,56,255,0.24));
+    color: #ffffff;
+    border-color: rgba(0,245,255,0.44);
+    box-shadow: 0 0 8px rgba(0,245,255,0.18);
   }
   .pc-lesson-select {
     width: 100%;
@@ -1983,12 +2129,11 @@ const ENGINE_CSS = `
   /* 4:5 aspect frame — the whole page viewport */
   .pe-feed-frame {
     --pe-feed-frame-width: min(calc(100vh * 4 / 5), 100vw);
-    --pe-feed-stage-height: calc(var(--pe-feed-frame-width) / var(--pe-slide-stage-ratio));
     height: 100vh;
     aspect-ratio: 4 / 5;
     max-width: 100vw;
     display: grid;
-    grid-template-rows: var(--pe-feed-stage-height) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
     background:
       radial-gradient(circle at top, rgba(0,245,255,0.10), transparent 32%),
       radial-gradient(circle at bottom, rgba(168,56,255,0.08), transparent 34%),
@@ -1997,146 +2142,110 @@ const ENGINE_CSS = `
     position: relative;
   }
 
-  /* Slide content area — fills most of the frame */
-  .pe-feed-slide-area {
-    min-height: 0;
-    height: var(--pe-feed-stage-height);
-    min-height: 0;
+  /* Title + description area — replaces slide content in 4:5 */
+  .pe-feed-title-area {
     width: 100%;
     display: flex;
     flex-direction: column;
-    position: relative;
+    justify-content: flex-end;
+    padding: clamp(2vh, 3.5vh, 5vh) clamp(1.5vw, 3vw, 5vw) clamp(1.5vh, 2.5vh, 4vh);
+    min-height: 0;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(202,211,230,0.06);
+    background:
+      radial-gradient(circle at 30% 40%, rgba(0,245,255,0.08), transparent 50%),
+      radial-gradient(circle at 70% 60%, rgba(168,56,255,0.06), transparent 50%),
+      linear-gradient(180deg, rgba(11,13,18,0.80), var(--tf-bg-surface, #111318));
+  }
+  .pe-feed-title-inner {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.4rem, 0.8vh, 0.8rem);
+  }
+  .pe-feed-deck-title {
+    font-size: clamp(1.25rem, 3.2vh, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--tf-text-primary, #e2e6f0);
+  }
+  .pe-feed-slide-title {
+    font-size: clamp(0.875rem, 2vh, 1.375rem);
+    font-weight: 600;
+    color: var(--tf-color-primary-light, #818cf8);
+    letter-spacing: 0.01em;
+  }
+  .pe-feed-description {
+    font-size: clamp(0.8125rem, 1.6vh, 1.125rem);
+    color: var(--tf-text-secondary, #bfc5d4);
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
-  .pe-feed-media-area {
+  /* Video / PIP capture area — middle row of the 4:5 grid */
+  .pe-feed-video {
+    width: 100%;
+    height: 100%;
     min-height: 0;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    overflow: hidden;
-    background: transparent;
-    height: 100%;
-  }
-
-  .pe-feed-lower {
-    min-height: 0;
-    display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
     overflow: hidden;
     background:
-      radial-gradient(ellipse 80% 60% at 30% 30%, rgba(129,140,248,0.12), transparent),
-      radial-gradient(ellipse 70% 50% at 70% 70%, rgba(192,132,252,0.10), transparent),
-      linear-gradient(180deg, rgba(17,19,24,0.92), rgba(11,11,15,0.96));
+      radial-gradient(ellipse 80% 60% at 30% 30%, rgba(129,140,248,0.22), transparent),
+      radial-gradient(ellipse 70% 50% at 70% 70%, rgba(192,132,252,0.18), transparent),
+      radial-gradient(ellipse 60% 40% at 50% 50%, rgba(56,189,248,0.10), transparent),
+      linear-gradient(160deg, #262a3d 0%, #2e3350 40%, #232740 100%);
+    border-top: 1px solid rgba(148,163,184,0.12);
   }
 
-  .pe-feed-slide-content {
+  /* SVG guide overlay — inside PIP area only */
+  .pe-feed-guide-svg {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-  .pe-feed-slide-content > * {
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-  }
-  .pe-feed-slide-content .lm-slide-frame {
-    padding: 1.6vh 3.2vw 1.6vh;
-    font-size: clamp(0.625rem, 1.8vh, 0.9375rem);
-  }
-  .pe-feed-slide-content.with-title-stack .lm-slide-frame {
-    padding-top: 1vh;
-  }
-  .pe-feed-slide-content .lm-slide-hero-title {
-    font-size: clamp(1.0625rem, 3vh, 1.875rem);
-    margin-bottom: 0.8vh;
-  }
-  .pe-feed-slide-content .lm-slide-title {
-    font-size: clamp(0.875rem, 2.4vh, 1.5rem);
-    margin-bottom: 0.8vh;
-    font-weight: 800;
-    letter-spacing: -0.01em;
-  }
-  .pe-feed-slide-content.with-title-stack .lm-slide-title {
-    display: none;
-  }
-  .pe-feed-slide-content .lm-slide-body {
-    gap: 0.6vh;
-  }
-  .pe-feed-slide-content .bullet-sub {
-    font-size: 0.88em;
-    line-height: 1.28;
-  }
-  .pe-feed-slide-content .sr-card {
-    padding: 0.6vh 1vw;
-  }
-  .pe-feed-slide-content .sr-value {
-    font-size: clamp(0.6875rem, 1.75vh, 1rem);
-  }
-  .pe-feed-slide-content .sr-label {
-    font-size: clamp(0.4375rem, 1vh, 0.625rem);
-  }
-  .pe-feed-slide-content table {
-    font-size: 0.88em;
-  }
-  .pe-feed-slide-content th,
-  .pe-feed-slide-content td {
-    padding: 0.5vh 1vw;
-  }
-  .pe-feed-slide-content .info-box {
-    padding: 0.8vh 1.2vw;
-    font-size: 0.82em;
-  }
-  .pe-feed-slide-content .mermaid-widget {
-    max-height: 100%;
-    overflow: hidden;
-  }
-
-  /* PIP inset — overlaid on bottom-right of the slide area */
-  .pe-feed-pip {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
     z-index: 10;
-    box-shadow: none;
-    background: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    pointer-events: none;
   }
 
   /* Footer bar at the bottom of the 4:5 frame */
   .pe-feed-footer {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-end;
-    gap: clamp(0.4rem, 0.9vh, 0.8rem);
-    padding: 0;
-    background: transparent;
-    min-height: 0;
-    height: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.25rem, 0.6vh, 0.5rem);
+    padding: clamp(0.5rem, 1.2vh, 1rem) 2.2vw;
+    min-height: fit-content;
+    flex-shrink: 0;
+    border-top: 1px solid rgba(202,211,230,0.08);
+    background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
   }
   .pe-feed-footer-row {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 0.5em;
     flex-wrap: wrap;
     width: 100%;
-    text-align: left;
+    text-align: center;
   }
   .pe-feed-footer .pe-footer-copy {
-    font-size: clamp(0.6875rem, 1.1vh, 0.875rem);
+    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
     color: var(--tf-text-muted, #64748b);
   }
   .pe-feed-footer-row.subscribe {
-    gap: 0.45em;
-    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    flex-wrap: nowrap;
+    white-space: nowrap;
   }
   .pe-feed-subscribe-icon {
     display: flex;
@@ -2147,23 +2256,44 @@ const ENGINE_CSS = `
     animation: pe-shorts-bell-ring 4.8s ease-in-out infinite;
   }
   .pe-feed-subscribe-icon svg {
-    width: clamp(0.75rem, 1.4vh, 1rem);
-    height: clamp(0.75rem, 1.4vh, 1rem);
+    width: clamp(0.875rem, 1.8vh, 1.25rem);
+    height: clamp(0.875rem, 1.8vh, 1.25rem);
   }
   .pe-feed-subscribe-text {
-    font-size: clamp(0.75rem, 1.3vh, 0.9375rem);
+    font-size: clamp(0.6875rem, 1.4vh, 0.9375rem);
     color: var(--tf-text-secondary, #bfc5d4);
     font-weight: 500;
     letter-spacing: 0.01em;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .pe-feed-subscribe-brand {
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
-    zoom: 0.8;
+    zoom: 0.72;
   }
-  .pe-feed-footer-row.copy {
-    align-self: flex-start;
+  .pe-feed-promo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    width: 100%;
+    min-width: 0;
+    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
+    color: var(--tf-text-muted, #8892a8);
+    white-space: nowrap;
+  }
+  .pe-feed-promo-label {
+    color: var(--tf-text-secondary, #bfc5d4);
+    font-weight: 500;
+  }
+  .pe-feed-footer-site {
+    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
+    color: var(--tf-color-primary-light, #818cf8);
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-weight: 700;
+    letter-spacing: 0.01em;
   }
 `;
 
@@ -2238,12 +2368,69 @@ const Icons = {
   fullscreen: (
     <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
       <path
-        d="M2 5V2h3M9 2h3v3M12 9v3H9M5 12H2V9"
+        d="M5 2H2v3M9 2h3v3M12 9v3H9M5 12H2V9"
         stroke="currentColor"
         strokeWidth="1.3"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+      <path
+        d="M2 2l3 3M12 2 9 5M12 12 9 9M2 12l3-3"
+        stroke="currentColor"
+        strokeWidth="1.15"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+  explore: (
+    <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+      <circle cx="7" cy="7" r="5.25" stroke="currentColor" strokeWidth="1.2" />
+      <path
+        d="m8.95 5.05-1.42 3.17-3.18 1.42 1.42-3.17 3.18-1.42Z"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
+  guides: (
+    <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+      <path
+        d="M4 1.5H1.5V4"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M10 1.5h2.5V4"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M12.5 10v2.5H10"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M4 12.5H1.5V10"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  ),
+  crossbars: (
+    <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+      <path
+        d="M7 1.5v3M7 9.5v3M1.5 7h3M9.5 7h3"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+      <circle cx="7" cy="7" r="1.3" stroke="currentColor" strokeWidth="1.1" />
     </svg>
   ),
   panel: (
@@ -2449,8 +2636,27 @@ type ControlCommand =
       action: "switch-deck";
       targetDeckId: string;
     }
-  | { type: "command"; deckId: string; action: "toggle-fullscreen" }
+  | {
+      type: "command";
+      deckId: string;
+      action: "toggle-fullscreen";
+      targetSurface?: PresentationSurface;
+    }
+  | {
+      type: "command";
+      deckId: string;
+      action: "toggle-guides";
+      targetSurface?: PresentationSurface;
+    }
+  | {
+      type: "command";
+      deckId: string;
+      action: "toggle-crossbars";
+      targetSurface?: PresentationSurface;
+    }
   | { type: "request-state"; deckId: string };
+
+type PresentationSurface = "presentation" | "shorts" | "feed";
 
 type ControlState = {
   type: "state";
@@ -2466,6 +2672,11 @@ type ControlState = {
   steps?: PresentationStep[];
   stepIndex: number;
   stepCount: number;
+  surface: PresentationSurface;
+  fullscreenActive: boolean;
+  fullscreenPromptVisible: boolean;
+  showGuides: boolean;
+  showCrossbars: boolean;
 };
 
 const DEFAULT_CONTROL_CHANNEL = "tf-slides-control";
@@ -2495,6 +2706,62 @@ function readStoredSlideZoom(storageKey: string): number {
     // Ignore localStorage access issues.
   }
   return DEFAULT_SLIDE_ZOOM;
+}
+
+function shouldHandleSurfaceCommand(
+  command: ControlCommand,
+  surface: PresentationSurface,
+): boolean {
+  return (
+    !("targetSurface" in command) ||
+    command.targetSurface == null ||
+    command.targetSurface === surface
+  );
+}
+
+function requestFullscreenForRoot(root: HTMLDivElement | null): Promise<void> {
+  if (root?.requestFullscreen) {
+    return root.requestFullscreen();
+  }
+  if (document.documentElement.requestFullscreen) {
+    return document.documentElement.requestFullscreen();
+  }
+  return Promise.reject(new Error("Fullscreen API unavailable"));
+}
+
+function useFullscreenFallbackArm(
+  armed: boolean,
+  rootRef: React.RefObject<HTMLDivElement | null>,
+  setArmed: React.Dispatch<React.SetStateAction<boolean>>,
+) {
+  useEffect(() => {
+    if (!armed) return;
+
+    const activate = () => {
+      requestFullscreenForRoot(rootRef.current)
+        .then(() => setArmed(false))
+        .catch(() => {});
+    };
+
+    const onPointerDown = () => {
+      activate();
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setArmed(false);
+        return;
+      }
+      activate();
+    };
+
+    window.addEventListener("pointerdown", onPointerDown, true);
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown, true);
+      window.removeEventListener("keydown", onKeyDown, true);
+    };
+  }, [armed, rootRef, setArmed]);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -2574,6 +2841,14 @@ export function PresentationLayout({
   );
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [pipMode, setPipMode] = useState(!!headless);
+  const [showGuides, setShowGuides] = useState(false);
+  const [showCrossbars, setShowCrossbars] = useState(false);
+  const [fullscreenPromptVisible, setFullscreenPromptVisible] = useState(false);
+  useFullscreenFallbackArm(
+    fullscreenPromptVisible,
+    rootRef,
+    setFullscreenPromptVisible,
+  );
   const slideCount = deck.slides.length;
   const elapsed = useSlideTimer(slideIndex);
 
@@ -2657,6 +2932,11 @@ export function PresentationLayout({
       steps: slide?.steps,
       stepIndex: slide?.steps?.length ? activeStepIndex : 0,
       stepCount: slide?.steps?.length ?? 0,
+      surface: "presentation",
+      fullscreenActive: Boolean(document.fullscreenElement),
+      fullscreenPromptVisible,
+      showGuides,
+      showCrossbars,
     };
     channel.postMessage(message);
     localStorage.setItem(stateStorageKey, JSON.stringify(message));
@@ -2668,6 +2948,9 @@ export function PresentationLayout({
     slideZoom,
     activeStepIndex,
     stateStorageKey,
+    fullscreenPromptVisible,
+    showGuides,
+    showCrossbars,
   ]);
 
   /* ── Stable refs for BroadcastChannel handler (avoids effect teardown on step change) ── */
@@ -2790,12 +3073,29 @@ export function PresentationLayout({
       } else if (msg.action === "set-zoom") {
         const nextZoom = Math.max(0.85, Math.min(msg.zoom, 1.4));
         setSlideZoom(nextZoom);
-      } else if (msg.action === "toggle-fullscreen") {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => {});
-        } else {
+      } else if (
+        msg.action === "toggle-fullscreen" &&
+        shouldHandleSurfaceCommand(msg, "presentation")
+      ) {
+        window.focus();
+        if (document.fullscreenElement) {
+          setFullscreenPromptVisible(false);
           document.exitFullscreen().catch(() => {});
+        } else {
+          requestFullscreenForRoot(rootRef.current)
+            .then(() => setFullscreenPromptVisible(false))
+            .catch(() => setFullscreenPromptVisible(true));
         }
+      } else if (
+        msg.action === "toggle-guides" &&
+        shouldHandleSurfaceCommand(msg, "presentation")
+      ) {
+        setShowGuides((v) => !v);
+      } else if (
+        msg.action === "toggle-crossbars" &&
+        shouldHandleSurfaceCommand(msg, "presentation")
+      ) {
+        setShowCrossbars((v) => !v);
       }
     };
 
@@ -2829,6 +3129,19 @@ export function PresentationLayout({
   useEffect(() => {
     setStepIndex(0);
   }, [deck.id, slideIndex]);
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      if (document.fullscreenElement) {
+        setFullscreenPromptVisible(false);
+      }
+      postControlState();
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+    };
+  }, [postControlState]);
 
   /* ── Fullscreen ── */
   const toggleFs = useCallback(() => {
@@ -2898,6 +3211,7 @@ export function PresentationLayout({
         className={`pe-root${headless ? " pe-headless" : ""}${pipMode ? " pe-pip-mode" : ""}`}
         ref={rootRef}
         aria-label={courseTitle}
+        data-fullscreen-pending={fullscreenPromptVisible ? "true" : undefined}
       >
         {/* ── Header ── */}
         <div className="pe-header">
@@ -2997,16 +3311,18 @@ export function PresentationLayout({
                   {Icons.shorts}
                   <span className="pe-shorts-btn-label">9:16</span>
                 </button>
-                <button
-                  className="pe-shorts-btn ratio"
-                  onClick={openFeedWindow}
-                  title="Open Shorts feed (4:5) view"
-                  aria-label="Open 4 by 5 shorts feed view"
-                >
-                  {Icons.shorts}
-                  <span className="pe-shorts-btn-label">4:5</span>
-                </button>
               </>
+            )}
+            {isFeedCapable(deck.deckType) && (
+              <button
+                className="pe-shorts-btn ratio"
+                onClick={openFeedWindow}
+                title="Open feed (4:5) view"
+                aria-label="Open 4 by 5 feed view"
+              >
+                {Icons.shorts}
+                <span className="pe-shorts-btn-label">4:5</span>
+              </button>
             )}
             <button className="pe-fs-btn" onClick={toggleFs} title="Fullscreen">
               {Icons.fullscreen}
@@ -3085,34 +3401,78 @@ export function PresentationLayout({
                   xmlns="http://www.w3.org/2000/svg"
                   aria-hidden="true"
                 >
-                  <polyline
-                    points="2,5 2,2 5,2"
-                    fill="none"
-                    stroke="rgba(226,230,240,0.85)"
-                    strokeWidth="1.5"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                  <polyline
-                    points="95,2 98,2 98,5"
-                    fill="none"
-                    stroke="rgba(226,230,240,0.85)"
-                    strokeWidth="1.5"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                  <polyline
-                    points="98,95 98,98 95,98"
-                    fill="none"
-                    stroke="rgba(226,230,240,0.85)"
-                    strokeWidth="1.5"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                  <polyline
-                    points="5,98 2,98 2,95"
-                    fill="none"
-                    stroke="rgba(226,230,240,0.85)"
-                    strokeWidth="1.5"
-                    vectorEffect="non-scaling-stroke"
-                  />
+                  {showGuides && (
+                    <>
+                      <polyline
+                        points="2,5 2,2 5,2"
+                        fill="none"
+                        stroke="rgba(226,230,240,0.85)"
+                        strokeWidth="1.5"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                      <polyline
+                        points="95,2 98,2 98,5"
+                        fill="none"
+                        stroke="rgba(226,230,240,0.85)"
+                        strokeWidth="1.5"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                      <polyline
+                        points="98,95 98,98 95,98"
+                        fill="none"
+                        stroke="rgba(226,230,240,0.85)"
+                        strokeWidth="1.5"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                      <polyline
+                        points="5,98 2,98 2,95"
+                        fill="none"
+                        stroke="rgba(226,230,240,0.85)"
+                        strokeWidth="1.5"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </>
+                  )}
+                  {showCrossbars && (
+                    <>
+                      <line
+                        x1="50"
+                        y1="0"
+                        x2="50"
+                        y2="3"
+                        stroke="rgba(226,230,240,0.6)"
+                        strokeWidth="1"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                      <line
+                        x1="50"
+                        y1="97"
+                        x2="50"
+                        y2="100"
+                        stroke="rgba(226,230,240,0.6)"
+                        strokeWidth="1"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                      <line
+                        x1="0"
+                        y1="50"
+                        x2="3"
+                        y2="50"
+                        stroke="rgba(226,230,240,0.6)"
+                        strokeWidth="1"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                      <line
+                        x1="97"
+                        y1="50"
+                        x2="100"
+                        y2="50"
+                        stroke="rgba(226,230,240,0.6)"
+                        strokeWidth="1"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </>
+                  )}
                 </svg>
               </div>
             </div>
@@ -3447,6 +3807,9 @@ export function ShortsLayout({
 
   const [slideIndex, setSlideIndex] = useState(getIndexFromHash);
   const [stepIndex, setStepIndex] = useState(0);
+  const [showGuides, setShowGuides] = useState(false);
+  const [showCrossbars, setShowCrossbars] = useState(false);
+  const [fullscreenPromptVisible, setFullscreenPromptVisible] = useState(false);
   const slideCount = deck.slides.length;
   const elapsed = useSlideTimer(slideIndex);
 
@@ -3458,7 +3821,7 @@ export function ShortsLayout({
   const activeStep = currentSteps[activeStepIndex] ?? null;
   const shortTitle = sanitizePresentationTitle(deck.title);
   const slideTitle = sanitizePresentationTitle(currentSlide?.title);
-  const showTitleStack = slideIndex > 0;
+  const showTitleStack = slideIndex > 0 && !currentSlide?.hideTitleStack;
 
   const stepContextValue: PresentationStepContextValue = {
     stepIndex: activeStepIndex,
@@ -3529,10 +3892,25 @@ export function ShortsLayout({
       steps: slide?.steps,
       stepIndex: slide?.steps?.length ? activeStepIndex : 0,
       stepCount: slide?.steps?.length ?? 0,
+      surface: "shorts",
+      fullscreenActive: Boolean(document.fullscreenElement),
+      fullscreenPromptVisible,
+      showGuides,
+      showCrossbars,
     };
     channel.postMessage(message);
     localStorage.setItem(stateStorageKey, JSON.stringify(message));
-  }, [deck, slideIndex, slideCount, elapsed, activeStepIndex, stateStorageKey]);
+  }, [
+    deck,
+    slideIndex,
+    slideCount,
+    elapsed,
+    activeStepIndex,
+    stateStorageKey,
+    fullscreenPromptVisible,
+    showGuides,
+    showCrossbars,
+  ]);
 
   /* ── Stable refs for BroadcastChannel handler (avoids effect teardown on step change) ── */
   const sGoPrevRef = useRef(goPrev);
@@ -3653,12 +4031,29 @@ export function ShortsLayout({
         setStepIndex(
           Math.max(0, Math.min(msg.index, sCurrentStepCountRef.current - 1)),
         );
-      } else if (msg.action === "toggle-fullscreen") {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => {});
-        } else {
+      } else if (
+        msg.action === "toggle-fullscreen" &&
+        shouldHandleSurfaceCommand(msg, "shorts")
+      ) {
+        window.focus();
+        if (document.fullscreenElement) {
+          setFullscreenPromptVisible(false);
           document.exitFullscreen().catch(() => {});
+        } else {
+          requestFullscreenForRoot(rootRef.current)
+            .then(() => setFullscreenPromptVisible(false))
+            .catch(() => setFullscreenPromptVisible(true));
         }
+      } else if (
+        msg.action === "toggle-guides" &&
+        shouldHandleSurfaceCommand(msg, "shorts")
+      ) {
+        setShowGuides((v) => !v);
+      } else if (
+        msg.action === "toggle-crossbars" &&
+        shouldHandleSurfaceCommand(msg, "shorts")
+      ) {
+        setShowCrossbars((v) => !v);
       }
     };
 
@@ -3692,10 +4087,33 @@ export function ShortsLayout({
     setStepIndex(0);
   }, [deck.id, slideIndex]);
 
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      if (document.fullscreenElement) {
+        setFullscreenPromptVisible(false);
+      }
+      postControlState();
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+    };
+  }, [postControlState]);
+
+  const activateLocalFullscreen = useCallback(() => {
+    requestFullscreenForRoot(rootRef.current)
+      .then(() => setFullscreenPromptVisible(false))
+      .catch(() => {});
+  }, []);
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
       <div className="pe-shorts-root" ref={rootRef} aria-label={courseTitle}>
+        <FullscreenPromptOverlay
+          visible={fullscreenPromptVisible}
+          onActivate={activateLocalFullscreen}
+        />
         <div className="pe-shorts-frame">
           {/* ── Slide content area ── */}
           <div className="pe-shorts-header">
@@ -3726,34 +4144,78 @@ export function ShortsLayout({
               xmlns="http://www.w3.org/2000/svg"
               aria-hidden="true"
             >
-              <polyline
-                points="3,8 3,3 8,3"
-                fill="none"
-                stroke="rgba(226,230,240,0.85)"
-                strokeWidth="1.5"
-                vectorEffect="non-scaling-stroke"
-              />
-              <polyline
-                points="92,3 97,3 97,8"
-                fill="none"
-                stroke="rgba(226,230,240,0.85)"
-                strokeWidth="1.5"
-                vectorEffect="non-scaling-stroke"
-              />
-              <polyline
-                points="97,92 97,97 92,97"
-                fill="none"
-                stroke="rgba(226,230,240,0.85)"
-                strokeWidth="1.5"
-                vectorEffect="non-scaling-stroke"
-              />
-              <polyline
-                points="8,97 3,97 3,92"
-                fill="none"
-                stroke="rgba(226,230,240,0.85)"
-                strokeWidth="1.5"
-                vectorEffect="non-scaling-stroke"
-              />
+              {showGuides && (
+                <>
+                  <polyline
+                    points="3,8 3,3 8,3"
+                    fill="none"
+                    stroke="rgba(226,230,240,0.85)"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <polyline
+                    points="92,3 97,3 97,8"
+                    fill="none"
+                    stroke="rgba(226,230,240,0.85)"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <polyline
+                    points="97,92 97,97 92,97"
+                    fill="none"
+                    stroke="rgba(226,230,240,0.85)"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <polyline
+                    points="8,97 3,97 3,92"
+                    fill="none"
+                    stroke="rgba(226,230,240,0.85)"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </>
+              )}
+              {showCrossbars && (
+                <>
+                  <line
+                    x1="50"
+                    y1="0"
+                    x2="50"
+                    y2="5"
+                    stroke="rgba(226,230,240,0.6)"
+                    strokeWidth="1"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <line
+                    x1="50"
+                    y1="95"
+                    x2="50"
+                    y2="100"
+                    stroke="rgba(226,230,240,0.6)"
+                    strokeWidth="1"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <line
+                    x1="0"
+                    y1="50"
+                    x2="5"
+                    y2="50"
+                    stroke="rgba(226,230,240,0.6)"
+                    strokeWidth="1"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <line
+                    x1="95"
+                    y1="50"
+                    x2="100"
+                    y2="50"
+                    stroke="rgba(226,230,240,0.6)"
+                    strokeWidth="1"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </>
+              )}
             </svg>
           </div>
 
@@ -3818,6 +4280,7 @@ export function ShortsFeedLayout({
 }: ShortsFeedLayoutProps) {
   const brandIconUrl = branding?.brandIconUrl;
   const brandLabel = branding?.brandLabel ?? "Tutorial";
+  const siteUrl = branding?.siteUrl ?? "tuts.localm.dev";
   const copyrightText =
     branding?.copyright ?? `\u00A9 ${new Date().getFullYear()} ${brandLabel}`;
 
@@ -3835,6 +4298,9 @@ export function ShortsFeedLayout({
 
   const [slideIndex, setSlideIndex] = useState(getIndexFromHash);
   const [stepIndex, setStepIndex] = useState(0);
+  const [showGuides, setShowGuides] = useState(false);
+  const [showCrossbars, setShowCrossbars] = useState(false);
+  const [fullscreenPromptVisible, setFullscreenPromptVisible] = useState(false);
   const slideCount = deck.slides.length;
   const elapsed = useSlideTimer(slideIndex);
 
@@ -3846,7 +4312,7 @@ export function ShortsFeedLayout({
   const activeStep = currentSteps[activeStepIndex] ?? null;
   const shortTitle = sanitizePresentationTitle(deck.title);
   const slideTitle = sanitizePresentationTitle(currentSlide?.title);
-  const showTitleStack = slideIndex > 0;
+  const showTitleStack = slideIndex > 0 && !currentSlide?.hideTitleStack;
 
   const stepContextValue: PresentationStepContextValue = {
     stepIndex: activeStepIndex,
@@ -3917,10 +4383,25 @@ export function ShortsFeedLayout({
       steps: slide?.steps,
       stepIndex: slide?.steps?.length ? activeStepIndex : 0,
       stepCount: slide?.steps?.length ?? 0,
+      surface: "feed",
+      fullscreenActive: Boolean(document.fullscreenElement),
+      fullscreenPromptVisible,
+      showGuides,
+      showCrossbars,
     };
     channel.postMessage(message);
     localStorage.setItem(stateStorageKey, JSON.stringify(message));
-  }, [deck, slideIndex, slideCount, elapsed, activeStepIndex, stateStorageKey]);
+  }, [
+    deck,
+    slideIndex,
+    slideCount,
+    elapsed,
+    activeStepIndex,
+    stateStorageKey,
+    fullscreenPromptVisible,
+    showGuides,
+    showCrossbars,
+  ]);
 
   /* ── Stable refs ── */
   const fGoPrevRef = useRef(goPrev);
@@ -4039,12 +4520,29 @@ export function ShortsFeedLayout({
         setStepIndex(
           Math.max(0, Math.min(msg.index, fCurrentStepCountRef.current - 1)),
         );
-      } else if (msg.action === "toggle-fullscreen") {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => {});
-        } else {
+      } else if (
+        msg.action === "toggle-fullscreen" &&
+        shouldHandleSurfaceCommand(msg, "feed")
+      ) {
+        window.focus();
+        if (document.fullscreenElement) {
+          setFullscreenPromptVisible(false);
           document.exitFullscreen().catch(() => {});
+        } else {
+          requestFullscreenForRoot(rootRef.current)
+            .then(() => setFullscreenPromptVisible(false))
+            .catch(() => setFullscreenPromptVisible(true));
         }
+      } else if (
+        msg.action === "toggle-guides" &&
+        shouldHandleSurfaceCommand(msg, "feed")
+      ) {
+        setShowGuides((v) => !v);
+      } else if (
+        msg.action === "toggle-crossbars" &&
+        shouldHandleSurfaceCommand(msg, "feed")
+      ) {
+        setShowCrossbars((v) => !v);
       }
     };
 
@@ -4078,58 +4576,163 @@ export function ShortsFeedLayout({
     setStepIndex(0);
   }, [deck.id, slideIndex]);
 
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      if (document.fullscreenElement) {
+        setFullscreenPromptVisible(false);
+      }
+      postControlState();
+    };
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+    };
+  }, [postControlState]);
+
+  const activateLocalFullscreen = useCallback(() => {
+    requestFullscreenForRoot(rootRef.current)
+      .then(() => setFullscreenPromptVisible(false))
+      .catch(() => {});
+  }, []);
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
       <div className="pe-feed-root" ref={rootRef} aria-label={courseTitle}>
+        <FullscreenPromptOverlay
+          visible={fullscreenPromptVisible}
+          onActivate={activateLocalFullscreen}
+        />
         <div className="pe-feed-frame">
-          {/* ── Slide content area (fills the frame) ── */}
-          <div className="pe-feed-slide-area">
-            {showTitleStack ? (
-              <ShortsTitleStack
-                shortTitle={shortTitle}
-                slideTitle={slideTitle}
-              />
-            ) : null}
-            <div
-              className={`pe-feed-slide-content${showTitleStack ? " with-title-stack" : ""}`}
-            >
-              <PresentationStepContext.Provider
-                key={`${deck.id}:${currentSlide?.id ?? slideIndex}`}
-                value={stepContextValue}
-              >
-                {currentSlide?.content}
-              </PresentationStepContext.Provider>
+          {/* ── Title + description area (replaces slide content) ── */}
+          <div className="pe-feed-title-area">
+            <div className="pe-feed-title-inner">
+              <span className="pe-feed-deck-title">{shortTitle}</span>
+              {slideTitle && slideIndex > 0 && (
+                <span className="pe-feed-slide-title">{slideTitle}</span>
+              )}
+              {currentSlide?.narration && (
+                <span className="pe-feed-description">
+                  {currentSlide.narration}
+                </span>
+              )}
             </div>
           </div>
 
-          <div className="pe-feed-lower">
-            <div className="pe-feed-media-area">
-              <div className="pe-feed-pip" aria-label="Video capture area" />
-            </div>
+          {/* ── Video / PIP capture area ── */}
+          <div className="pe-feed-video" aria-label="Video capture area">
+            <svg
+              className="pe-feed-guide-svg"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              {showGuides && (
+                <>
+                  <polyline
+                    points="3,8 3,3 8,3"
+                    fill="none"
+                    stroke="rgba(226,230,240,0.85)"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <polyline
+                    points="92,3 97,3 97,8"
+                    fill="none"
+                    stroke="rgba(226,230,240,0.85)"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <polyline
+                    points="97,92 97,97 92,97"
+                    fill="none"
+                    stroke="rgba(226,230,240,0.85)"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <polyline
+                    points="8,97 3,97 3,92"
+                    fill="none"
+                    stroke="rgba(226,230,240,0.85)"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </>
+              )}
+              {showCrossbars && (
+                <>
+                  <line
+                    x1="50"
+                    y1="0"
+                    x2="50"
+                    y2="5"
+                    stroke="rgba(226,230,240,0.6)"
+                    strokeWidth="1"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <line
+                    x1="50"
+                    y1="95"
+                    x2="50"
+                    y2="100"
+                    stroke="rgba(226,230,240,0.6)"
+                    strokeWidth="1"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <line
+                    x1="0"
+                    y1="50"
+                    x2="5"
+                    y2="50"
+                    stroke="rgba(226,230,240,0.6)"
+                    strokeWidth="1"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                  <line
+                    x1="95"
+                    y1="50"
+                    x2="100"
+                    y2="50"
+                    stroke="rgba(226,230,240,0.6)"
+                    strokeWidth="1"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                </>
+              )}
+            </svg>
+          </div>
 
-            <div className="pe-feed-footer">
-              <div className="pe-feed-footer-row subscribe">
-                <span className="pe-feed-subscribe-icon">{Icons.bell}</span>
-                <span className="pe-feed-subscribe-text">Subscribe to</span>
-                <span className="pe-feed-subscribe-brand">
-                  {brandIconUrl ? (
-                    <BrandLockup
-                      iconUrl={brandIconUrl}
-                      size="sm"
-                      label={brandLabel}
-                    />
-                  ) : (
-                    <strong>{brandLabel}</strong>
-                  )}
+          {/* ── Footer ── */}
+          <div className="pe-feed-footer">
+            <div className="pe-feed-footer-row subscribe">
+              <span className="pe-feed-subscribe-icon">{Icons.bell}</span>
+              <span className="pe-feed-subscribe-text">Subscribe to</span>
+              <span className="pe-feed-subscribe-brand">
+                {brandIconUrl ? (
+                  <BrandLockup
+                    iconUrl={brandIconUrl}
+                    size="sm"
+                    label={brandLabel}
+                  />
+                ) : (
+                  <strong>{brandLabel}</strong>
+                )}
+              </span>
+              <span className="pe-feed-subscribe-text">
+                for more videos, interview tips & tutorials
+              </span>
+            </div>
+            <div className="pe-feed-footer-row">
+              <span className="pe-feed-promo">
+                <span className="pe-feed-promo-label">
+                  Explore free interactive tutorials at
                 </span>
-                <span className="pe-feed-subscribe-text">
-                  for more videos & tutorials
-                </span>
-              </div>
-              <div className="pe-feed-footer-row copy">
-                <span className="pe-footer-copy">{copyrightText}</span>
-              </div>
+                <span className="pe-feed-footer-site">{siteUrl}</span>
+              </span>
+            </div>
+            <div className="pe-feed-footer-row copy">
+              <span className="pe-footer-copy">{copyrightText}</span>
             </div>
           </div>
         </div>
@@ -4175,9 +4778,9 @@ export function PresentationControlPanel({
   const commandStorageKey = getControlStorageKey(controlChannelId, "command");
   const zoomStorageKey = getZoomStorageKey(controlChannelId, deck.id);
   const transcriptScaleStorageKey = `${controlChannelId}:transcript-scale`;
-  /** True once a presenter/shorts/feed window has responded with state. */
-  const [connected, setConnected] = useState(false);
-  const [state, setState] = useState<ControlState>({
+  const buildDefaultControlState = (
+    surface: PresentationSurface,
+  ): ControlState => ({
     type: "state",
     deckId: deck.id,
     deckTitle: deck.title,
@@ -4191,6 +4794,28 @@ export function PresentationControlPanel({
     steps: deck.slides[0]?.steps,
     stepIndex: 0,
     stepCount: deck.slides[0]?.steps?.length ?? 0,
+    surface,
+    fullscreenActive: false,
+    fullscreenPromptVisible: false,
+    showGuides: false,
+    showCrossbars: false,
+  });
+  const [activeSurface, setActiveSurface] =
+    useState<PresentationSurface>("presentation");
+  const activeSurfaceRef = useRef<PresentationSurface>("presentation");
+  const [connectedSurfaces, setConnectedSurfaces] = useState<
+    Record<PresentationSurface, boolean>
+  >({
+    presentation: false,
+    shorts: false,
+    feed: false,
+  });
+  const [surfaceStates, setSurfaceStates] = useState<
+    Record<PresentationSurface, ControlState>
+  >({
+    presentation: buildDefaultControlState("presentation"),
+    shorts: buildDefaultControlState("shorts"),
+    feed: buildDefaultControlState("feed"),
   });
   const [deckTypeFilter, setDeckTypeFilter] = useState<DeckType | "all">("all");
   const availableDeckTypes = useMemo(() => {
@@ -4238,7 +4863,6 @@ export function PresentationControlPanel({
       return DEFAULT_TRANSCRIPT_FONT_SCALE_INDEX;
     },
   );
-
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -4257,8 +4881,8 @@ export function PresentationControlPanel({
     const onMessage = (ev: MessageEvent<ControlState>) => {
       const msg = ev.data;
       if (!msg || msg.type !== "state" || msg.deckId !== deck.id) return;
-      setConnected(true);
-      setState(msg);
+      setConnectedSurfaces((prev) => ({ ...prev, [msg.surface]: true }));
+      setSurfaceStates((prev) => ({ ...prev, [msg.surface]: msg }));
     };
 
     const onStorage = (ev: StorageEvent) => {
@@ -4266,8 +4890,8 @@ export function PresentationControlPanel({
       try {
         const msg = JSON.parse(ev.newValue) as ControlState;
         if (!msg || msg.type !== "state" || msg.deckId !== deck.id) return;
-        setConnected(true);
-        setState(msg);
+        setConnectedSurfaces((prev) => ({ ...prev, [msg.surface]: true }));
+        setSurfaceStates((prev) => ({ ...prev, [msg.surface]: msg }));
       } catch {
         // Ignore malformed sync payloads.
       }
@@ -4289,7 +4913,8 @@ export function PresentationControlPanel({
       try {
         const msg = JSON.parse(cachedState) as ControlState;
         if (msg?.type === "state" && msg.deckId === deck.id) {
-          setState(msg);
+          setConnectedSurfaces((prev) => ({ ...prev, [msg.surface]: true }));
+          setSurfaceStates((prev) => ({ ...prev, [msg.surface]: msg }));
         }
       } catch {
         // Ignore malformed sync payloads.
@@ -4327,17 +4952,31 @@ export function PresentationControlPanel({
     [deck.id, onSelectDeck, send],
   );
 
+  const selectSurface = useCallback((surface: PresentationSurface) => {
+    activeSurfaceRef.current = surface;
+    setActiveSurface(surface);
+  }, []);
+
+  const activeState = surfaceStates[activeSurface];
+  const connected = Object.values(connectedSurfaces).some(Boolean);
+  const activeConnected = connectedSurfaces[activeSurface];
   const atStart =
-    state.slideIndex <= 0 && (state.stepCount === 0 || state.stepIndex <= 0);
+    activeState.slideIndex <= 0 &&
+    (activeState.stepCount === 0 || activeState.stepIndex <= 0);
   const atEnd =
-    state.slideIndex >= state.slideCount - 1 &&
-    (state.stepCount === 0 || state.stepIndex >= state.stepCount - 1);
-  const timerOver =
-    state.duration != null ? state.elapsed > state.duration : false;
+    activeState.slideIndex >= activeState.slideCount - 1 &&
+    (activeState.stepCount === 0 ||
+      activeState.stepIndex >= activeState.stepCount - 1);
   const transcriptFontScale =
     TRANSCRIPT_FONT_SCALE_STOPS[transcriptScaleIndex] ??
     TRANSCRIPT_FONT_SCALE_STOPS[DEFAULT_TRANSCRIPT_FONT_SCALE_INDEX];
   const transcriptFontScaleLabel = `${Math.round(transcriptFontScale * 100)}%`;
+  const timerOver =
+    activeState.duration != null && activeState.elapsed > activeState.duration;
+  const guidesOn = activeState.showGuides;
+  const crossbarsOn = activeState.showCrossbars;
+  const fullscreenOn =
+    activeState.fullscreenActive || activeState.fullscreenPromptVisible;
 
   return (
     <>
@@ -4353,7 +4992,7 @@ export function PresentationControlPanel({
           <span className="pc-header-separator" aria-hidden="true" />
           <div className="pc-meta">
             <span className="pc-meta-item">
-              {state.slideIndex + 1}/{state.slideCount}
+              {activeState.slideIndex + 1}/{activeState.slideCount}
             </span>
             <span className="pc-meta-divider" aria-hidden="true" />
             <span
@@ -4364,16 +5003,25 @@ export function PresentationControlPanel({
                   : "var(--tf-text-muted, #8892a8)",
               }}
             >
-              {formatTime(state.elapsed)}
-              {state.duration != null ? ` / ${formatTime(state.duration)}` : ""}
+              {formatTime(activeState.elapsed)}
+              {activeState.duration != null
+                ? ` / ${formatTime(activeState.duration)}`
+                : ""}
             </span>
             <span className="pc-meta-divider" aria-hidden="true" />
-            <span className="pc-meta-item">Zoom {state.zoom.toFixed(2)}x</span>
+            <span className="pc-meta-item">
+              Zoom {activeState.zoom.toFixed(2)}x
+            </span>
           </div>
           <div className="pc-header-spacer" />
           {onExplore && (
-            <button className="pc-btn pc-btn-header" onClick={onExplore}>
-              Explore
+            <button
+              className="pc-btn pc-btn-header pc-btn-icon"
+              onClick={onExplore}
+              title="Home"
+              aria-label="Home"
+            >
+              {Icons.home}
             </button>
           )}
           <span className="pc-header-separator" aria-hidden="true" />
@@ -4390,41 +5038,111 @@ export function PresentationControlPanel({
             <>
               <span className="pc-header-separator" aria-hidden="true" />
               <button
-                className="pc-btn pc-btn-header"
-                onClick={onOpenPresenter}
+                className={`pc-btn pc-btn-header pc-btn-ratio${activeSurface === "presentation" ? " active" : ""}`}
+                onClick={() => {
+                  selectSurface("presentation");
+                  onOpenPresenter();
+                }}
+                title="Open or focus 16:9 slide window"
+                aria-label="Open or focus 16 by 9 slide window"
               >
-                ▶ 16:9
+                {Icons.pip}
+                <span className="pc-btn-label">16:9</span>
               </button>
             </>
           )}
           {onOpenShorts && isShortDeck(deck.deckType) && (
-            <button className="pc-btn pc-btn-header" onClick={onOpenShorts}>
-              📱 9:16
+            <button
+              className={`pc-btn pc-btn-header pc-btn-ratio${activeSurface === "shorts" ? " active" : ""}`}
+              onClick={() => {
+                selectSurface("shorts");
+                onOpenShorts();
+              }}
+              title="Open or focus 9:16 slide window"
+              aria-label="Open or focus 9 by 16 slide window"
+            >
+              {Icons.shorts}
+              <span className="pc-btn-label">9:16</span>
             </button>
           )}
-          {onOpenFeed && isShortDeck(deck.deckType) && (
-            <button className="pc-btn pc-btn-header" onClick={onOpenFeed}>
-              📱 4:5
+          {onOpenFeed && isFeedCapable(deck.deckType) && (
+            <button
+              className={`pc-btn pc-btn-header pc-btn-ratio${activeSurface === "feed" ? " active" : ""}`}
+              onClick={() => {
+                selectSurface("feed");
+                onOpenFeed();
+              }}
+              title="Open or focus 4:5 slide window"
+              aria-label="Open or focus 4 by 5 slide window"
+            >
+              {Icons.shorts}
+              <span className="pc-btn-label">4:5</span>
             </button>
           )}
           <span className="pc-header-separator" aria-hidden="true" />
           <button
-            className="pc-btn pc-btn-header"
+            className={`pc-btn pc-btn-header pc-btn-icon${fullscreenOn ? " active" : ""}`}
             onClick={() =>
               send({
                 type: "command",
                 deckId: deck.id,
                 action: "toggle-fullscreen",
+                targetSurface: activeSurfaceRef.current,
               })
             }
-            disabled={!connected}
+            disabled={!activeConnected}
             title={
-              connected
-                ? "Toggle fullscreen on slide window"
+              activeConnected
+                ? activeState.fullscreenActive
+                  ? "Exit fullscreen on slide window"
+                  : activeState.fullscreenPromptVisible
+                    ? "Slide window is waiting for one click to enter fullscreen"
+                    : "Toggle fullscreen on slide window"
                 : "No slide window connected"
             }
+            aria-label="Toggle fullscreen on slide window"
           >
-            ⛶ Fullscreen
+            {Icons.fullscreen}
+          </button>
+          <button
+            className={`pc-btn pc-btn-header pc-btn-icon${guidesOn ? " active" : ""}`}
+            onClick={() => {
+              send({
+                type: "command",
+                deckId: deck.id,
+                action: "toggle-guides",
+                targetSurface: activeSurfaceRef.current,
+              });
+            }}
+            disabled={!activeConnected}
+            title={
+              activeConnected
+                ? "Toggle L-corner guides"
+                : "No slide window connected"
+            }
+            aria-label="Toggle L-corner guides"
+          >
+            {Icons.guides}
+          </button>
+          <button
+            className={`pc-btn pc-btn-header pc-btn-icon${crossbarsOn ? " active" : ""}`}
+            onClick={() => {
+              send({
+                type: "command",
+                deckId: deck.id,
+                action: "toggle-crossbars",
+                targetSurface: activeSurfaceRef.current,
+              });
+            }}
+            disabled={!activeConnected}
+            title={
+              activeConnected
+                ? "Toggle center crossbar alignment marks"
+                : "No slide window connected"
+            }
+            aria-label="Toggle center crossbar alignment marks"
+          >
+            {Icons.crossbars}
           </button>
           <span
             className="pc-connection-dot"
@@ -4507,12 +5225,15 @@ export function PresentationControlPanel({
               </span>
               <select
                 className="pc-lesson-select"
-                value={state.zoom.toFixed(2)}
+                value={activeState.zoom.toFixed(2)}
                 onChange={(e) => {
                   const nextZoom = parseFloat(e.target.value);
-                  setState((current) => ({
+                  setSurfaceStates((current) => ({
                     ...current,
-                    zoom: nextZoom,
+                    [activeSurface]: {
+                      ...current[activeSurface],
+                      zoom: nextZoom,
+                    },
                   }));
                   try {
                     localStorage.setItem(zoomStorageKey, String(nextZoom));
@@ -4567,7 +5288,7 @@ export function PresentationControlPanel({
               {deck.slides.map((slide, idx) => (
                 <button
                   key={slide.id}
-                  className={`pc-jump-item ${idx === state.slideIndex ? "active" : ""}${!connected ? " disabled" : ""}`}
+                  className={`pc-jump-item ${idx === activeState.slideIndex ? "active" : ""}${!connected ? " disabled" : ""}`}
                   onClick={() => {
                     if (!connected) return;
                     send({
@@ -4597,11 +5318,12 @@ export function PresentationControlPanel({
               } as React.CSSProperties
             }
           >
-            {state.stepCount > 0 ? (
+            {activeState.stepCount > 0 ? (
               <div className="pc-step-controls">
                 <span className="pc-step-counter">
-                  Step {Math.min(state.stepIndex + 1, state.stepCount)} /{" "}
-                  {state.stepCount}
+                  Step{" "}
+                  {Math.min(activeState.stepIndex + 1, activeState.stepCount)} /{" "}
+                  {activeState.stepCount}
                 </span>
                 <div className="pc-step-actions">
                   <button
@@ -4611,10 +5333,10 @@ export function PresentationControlPanel({
                         type: "command",
                         deckId: deck.id,
                         action: "step-goto",
-                        index: Math.max(0, state.stepIndex - 1),
+                        index: Math.max(0, activeState.stepIndex - 1),
                       })
                     }
-                    disabled={!connected || state.stepIndex <= 0}
+                    disabled={!connected || activeState.stepIndex <= 0}
                   >
                     Back
                   </button>
@@ -4627,13 +5349,14 @@ export function PresentationControlPanel({
                         deckId: deck.id,
                         action: "step-goto",
                         index: Math.min(
-                          state.stepCount - 1,
-                          state.stepIndex + 1,
+                          activeState.stepCount - 1,
+                          activeState.stepIndex + 1,
                         ),
                       })
                     }
                     disabled={
-                      !connected || state.stepIndex >= state.stepCount - 1
+                      !connected ||
+                      activeState.stepIndex >= activeState.stepCount - 1
                     }
                   >
                     Step
@@ -4647,7 +5370,7 @@ export function PresentationControlPanel({
                         action: "step-reset",
                       })
                     }
-                    disabled={!connected || state.stepIndex <= 0}
+                    disabled={!connected || activeState.stepIndex <= 0}
                   >
                     Reset
                   </button>
@@ -4656,7 +5379,7 @@ export function PresentationControlPanel({
             ) : null}
             <div className="pc-transcript-header">
               <span className="pc-transcript-header-title">
-                {state.stepCount > 0 ? "Step Transcript" : "Transcript"}
+                {activeState.stepCount > 0 ? "Step Transcript" : "Transcript"}
               </span>
               <div className="pc-transcript-header-tools">
                 <div className="pc-slider-row compact">
@@ -4688,13 +5411,13 @@ export function PresentationControlPanel({
               </div>
             </div>
             <div className="pc-transcript-body">
-              {state.stepCount > 0 && state.steps?.length ? (
+              {activeState.stepCount > 0 && activeState.steps?.length ? (
                 <>
                   <div
                     className="pc-transcript-current"
                     key={
-                      state.steps[state.stepIndex]?.id ??
-                      `step-${state.stepIndex}`
+                      activeState.steps[activeState.stepIndex]?.id ??
+                      `step-${activeState.stepIndex}`
                     }
                   >
                     <div className="pc-transcript-current-title">
@@ -4702,15 +5425,19 @@ export function PresentationControlPanel({
                         Active Transcript
                       </span>
                       <span className="pc-transcript-current-step">
-                        Step {Math.min(state.stepIndex + 1, state.stepCount)} /{" "}
-                        {state.stepCount}
+                        Step{" "}
+                        {Math.min(
+                          activeState.stepIndex + 1,
+                          activeState.stepCount,
+                        )}{" "}
+                        / {activeState.stepCount}
                       </span>
                     </div>
                     <div className="pc-transcript-current-heading">
-                      {state.steps[state.stepIndex]?.title}
+                      {activeState.steps[activeState.stepIndex]?.title}
                     </div>
                     <div className="pc-transcript-current-text">
-                      {state.steps[state.stepIndex]?.transcript}
+                      {activeState.steps[activeState.stepIndex]?.transcript}
                     </div>
                   </div>
 
@@ -4722,11 +5449,11 @@ export function PresentationControlPanel({
                   </div>
 
                   <div className="pc-transcript-steps">
-                    {state.steps.map((step, index) => (
+                    {activeState.steps.map((step, index) => (
                       <button
                         key={step.id}
                         type="button"
-                        className={`pc-transcript-step ${index === state.stepIndex ? "active" : ""} ${index < state.stepIndex ? "complete" : ""}`}
+                        className={`pc-transcript-step ${index === activeState.stepIndex ? "active" : ""} ${index < activeState.stepIndex ? "complete" : ""}`}
                         onClick={() =>
                           send({
                             type: "command",
@@ -4751,8 +5478,10 @@ export function PresentationControlPanel({
                     ))}
                   </div>
                 </>
-              ) : state.narration ? (
-                <div className="pc-transcript-text">{state.narration}</div>
+              ) : activeState.narration ? (
+                <div className="pc-transcript-text">
+                  {activeState.narration}
+                </div>
               ) : (
                 <div className="pc-transcript-empty">
                   No transcript for this slide.

@@ -4,6 +4,7 @@ import { TutorialGlobalStyles } from "../../src/index";
 import {
   PresentationControlPanel,
   PresentationLayout,
+  ShortsFeedLayout,
   ShortsLayout,
   usePresentationStep,
 } from "../../src/components/presentation";
@@ -13,6 +14,7 @@ const deck = {
   id: "01",
   number: "01",
   title: "Step Harness",
+  deckType: "short",
   slides: [
     {
       id: "step-slide",
@@ -112,9 +114,39 @@ function App() {
           deck={deck}
           decks={[deck]}
           controlChannelId={CHANNEL_ID}
+          onOpenPresenter={() => {
+            const popup = window.open(
+              `${window.location.pathname}${window.location.hash}`,
+              "tf-step-harness-presenter",
+              "popup=yes,width=1600,height=900,resizable=yes,scrollbars=yes",
+            );
+            popup?.focus();
+          }}
+          onOpenShorts={() => {
+            const popup = window.open(
+              `${window.location.pathname}?shorts=1${window.location.hash}`,
+              "tf-step-harness-shorts",
+              "popup=yes,width=560,height=1000,resizable=yes,scrollbars=yes",
+            );
+            popup?.focus();
+          }}
+          onOpenFeed={() => {
+            const popup = window.open(
+              `${window.location.pathname}?shorts=45${window.location.hash}`,
+              "tf-step-harness-feed",
+              "popup=yes,width=900,height=1125,resizable=yes,scrollbars=yes",
+            );
+            popup?.focus();
+          }}
         />
       ) : shortsMode === "1" ? (
         <ShortsLayout
+          courseTitle="Harness"
+          deck={shortDeck}
+          controlChannelId={CHANNEL_ID}
+        />
+      ) : shortsMode === "45" ? (
+        <ShortsFeedLayout
           courseTitle="Harness"
           deck={shortDeck}
           controlChannelId={CHANNEL_ID}
