@@ -105,6 +105,28 @@ function App() {
   const params = new URLSearchParams(window.location.search);
   const control = params.get("control") === "1";
   const shortsMode = params.get("shorts");
+  const presenterPopupRef = React.useRef<Window | null>(null);
+  const shortsPopupRef = React.useRef<Window | null>(null);
+  const feedPopupRef = React.useRef<Window | null>(null);
+
+  const focusOrOpenPopup = (
+    popupRef: React.MutableRefObject<Window | null>,
+    url: string,
+    name: string,
+    features: string,
+  ) => {
+    if (popupRef.current && !popupRef.current.closed) {
+      popupRef.current.focus();
+      return popupRef.current;
+    }
+
+    const popup = window.open(url, name, features);
+    if (popup) {
+      popupRef.current = popup;
+      popup.focus();
+    }
+    return popup;
+  };
 
   return (
     <>
@@ -115,28 +137,28 @@ function App() {
           decks={[deck]}
           controlChannelId={CHANNEL_ID}
           onOpenPresenter={() => {
-            const popup = window.open(
+            focusOrOpenPopup(
+              presenterPopupRef,
               `${window.location.pathname}${window.location.hash}`,
               "tf-step-harness-presenter",
               "popup=yes,width=1600,height=900,resizable=yes,scrollbars=yes",
             );
-            popup?.focus();
           }}
           onOpenShorts={() => {
-            const popup = window.open(
+            focusOrOpenPopup(
+              shortsPopupRef,
               `${window.location.pathname}?shorts=1${window.location.hash}`,
               "tf-step-harness-shorts",
               "popup=yes,width=560,height=1000,resizable=yes,scrollbars=yes",
             );
-            popup?.focus();
           }}
           onOpenFeed={() => {
-            const popup = window.open(
+            focusOrOpenPopup(
+              feedPopupRef,
               `${window.location.pathname}?shorts=45${window.location.hash}`,
               "tf-step-harness-feed",
               "popup=yes,width=900,height=1125,resizable=yes,scrollbars=yes",
             );
-            popup?.focus();
           }}
         />
       ) : shortsMode === "1" ? (

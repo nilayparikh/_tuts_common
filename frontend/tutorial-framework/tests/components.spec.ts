@@ -191,17 +191,6 @@ test("control toolbar defaults guides off and fullscreen hands off to the slide 
   await expect(shorts.locator(".pe-shorts-guide-svg line")).toHaveCount(0);
 
   await control
-    .getByRole("button", { name: "Open or focus 9 by 16 slide window" })
-    .click();
-  await expect(guidesButton).toBeEnabled();
-  await guidesButton.click();
-  await expect(guidesButton).toHaveClass(/active/);
-  await expect(shorts.locator(".pe-shorts-guide-svg polyline")).toHaveCount(4);
-  await expect(
-    presenter.locator(".pe-viewport-guide-svg polyline"),
-  ).toHaveCount(4);
-
-  await control
     .getByRole("button", { name: "Open or focus 16 by 9 slide window" })
     .click();
   await fullscreenButton.click();

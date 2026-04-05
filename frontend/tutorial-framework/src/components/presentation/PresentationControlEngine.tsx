@@ -3040,7 +3040,7 @@ export function PresentationLayout({
       if (!msg) return;
       /* Dedup: both BroadcastChannel and localStorage fire for cross-window commands */
       const now = Date.now();
-      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}`;
+      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}:${(msg as ControlCommand & { targetSurface?: PresentationSurface }).targetSurface ?? ""}:${(msg as ControlCommand & { zoom?: number }).zoom ?? ""}`;
       if (sig === lastCmdRef.current.sig && now - lastCmdRef.current.ts < 80)
         return;
       lastCmdRef.current = { sig, ts: now };
@@ -3863,8 +3863,17 @@ export function ShortsLayout({
   const currentStepCount = currentSteps.length;
   const activeStepIndex =
     currentStepCount > 0 ? Math.min(stepIndex, currentStepCount - 1) : 0;
+  const activeStep = currentSteps[activeStepIndex] ?? null;
   const shortTitle = sanitizePresentationTitle(deck.title);
   const slideTitle = sanitizePresentationTitle(currentSlide?.title);
+  const showTitleStack = slideIndex > 0 && !currentSlide?.hideTitleStack;
+
+  const stepContextValue: PresentationStepContextValue = {
+    stepIndex: activeStepIndex,
+    stepCount: currentStepCount,
+    activeStep,
+    steps: currentSteps,
+  };
 
   /* ── Navigation ── */
   const goTo = useCallback(
@@ -4037,7 +4046,7 @@ export function ShortsLayout({
       if (!msg) return;
       /* Dedup: both BroadcastChannel and localStorage fire for cross-window commands */
       const now = Date.now();
-      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}`;
+      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}:${(msg as ControlCommand & { targetSurface?: PresentationSurface }).targetSurface ?? ""}:${(msg as ControlCommand & { zoom?: number }).zoom ?? ""}`;
       if (sig === sLastCmdRef.current.sig && now - sLastCmdRef.current.ts < 80)
         return;
       sLastCmdRef.current = { sig, ts: now };
@@ -4526,7 +4535,7 @@ export function ShortsFeedLayout({
     const handleCommand = (msg: ControlCommand) => {
       if (!msg) return;
       const now = Date.now();
-      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}`;
+      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}:${(msg as ControlCommand & { targetSurface?: PresentationSurface }).targetSurface ?? ""}:${(msg as ControlCommand & { zoom?: number }).zoom ?? ""}`;
       if (sig === fLastCmdRef.current.sig && now - fLastCmdRef.current.ts < 80)
         return;
       fLastCmdRef.current = { sig, ts: now };
@@ -4969,6 +4978,10 @@ export function PresentationControlPanel({
     [commandStorageKey],
   );
 
+  const requestState = useCallback(() => {
+    channelRef.current?.postMessage({ type: "request-state", deckId: deck.id });
+  }, [deck.id]);
+
   const handleSelectDeck = useCallback(
     (nextDeckId: string) => {
       if (!nextDeckId || nextDeckId === deck.id) return;
@@ -4987,6 +5000,14 @@ export function PresentationControlPanel({
     activeSurfaceRef.current = surface;
     setActiveSurface(surface);
   }, []);
+
+  useEffect(() => {
+    requestState();
+    const timeoutId = window.setTimeout(() => {
+      requestState();
+    }, 150);
+    return () => window.clearTimeout(timeoutId);
+  }, [activeSurface, requestState]);
 
   const activeState = surfaceStates[activeSurface];
   const connected = Object.values(connectedSurfaces).some(Boolean);
@@ -5121,7 +5142,7 @@ export function PresentationControlPanel({
                 targetSurface: activeSurfaceRef.current,
               })
             }
-            disabled={!activeConnected}
+            disabled={!connected}
             title={
               activeConnected
                 ? activeState.fullscreenActive
@@ -5129,6 +5150,8 @@ export function PresentationControlPanel({
                   : activeState.fullscreenPromptVisible
                     ? "Slide window is waiting for one click to enter fullscreen"
                     : "Toggle fullscreen on slide window"
+                : connected
+                  ? "Selected slide window is still connecting"
                 : "No slide window connected"
             }
             aria-label="Toggle fullscreen on slide window"
@@ -5145,10 +5168,12 @@ export function PresentationControlPanel({
                 targetSurface: activeSurfaceRef.current,
               });
             }}
-            disabled={!activeConnected}
+            disabled={!connected}
             title={
               activeConnected
                 ? "Toggle L-corner guides"
+                : connected
+                  ? "Selected slide window is still connecting"
                 : "No slide window connected"
             }
             aria-label="Toggle L-corner guides"
@@ -5165,10 +5190,12 @@ export function PresentationControlPanel({
                 targetSurface: activeSurfaceRef.current,
               });
             }}
-            disabled={!activeConnected}
+            disabled={!connected}
             title={
               activeConnected
                 ? "Toggle center crossbar alignment marks"
+                : connected
+                  ? "Selected slide window is still connecting"
                 : "No slide window connected"
             }
             aria-label="Toggle center crossbar alignment marks"
