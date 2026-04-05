@@ -5152,7 +5152,7 @@ export function PresentationControlPanel({
                     : "Toggle fullscreen on slide window"
                 : connected
                   ? "Selected slide window is still connecting"
-                : "No slide window connected"
+                  : "No slide window connected"
             }
             aria-label="Toggle fullscreen on slide window"
           >
@@ -5174,7 +5174,7 @@ export function PresentationControlPanel({
                 ? "Toggle L-corner guides"
                 : connected
                   ? "Selected slide window is still connecting"
-                : "No slide window connected"
+                  : "No slide window connected"
             }
             aria-label="Toggle L-corner guides"
           >
@@ -5196,7 +5196,7 @@ export function PresentationControlPanel({
                 ? "Toggle center crossbar alignment marks"
                 : connected
                   ? "Selected slide window is still connecting"
-                : "No slide window connected"
+                  : "No slide window connected"
             }
             aria-label="Toggle center crossbar alignment marks"
           >
