@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+test.describe.configure({ mode: "serial" });
+
 async function expectApproxRatio(
   actual: number,
   expected: number,
@@ -191,6 +193,7 @@ test("control toolbar defaults guides off and fullscreen hands off to the slide 
   await control
     .getByRole("button", { name: "Open or focus 9 by 16 slide window" })
     .click();
+  await expect(guidesButton).toBeEnabled();
   await guidesButton.click();
   await expect(guidesButton).toHaveClass(/active/);
   await expect(shorts.locator(".pe-shorts-guide-svg polyline")).toHaveCount(4);
@@ -207,7 +210,7 @@ test("control toolbar defaults guides off and fullscreen hands off to the slide 
       presenter.evaluate(() => {
         return (
           Boolean(document.fullscreenElement) ||
-          Boolean(document.querySelector('[data-testid="fullscreen-prompt"]'))
+          Boolean(document.querySelector('[data-fullscreen-pending="true"]'))
         );
       }),
     )
@@ -260,6 +263,7 @@ test("control toolbar toggles guides and crossbars for 16:9, 9:16, and 4:5 surfa
   await control
     .getByRole("button", { name: "Open or focus 16 by 9 slide window" })
     .click();
+  await expect(guidesButton).toBeEnabled();
   await guidesButton.click();
   await crossbarsButton.click();
   await expect(presenter.locator(".pe-pip-guide-svg polyline")).toHaveCount(4);
@@ -272,6 +276,7 @@ test("control toolbar toggles guides and crossbars for 16:9, 9:16, and 4:5 surfa
   await control
     .getByRole("button", { name: "Open or focus 9 by 16 slide window" })
     .click();
+  await expect(guidesButton).toBeEnabled();
   await guidesButton.click();
   await crossbarsButton.click();
   await expect(shorts.locator(".pe-shorts-guide-svg polyline")).toHaveCount(4);
@@ -282,6 +287,7 @@ test("control toolbar toggles guides and crossbars for 16:9, 9:16, and 4:5 surfa
   await control
     .getByRole("button", { name: "Open or focus 4 by 5 slide window" })
     .click();
+  await expect(guidesButton).toBeEnabled();
   await guidesButton.click();
   await crossbarsButton.click();
   await expect(feed.locator(".pe-feed-guide-svg polyline")).toHaveCount(4);

@@ -3572,38 +3572,78 @@ export function PresentationLayout({
                       xmlns="http://www.w3.org/2000/svg"
                       aria-hidden="true"
                     >
-                      {/* Top-left L */}
-                      <polyline
-                        points="3,8 3,3 8,3"
-                        fill="none"
-                        stroke="rgba(226,230,240,0.85)"
-                        strokeWidth="1.5"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                      {/* Top-right L */}
-                      <polyline
-                        points="92,3 97,3 97,8"
-                        fill="none"
-                        stroke="rgba(226,230,240,0.85)"
-                        strokeWidth="1.5"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                      {/* Bottom-right L */}
-                      <polyline
-                        points="97,92 97,97 92,97"
-                        fill="none"
-                        stroke="rgba(226,230,240,0.85)"
-                        strokeWidth="1.5"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                      {/* Bottom-left L */}
-                      <polyline
-                        points="8,97 3,97 3,92"
-                        fill="none"
-                        stroke="rgba(226,230,240,0.85)"
-                        strokeWidth="1.5"
-                        vectorEffect="non-scaling-stroke"
-                      />
+                      {showGuides && (
+                        <>
+                          <polyline
+                            points="3,8 3,3 8,3"
+                            fill="none"
+                            stroke="rgba(226,230,240,0.85)"
+                            strokeWidth="1.5"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                          <polyline
+                            points="92,3 97,3 97,8"
+                            fill="none"
+                            stroke="rgba(226,230,240,0.85)"
+                            strokeWidth="1.5"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                          <polyline
+                            points="97,92 97,97 92,97"
+                            fill="none"
+                            stroke="rgba(226,230,240,0.85)"
+                            strokeWidth="1.5"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                          <polyline
+                            points="8,97 3,97 3,92"
+                            fill="none"
+                            stroke="rgba(226,230,240,0.85)"
+                            strokeWidth="1.5"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                        </>
+                      )}
+                      {showCrossbars && (
+                        <>
+                          <line
+                            x1="50"
+                            y1="0"
+                            x2="50"
+                            y2="5"
+                            stroke="rgba(226,230,240,0.6)"
+                            strokeWidth="1"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                          <line
+                            x1="50"
+                            y1="95"
+                            x2="50"
+                            y2="100"
+                            stroke="rgba(226,230,240,0.6)"
+                            strokeWidth="1"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                          <line
+                            x1="0"
+                            y1="50"
+                            x2="5"
+                            y2="50"
+                            stroke="rgba(226,230,240,0.6)"
+                            strokeWidth="1"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                          <line
+                            x1="95"
+                            y1="50"
+                            x2="100"
+                            y2="50"
+                            stroke="rgba(226,230,240,0.6)"
+                            strokeWidth="1"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                        </>
+                      )}
                     </svg>
                   </div>
                 </div>
@@ -3810,6 +3850,11 @@ export function ShortsLayout({
   const [showGuides, setShowGuides] = useState(false);
   const [showCrossbars, setShowCrossbars] = useState(false);
   const [fullscreenPromptVisible, setFullscreenPromptVisible] = useState(false);
+  useFullscreenFallbackArm(
+    fullscreenPromptVisible,
+    rootRef,
+    setFullscreenPromptVisible,
+  );
   const slideCount = deck.slides.length;
   const elapsed = useSlideTimer(slideIndex);
 
@@ -3818,17 +3863,8 @@ export function ShortsLayout({
   const currentStepCount = currentSteps.length;
   const activeStepIndex =
     currentStepCount > 0 ? Math.min(stepIndex, currentStepCount - 1) : 0;
-  const activeStep = currentSteps[activeStepIndex] ?? null;
   const shortTitle = sanitizePresentationTitle(deck.title);
   const slideTitle = sanitizePresentationTitle(currentSlide?.title);
-  const showTitleStack = slideIndex > 0 && !currentSlide?.hideTitleStack;
-
-  const stepContextValue: PresentationStepContextValue = {
-    stepIndex: activeStepIndex,
-    stepCount: currentStepCount,
-    activeStep,
-    steps: currentSteps,
-  };
 
   /* ── Navigation ── */
   const goTo = useCallback(
@@ -4100,20 +4136,15 @@ export function ShortsLayout({
     };
   }, [postControlState]);
 
-  const activateLocalFullscreen = useCallback(() => {
-    requestFullscreenForRoot(rootRef.current)
-      .then(() => setFullscreenPromptVisible(false))
-      .catch(() => {});
-  }, []);
-
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
-      <div className="pe-shorts-root" ref={rootRef} aria-label={courseTitle}>
-        <FullscreenPromptOverlay
-          visible={fullscreenPromptVisible}
-          onActivate={activateLocalFullscreen}
-        />
+      <div
+        className="pe-shorts-root"
+        ref={rootRef}
+        aria-label={courseTitle}
+        data-fullscreen-pending={fullscreenPromptVisible ? "true" : undefined}
+      >
         <div className="pe-shorts-frame">
           {/* ── Slide content area ── */}
           <div className="pe-shorts-header">
@@ -4301,6 +4332,11 @@ export function ShortsFeedLayout({
   const [showGuides, setShowGuides] = useState(false);
   const [showCrossbars, setShowCrossbars] = useState(false);
   const [fullscreenPromptVisible, setFullscreenPromptVisible] = useState(false);
+  useFullscreenFallbackArm(
+    fullscreenPromptVisible,
+    rootRef,
+    setFullscreenPromptVisible,
+  );
   const slideCount = deck.slides.length;
   const elapsed = useSlideTimer(slideIndex);
 
@@ -4589,20 +4625,15 @@ export function ShortsFeedLayout({
     };
   }, [postControlState]);
 
-  const activateLocalFullscreen = useCallback(() => {
-    requestFullscreenForRoot(rootRef.current)
-      .then(() => setFullscreenPromptVisible(false))
-      .catch(() => {});
-  }, []);
-
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
-      <div className="pe-feed-root" ref={rootRef} aria-label={courseTitle}>
-        <FullscreenPromptOverlay
-          visible={fullscreenPromptVisible}
-          onActivate={activateLocalFullscreen}
-        />
+      <div
+        className="pe-feed-root"
+        ref={rootRef}
+        aria-label={courseTitle}
+        data-fullscreen-pending={fullscreenPromptVisible ? "true" : undefined}
+      >
         <div className="pe-feed-frame">
           {/* ── Title + description area (replaces slide content) ── */}
           <div className="pe-feed-title-area">
