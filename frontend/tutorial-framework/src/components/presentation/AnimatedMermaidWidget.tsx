@@ -72,6 +72,58 @@ interface AnimatedMermaidWidgetProps {
 
 let widgetCounter = 0;
 
+function escapeSelectorFragment(value: string): string {
+  return value.replace(/["\\]/g, "\\$&");
+}
+
+function matchesNodeId(candidate: string | null, nodeId: string): boolean {
+  if (!candidate) return false;
+  if (candidate === nodeId) return true;
+
+  return [
+    `${nodeId}-`,
+    `-${nodeId}-`,
+    `-${nodeId}`,
+    `_${nodeId}_`,
+    `_${nodeId}-`,
+    `-${nodeId}_`,
+  ].some((fragment) => candidate.includes(fragment));
+}
+
+function findRenderedNode(
+  container: HTMLDivElement,
+  nodeId: string,
+): HTMLElement | null {
+  const directMatch = container.querySelector(
+    [
+      `.node[data-id="${escapeSelectorFragment(nodeId)}"]`,
+      `.node[id="${escapeSelectorFragment(nodeId)}"]`,
+      `.node[id^="${escapeSelectorFragment(nodeId)}-"]`,
+      `.node[id$="-${escapeSelectorFragment(nodeId)}"]`,
+      `.node[id*="-${escapeSelectorFragment(nodeId)}-"]`,
+    ].join(", "),
+  );
+  if (directMatch) return directMatch as HTMLElement;
+
+  const renderedNodes = container.querySelectorAll(".node");
+  for (const node of renderedNodes) {
+    const htmlNode = node as HTMLElement;
+    const label = htmlNode.getAttribute("data-id");
+    const id = htmlNode.getAttribute("id");
+    const title = htmlNode.querySelector("title")?.textContent ?? null;
+
+    if (
+      matchesNodeId(label, nodeId) ||
+      matchesNodeId(id, nodeId) ||
+      title === nodeId
+    ) {
+      return htmlNode;
+    }
+  }
+
+  return null;
+}
+
 export function AnimatedMermaidWidget({
   chart,
   steps,
@@ -182,10 +234,7 @@ export function AnimatedMermaidWidget({
 
     // Animate node <g class="node"> elements
     for (const nodeId of allNodeIds) {
-      // Mermaid v11 flowchart node IDs: flowchart-{nodeId}-{N}
-      const el = containerRef.current.querySelector(
-        `[id^="flowchart-${nodeId}-"]`,
-      ) as HTMLElement | null;
+      const el = findRenderedNode(containerRef.current, nodeId);
       if (!el) continue;
       const revealed = revealedNodes.has(nodeId);
       const active = nodeId === activeNodeId;
