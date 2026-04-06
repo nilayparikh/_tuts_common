@@ -72,6 +72,7 @@ export interface PresentationBranding {
   linkedinUrl?: string;
   twitterUrl?: string;
   twitterHandle?: string;
+  twitterLabel?: string;
   linkedinHandle?: string;
   youtubeHandle?: string;
   copyright?: string;
@@ -2803,6 +2804,7 @@ export function PresentationLayout({
   const linkedinUrl = branding?.linkedinUrl;
   const twitterUrl = branding?.twitterUrl;
   const twitterHandle = branding?.twitterHandle;
+  const twitterLabelOverride = branding?.twitterLabel;
   const linkedinHandle = branding?.linkedinHandle;
   const copyrightText =
     branding?.copyright ?? `\u00A9 ${new Date().getFullYear()} ${brandLabel}`;
@@ -2818,9 +2820,9 @@ export function PresentationLayout({
   const youtubeLabel = youtubeHandle
     ? `yt/${youtubeHandle.replace(/^@/, "")}`
     : "YouTube";
-  const twitterLabel = twitterHandle
-    ? `x/${twitterHandle.replace(/^@/, "")}`
-    : "X";
+  const twitterLabel =
+    twitterLabelOverride ??
+    (twitterHandle ? `x/${twitterHandle.replace(/^@/, "")}` : "X");
   const linkedinLabel = linkedinHandle
     ? linkedinHandle.startsWith("in/")
       ? linkedinHandle
@@ -3774,7 +3776,7 @@ export function PresentationLayout({
                 aria-label="X (Twitter)"
               >
                 {Icons.twitter}
-                {twitterHandle ? <span>{twitterHandle}</span> : null}
+                {twitterLabel ? <span>{twitterLabel}</span> : null}
               </a>
             ) : null}
             {linkedinUrl ? (
