@@ -1,6 +1,7 @@
 import React from "react";
 import { FollowBar } from "../sharing/FollowBar";
 import { BrandLockup } from "./BrandLockup";
+import { externalLinkProps, isExternalHref } from "../../lib/links";
 
 export interface FooterLink {
   label: string;
@@ -144,8 +145,8 @@ export function TutorialFooter({
                     <a
                       href={link.href}
                       style={s.link}
-                      {...(link.external
-                        ? { target: "_blank", rel: "noopener noreferrer" }
+                      {...(link.external || isExternalHref(link.href)
+                        ? externalLinkProps(link.href)
                         : {})}
                     >
                       {link.label}

@@ -1,4 +1,5 @@
 import React from "react";
+import { externalLinkProps } from "../../lib/links";
 
 export type ConceptCardVariant =
   | "default"
@@ -228,7 +229,7 @@ export function ConceptCard({
 
   if (href) {
     return (
-      <a href={href} style={card}>
+      <a href={href} style={card} {...externalLinkProps(href)}>
         {content}
       </a>
     );

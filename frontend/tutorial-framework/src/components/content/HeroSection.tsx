@@ -1,4 +1,5 @@
 import React from "react";
+import { externalLinkProps } from "../../lib/links";
 
 export interface HeroSectionProps {
   /** Eyebrow label above the headline */
@@ -207,7 +208,11 @@ export function HeroSection({
               }}
             >
               {primaryAction && (
-                <a href={primaryAction.href} style={s.btnPrimary}>
+                <a
+                  href={primaryAction.href}
+                  style={s.btnPrimary}
+                  {...externalLinkProps(primaryAction.href)}
+                >
                   {primaryAction.label}
                   <svg
                     width="14"
@@ -220,7 +225,11 @@ export function HeroSection({
                 </a>
               )}
               {secondaryAction && (
-                <a href={secondaryAction.href} style={s.btnSecondary}>
+                <a
+                  href={secondaryAction.href}
+                  style={s.btnSecondary}
+                  {...externalLinkProps(secondaryAction.href)}
+                >
                   {secondaryAction.label}
                 </a>
               )}

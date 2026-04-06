@@ -2,6 +2,7 @@
 import React from "react";
 import { ThemeSelector } from "./ThemeSelector";
 import { BrandLockup } from "./BrandLockup";
+import { externalLinkProps, isExternalHref } from "../../lib/links";
 
 export interface NavItem {
   label: string;
@@ -196,11 +197,16 @@ export function TutorialHeader({
                   <li key={item.href}>
                     <a
                       href={item.href}
+                      {...externalLinkProps(item.href)}
                       style={{
                         ...s.navLink,
                         ...(isActive ? s.navLinkActive : {}),
                       }}
-                      aria-current={isActive ? "page" : undefined}
+                      aria-current={
+                        isActive && !isExternalHref(item.href)
+                          ? "page"
+                          : undefined
+                      }
                     >
                       {item.label}
                     </a>
