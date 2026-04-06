@@ -23,7 +23,7 @@ See [`docs/tutorial-framework.md`](docs/tutorial-framework.md) for the full comp
 
 ## How Tutorial Sites Use This
 
-Tutorial repos (e.g. [`_tuts`](https://github.com/nilayparikh/_tuts)) include this as a **git submodule** at `_common/`:
+Tutorial repos (e.g. <a href="https://github.com/nilayparikh/_tuts" target="_blank" rel="noopener noreferrer">`_tuts`</a>) include this as a **git submodule** at `_common/`:
 
 ```gitmodules
 [submodule "_common"]

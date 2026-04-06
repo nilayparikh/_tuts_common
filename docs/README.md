@@ -2,7 +2,7 @@
 
 Shared, reusable code, AI agent configurations, and documentation used across **all** LocalM tutorial sites.
 
-**Repository**: [`nilayparikh/_tuts_common`](https://github.com/nilayparikh/_tuts_common)
+**Repository**: <a href="https://github.com/nilayparikh/_tuts_common" target="_blank" rel="noopener noreferrer">`nilayparikh/_tuts_common`</a>
 
 ## What's Inside
 
