@@ -1309,6 +1309,7 @@ const ENGINE_CSS = `
   .pc-transcript-header-tools {
     display: flex;
     align-items: center;
+    gap: 12px;
     min-width: 0;
   }
   .pc-transcript-body {
@@ -1454,6 +1455,138 @@ const ENGINE_CSS = `
   .pc-transcript-empty {
     color: var(--tf-text-muted, #8892a8);
     font-style: italic;
+  }
+  .pc-transcript-edit-btn {
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 6px;
+    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
+    background: var(--tf-bg-elevated, #191c23);
+    color: var(--tf-text-secondary, #bfc5d4);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    transition: all 150ms;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .pc-transcript-edit-btn:hover {
+    background: var(--tf-bg-overlay, #1f222a);
+    border-color: var(--tf-color-primary-light, #818cf8);
+    color: var(--tf-text-primary, #e2e6f0);
+  }
+  .pc-transcript-edit-btn.active {
+    background: rgba(99,102,241,0.15);
+    border-color: var(--tf-color-primary-light, #818cf8);
+    color: var(--tf-color-primary-light, #818cf8);
+  }
+  .pc-transcript-edit-btn .pc-edit-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tf-color-accent, #f59e0b);
+    flex-shrink: 0;
+  }
+  .pc-transcript-edit-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+  .pc-transcript-textarea {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    padding: 14px 16px;
+    border: none;
+    border-top: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    background: var(--tf-bg-base, #0b0d12);
+    color: var(--tf-text-secondary, #bfc5d4);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: calc(14px * var(--pc-transcript-font-scale, 1.1));
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+    box-sizing: border-box;
+    white-space: pre-wrap;
+  }
+  .pc-transcript-textarea::placeholder {
+    color: var(--tf-text-muted, #8892a8);
+    font-style: italic;
+  }
+  .pc-transcript-original {
+    padding: 10px 16px;
+    border-top: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    background: rgba(11,13,18,0.6);
+  }
+  .pc-transcript-original-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tf-text-muted, #8892a8);
+    margin-bottom: 4px;
+  }
+  .pc-transcript-original-text {
+    font-size: 11px;
+    color: var(--tf-text-muted, #8892a8);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    max-height: 80px;
+    overflow-y: auto;
+    opacity: 0.7;
+  }
+  .pc-transcript-revert-btn {
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    background: transparent;
+    color: var(--tf-text-muted, #8892a8);
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .pc-transcript-revert-btn:hover {
+    border-color: var(--tf-color-danger, #ef4444);
+    color: var(--tf-color-danger, #ef4444);
+  }
+  .pc-transcript-split-section {
+    padding: 14px 16px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .pc-transcript-split-section + .pc-transcript-split-section {
+    border-top: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    background: rgba(11,13,18,0.4);
+  }
+  .pc-transcript-split-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .pc-transcript-split-label.edited {
+    color: var(--tf-color-accent, #f59e0b);
+  }
+  .pc-transcript-split-label.original {
+    color: var(--tf-text-muted, #8892a8);
+  }
+  .pc-transcript-split-text {
+    font-size: calc(12px * var(--pc-transcript-font-scale, 1.1));
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+  .pc-transcript-split-text.edited {
+    color: var(--tf-text-secondary, #bfc5d4);
+  }
+  .pc-transcript-split-text.original {
+    color: var(--tf-text-muted, #8892a8);
+    opacity: 0.7;
   }
   @keyframes pc-active-transcript-enter {
     0% {
@@ -4916,6 +5049,93 @@ export function PresentationControlPanel({
     }
   }, [transcriptScaleIndex, transcriptScaleStorageKey]);
 
+  /* ── Editable transcript state ─────────────────────────────────────── */
+  const [transcriptEditMode, setTranscriptEditMode] = useState(false);
+  const transcriptEditKey = `${controlChannelId}:${deck.id}:transcript-edits`;
+
+  /** Read a persisted transcript edit from localStorage, or return null. */
+  const getEditedTranscript = useCallback(
+    (slideIdx: number): string | null => {
+      try {
+        const stored = localStorage.getItem(transcriptEditKey);
+        if (stored) {
+          const edits = JSON.parse(stored) as Record<string, string>;
+          const val = edits[String(slideIdx)];
+          return val != null && val !== "" ? val : null;
+        }
+      } catch {
+        /* ignore */
+      }
+      return null;
+    },
+    [transcriptEditKey],
+  );
+
+  /** Persist a transcript edit to localStorage. Empty string = delete. */
+  const setEditedTranscript = useCallback(
+    (slideIdx: number, text: string) => {
+      try {
+        const stored = localStorage.getItem(transcriptEditKey);
+        const edits: Record<string, string> = stored ? JSON.parse(stored) : {};
+        if (
+          text.trim() === "" ||
+          text === (deck.slides[slideIdx]?.narration ?? "")
+        ) {
+          delete edits[String(slideIdx)];
+        } else {
+          edits[String(slideIdx)] = text;
+        }
+        localStorage.setItem(transcriptEditKey, JSON.stringify(edits));
+      } catch {
+        /* ignore */
+      }
+    },
+    [transcriptEditKey, deck.slides],
+  );
+
+  /** Check whether any edits exist for the current deck. */
+  const hasAnyTranscriptEdits = useCallback((): boolean => {
+    try {
+      const stored = localStorage.getItem(transcriptEditKey);
+      if (stored) {
+        const edits = JSON.parse(stored) as Record<string, string>;
+        return Object.keys(edits).length > 0;
+      }
+    } catch {
+      /* ignore */
+    }
+    return false;
+  }, [transcriptEditKey]);
+
+  const currentSlideIdx =
+    surfaceStates[activeSurfaceRef.current]?.slideIndex ?? 0;
+  const [editDraft, setEditDraft] = useState("");
+  const editDraftSlideRef = useRef(-1);
+
+  // Sync draft when slide changes or edit mode toggles
+  useEffect(() => {
+    if (transcriptEditMode) {
+      const edited = getEditedTranscript(currentSlideIdx);
+      const original = deck.slides[currentSlideIdx]?.narration ?? "";
+      setEditDraft(edited ?? original);
+      editDraftSlideRef.current = currentSlideIdx;
+    }
+  }, [transcriptEditMode, currentSlideIdx, getEditedTranscript, deck.slides]);
+
+  // Auto-save draft on change (debounced via the onBlur / onChange)
+  const handleTranscriptDraftChange = useCallback(
+    (text: string) => {
+      setEditDraft(text);
+      setEditedTranscript(currentSlideIdx, text);
+    },
+    [currentSlideIdx, setEditedTranscript],
+  );
+
+  const revertTranscriptEdit = useCallback(() => {
+    setEditedTranscript(currentSlideIdx, "");
+    setEditDraft(deck.slides[currentSlideIdx]?.narration ?? "");
+  }, [currentSlideIdx, setEditedTranscript, deck.slides]);
+
   useEffect(() => {
     const channel = new BroadcastChannel(controlChannelId);
     channelRef.current = channel;
@@ -5442,6 +5662,24 @@ export function PresentationControlPanel({
                 {activeState.stepCount > 0 ? "Step Transcript" : "Transcript"}
               </span>
               <div className="pc-transcript-header-tools">
+                <button
+                  type="button"
+                  className={`pc-transcript-edit-btn${transcriptEditMode ? " active" : ""}`}
+                  onClick={() => setTranscriptEditMode((m) => !m)}
+                  title={
+                    transcriptEditMode ? "Exit edit mode" : "Edit transcript"
+                  }
+                  disabled={
+                    !transcriptEditMode &&
+                    currentSlideIdx !== 0 &&
+                    currentSlideIdx !== deck.slides.length - 1
+                  }
+                >
+                  {hasAnyTranscriptEdits() && !transcriptEditMode && (
+                    <span className="pc-edit-dot" />
+                  )}
+                  {transcriptEditMode ? "Done" : "Edit"}
+                </button>
                 <div className="pc-slider-row compact">
                   <label
                     className="pc-slider-label"
@@ -5470,84 +5708,160 @@ export function PresentationControlPanel({
                 </div>
               </div>
             </div>
-            <div className="pc-transcript-body">
-              {activeState.stepCount > 0 && activeState.steps?.length ? (
-                <>
-                  <div
-                    className="pc-transcript-current"
-                    key={
-                      activeState.steps[activeState.stepIndex]?.id ??
-                      `step-${activeState.stepIndex}`
-                    }
-                  >
-                    <div className="pc-transcript-current-title">
-                      <span className="pc-transcript-current-label">
-                        Active Transcript
-                      </span>
-                      <span className="pc-transcript-current-step">
-                        Step{" "}
-                        {Math.min(
-                          activeState.stepIndex + 1,
-                          activeState.stepCount,
-                        )}{" "}
-                        / {activeState.stepCount}
-                      </span>
-                    </div>
-                    <div className="pc-transcript-current-heading">
-                      {activeState.steps[activeState.stepIndex]?.title}
-                    </div>
-                    <div className="pc-transcript-current-text">
-                      {activeState.steps[activeState.stepIndex]?.transcript}
-                    </div>
-                  </div>
-
-                  <div className="pc-transcript-steps-header">
-                    <span className="pc-transcript-steps-label">All Steps</span>
-                    <span className="pc-transcript-steps-hint">
-                      Click any step to jump
-                    </span>
-                  </div>
-
-                  <div className="pc-transcript-steps">
-                    {activeState.steps.map((step, index) => (
+            {transcriptEditMode ? (
+              /* ── Editable transcript mode ──────────────────────── */
+              <>
+                <textarea
+                  className="pc-transcript-textarea"
+                  value={editDraft}
+                  onChange={(e) => handleTranscriptDraftChange(e.target.value)}
+                  placeholder="Type your updated transcript here…"
+                  spellCheck
+                />
+                {activeState.narration &&
+                  getEditedTranscript(activeState.slideIndex) != null && (
+                    <div className="pc-transcript-original">
+                      <div className="pc-transcript-original-label">
+                        Original
+                      </div>
+                      <div className="pc-transcript-original-text">
+                        {activeState.narration}
+                      </div>
                       <button
-                        key={step.id}
                         type="button"
-                        className={`pc-transcript-step ${index === activeState.stepIndex ? "active" : ""} ${index < activeState.stepIndex ? "complete" : ""}`}
-                        onClick={() =>
-                          send({
-                            type: "command",
-                            deckId: deck.id,
-                            action: "step-goto",
-                            index,
-                          })
-                        }
+                        className="pc-transcript-revert-btn"
+                        onClick={revertTranscriptEdit}
                       >
-                        <div className="pc-transcript-step-title">
-                          <span className="pc-transcript-step-index">
-                            Step {index + 1}
-                          </span>
-                          <span className="pc-transcript-step-label">
-                            {step.title}
-                          </span>
-                        </div>
-                        <div className="pc-transcript-step-text">
-                          {step.transcript}
-                        </div>
+                        Revert to original
                       </button>
-                    ))}
-                  </div>
-                </>
-              ) : activeState.narration ? (
-                <div className="pc-transcript-text">
-                  {activeState.narration}
-                </div>
-              ) : (
-                <div className="pc-transcript-empty">
-                  No transcript for this slide.
-                </div>
-              )}
-            </div>
+                    </div>
+                  )}
+              </>
+            ) : (
+              <div className="pc-transcript-body">
+                {(() => {
+                  const editedText = getEditedTranscript(
+                    activeState.slideIndex,
+                  );
+                  if (activeState.stepCount > 0 && activeState.steps?.length) {
+                    return (
+                      <>
+                        <div
+                          className="pc-transcript-current"
+                          key={
+                            activeState.steps[activeState.stepIndex]?.id ??
+                            `step-${activeState.stepIndex}`
+                          }
+                        >
+                          <div className="pc-transcript-current-title">
+                            <span className="pc-transcript-current-label">
+                              Active Transcript
+                            </span>
+                            <span className="pc-transcript-current-step">
+                              Step{" "}
+                              {Math.min(
+                                activeState.stepIndex + 1,
+                                activeState.stepCount,
+                              )}{" "}
+                              / {activeState.stepCount}
+                            </span>
+                          </div>
+                          <div className="pc-transcript-current-heading">
+                            {activeState.steps[activeState.stepIndex]?.title}
+                          </div>
+                          <div className="pc-transcript-current-text">
+                            {
+                              activeState.steps[activeState.stepIndex]
+                                ?.transcript
+                            }
+                          </div>
+                        </div>
+
+                        <div className="pc-transcript-steps-header">
+                          <span className="pc-transcript-steps-label">
+                            All Steps
+                          </span>
+                          <span className="pc-transcript-steps-hint">
+                            Click any step to jump
+                          </span>
+                        </div>
+
+                        <div className="pc-transcript-steps">
+                          {activeState.steps.map((step, index) => (
+                            <button
+                              key={step.id}
+                              type="button"
+                              className={`pc-transcript-step ${index === activeState.stepIndex ? "active" : ""} ${index < activeState.stepIndex ? "complete" : ""}`}
+                              onClick={() =>
+                                send({
+                                  type: "command",
+                                  deckId: deck.id,
+                                  action: "step-goto",
+                                  index,
+                                })
+                              }
+                            >
+                              <div className="pc-transcript-step-title">
+                                <span className="pc-transcript-step-index">
+                                  Step {index + 1}
+                                </span>
+                                <span className="pc-transcript-step-label">
+                                  {step.title}
+                                </span>
+                              </div>
+                              <div className="pc-transcript-step-text">
+                                {step.transcript}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    );
+                  }
+                  const displayText = editedText ?? activeState.narration;
+                  if (editedText != null && activeState.narration) {
+                    return (
+                      <>
+                        <div className="pc-transcript-split-section">
+                          <div className="pc-transcript-split-label edited">
+                            Edited
+                          </div>
+                          <div className="pc-transcript-split-text edited">
+                            {editedText}
+                          </div>
+                        </div>
+                        <div className="pc-transcript-split-section">
+                          <div className="pc-transcript-split-label original">
+                            Original
+                          </div>
+                          <div className="pc-transcript-split-text original">
+                            {activeState.narration}
+                          </div>
+                          <button
+                            type="button"
+                            className="pc-transcript-revert-btn"
+                            onClick={revertTranscriptEdit}
+                            style={{ marginTop: "8px" }}
+                          >
+                            Revert to original
+                          </button>
+                        </div>
+                      </>
+                    );
+                  }
+                  if (displayText) {
+                    return (
+                      <div className="pc-transcript-text">{displayText}</div>
+                    );
+                  }
+                  return (
+                    <div className="pc-transcript-empty">
+                      No transcript for this slide.
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </section>
         </div>
       </div>
