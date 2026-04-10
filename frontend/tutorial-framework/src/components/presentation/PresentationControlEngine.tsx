@@ -4975,9 +4975,12 @@ export function PresentationControlPanel({
     showGuides: false,
     showCrossbars: false,
   });
-  const [activeSurface, setActiveSurface] =
-    useState<PresentationSurface>("presentation");
-  const activeSurfaceRef = useRef<PresentationSurface>("presentation");
+  const [activeSurface, setActiveSurface] = useState<PresentationSurface>(
+    isShortDeck(deck.deckType) ? "shorts" : "presentation",
+  );
+  const activeSurfaceRef = useRef<PresentationSurface>(
+    isShortDeck(deck.deckType) ? "shorts" : "presentation",
+  );
   const [connectedSurfaces, setConnectedSurfaces] = useState<
     Record<PresentationSurface, boolean>
   >({
@@ -5222,6 +5225,21 @@ export function PresentationControlPanel({
     activeSurfaceRef.current = surface;
     setActiveSurface(surface);
   }, []);
+
+  useEffect(() => {
+    const preferredOrder: PresentationSurface[] = isShortDeck(deck.deckType)
+      ? ["shorts", "feed", "presentation"]
+      : ["presentation", "shorts", "feed"];
+
+    if (connectedSurfaces[activeSurface]) return;
+
+    const nextSurface = preferredOrder.find(
+      (surface) => connectedSurfaces[surface],
+    );
+    if (nextSurface && nextSurface !== activeSurface) {
+      selectSurface(nextSurface);
+    }
+  }, [activeSurface, connectedSurfaces, deck.deckType, selectSurface]);
 
   useEffect(() => {
     requestState();
