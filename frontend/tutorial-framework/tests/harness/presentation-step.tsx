@@ -109,12 +109,25 @@ function App() {
   const shortsPopupRef = React.useRef<Window | null>(null);
   const feedPopupRef = React.useRef<Window | null>(null);
 
+  const closeOtherSlideWindows = (
+    keep: React.MutableRefObject<Window | null>,
+  ) => {
+    for (const ref of [presenterPopupRef, shortsPopupRef, feedPopupRef]) {
+      if (ref !== keep && ref.current && !ref.current.closed) {
+        ref.current.close();
+        ref.current = null;
+      }
+    }
+  };
+
   const focusOrOpenPopup = (
     popupRef: React.MutableRefObject<Window | null>,
     url: string,
     name: string,
     features: string,
   ) => {
+    closeOtherSlideWindows(popupRef);
+
     if (popupRef.current && !popupRef.current.closed) {
       popupRef.current.focus();
       return popupRef.current;

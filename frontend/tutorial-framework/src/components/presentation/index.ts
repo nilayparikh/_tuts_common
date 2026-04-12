@@ -81,6 +81,12 @@ export {
 } from "./AnimatedMermaidWidget";
 export { ProcessStagesWidget, type ProcessStage } from "./ProcessStagesWidget";
 
+// Teleprompter
+export {
+  TeleprompterOverlay,
+  type TeleprompterOverlayProps,
+} from "./TeleprompterOverlay";
+
 // Diagram components
 export {
   DiagramBox,
