@@ -22,6 +22,7 @@ import React, {
 } from "react";
 import { BrandLockup } from "../layout/BrandLockup";
 import { ShortsTitleStack } from "./ShortsTitleStack";
+import { TeleprompterOverlay } from "./TeleprompterOverlay";
 
 export interface PresentationSlide {
   id: string;
@@ -119,6 +120,21 @@ function sanitizePresentationTitle(title: string | undefined): string {
   return m ? title.slice(m[0].length) : title;
 }
 
+function getBlankSlideTitleState(slideIndex: number): {
+  title: string;
+  subtitle: string;
+} {
+  try {
+    return {
+      title: localStorage.getItem(`blank-slide:${slideIndex}:title`) ?? "",
+      subtitle:
+        localStorage.getItem(`blank-slide:${slideIndex}:subtitle`) ?? "",
+    };
+  } catch {
+    return { title: "", subtitle: "" };
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════ */
 /*  CSS                                                                   */
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -147,8 +163,8 @@ const ENGINE_CSS = `
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     padding: 0 24px;
-    height: 64px;
-    min-height: 64px;
+    height: 36px;
+    min-height: 36px;
     background: linear-gradient(180deg, rgba(15,18,28,0.82), rgba(11,13,18,0.62));
     border-bottom: 1px solid rgba(202,211,230,0.10);
     gap: 14px;
@@ -165,12 +181,13 @@ const ENGINE_CSS = `
     justify-self: start;
   }
   .pe-header-center {
-    width: clamp(620px, 56vw, 880px);
+    flex: 1 1 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     min-width: 0;
     justify-self: center;
+  }
   .pe-fullscreen-prompt {
     position: fixed;
     inset: 0;
@@ -276,6 +293,20 @@ const ENGINE_CSS = `
     font-family: 'JetBrains Mono', monospace;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+  }
+  .pe-header-slide-title {
+    font-size: clamp(22px, 3vw, 36px);
+    font-weight: 800;
+    color: var(--tf-text-primary, #e2e6f0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .pe-header-nav {
@@ -427,6 +458,9 @@ const ENGINE_CSS = `
     min-width: 0;
     min-height: 0;
     overflow: hidden;
+  }
+  .pe-slide-stage .lm-slide-title {
+    display: none;
   }
   .pe-viewport-guide-svg {
     position: absolute;
@@ -675,17 +709,114 @@ const ENGINE_CSS = `
 
   /* ── Footer ────────────────────────── */
   .pe-footer {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    padding: 0 24px;
-    height: 52px;
-    min-height: 52px;
-    background: var(--tf-bg-surface, #111318);
-    border-top: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    justify-content: center;
+    padding: 32px 36px 28px;
+    min-height: 160px;
+    background:
+      radial-gradient(ellipse 70% 100% at 50% 100%, rgba(99,102,241,0.14), transparent 70%),
+      linear-gradient(180deg, rgba(15,18,28,0.96), rgba(9,11,18,0.98));
+    border-top: 1px solid rgba(129,140,248,0.22);
     flex-shrink: 0;
     z-index: 20;
+    gap: 10px;
+  }
+  .pe-footer-row1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 12px;
+  }
+  .pe-footer-row1 svg {
+    width: clamp(24px, 2.8vw, 36px);
+    height: clamp(24px, 2.8vw, 36px);
+    flex-shrink: 0;
+  }
+  .pe-footer-subscribe-label {
+    font-size: clamp(22px, 2.6vw, 34px);
+    font-weight: 800;
+    color: var(--tf-text-primary, #e2e6f0);
+    letter-spacing: -0.02em;
+  }
+  .pe-footer-brand-wrap {
+    display: inline-flex;
+    align-items: center;
+  }
+  .pe-footer-row3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .pe-footer-row3-text {
+    font-size: clamp(16px, 1.8vw, 24px);
+    font-weight: 500;
+    color: var(--tf-text-muted, #8892a8);
+  }
+  .pe-footer-x-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--tf-text-secondary, #bfc5d4);
+  }
+  .pe-footer-x-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+  .pe-footer-handle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(15px, 1.6vw, 20px);
+    font-weight: 700;
+    color: var(--tf-color-primary-light, #818cf8);
+  }
+  .pe-footer-x-capsule {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(129,140,248,0.32);
+    background: rgba(20,24,36,0.72);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(15px, 1.6vw, 22px);
+    font-weight: 700;
+    color: var(--tf-color-primary-light, #818cf8);
+  }
+  .pe-footer-x-capsule-icon {
+    display: none;
+  }
+  .pe-footer-qr-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 8px;
+  }
+  .pe-footer-qr-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .pe-footer-qr-item img {
+    width: clamp(88px, 10vw, 130px);
+    height: clamp(88px, 10vw, 130px);
+    border-radius: 8px;
+    border: 1px solid rgba(129,140,248,0.18);
+  }
+  .pe-footer-qr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(9px, 1vw, 12px);
+    max-width: clamp(88px, 10vw, 130px);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--tf-text-muted, #8892a8);
+    letter-spacing: 0.02em;
   }
   .pe-footer-left {
     display: flex;
@@ -1030,6 +1161,7 @@ const ENGINE_CSS = `
     margin-left: 8px;
   }
   .pc-body {
+    position: relative;
     flex: 1;
     min-height: 0;
     display: grid;
@@ -1042,6 +1174,44 @@ const ENGINE_CSS = `
     display: flex;
     flex-direction: column;
     min-height: 0;
+  }
+  .pc-camera-preview {
+    padding: 10px;
+    border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .pc-camera-video {
+    width: 100%;
+    border-radius: 10px;
+    background: #000;
+    object-fit: contain;
+  }
+  .pc-camera-select {
+    width: 100%;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(202,211,230,0.16);
+    background:
+      linear-gradient(180deg, rgba(26,31,46,0.88), rgba(18,21,32,0.84)),
+      linear-gradient(135deg, rgba(0,245,255,0.08), rgba(168,56,255,0.10));
+    color: var(--tf-text-primary, #e2e6f0);
+    font-size: 12px;
+    padding: 0 10px;
+    outline: none;
+    cursor: pointer;
+    transition: all 150ms;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .pc-camera-select:hover,
+  .pc-camera-select:focus-visible {
+    border-color: var(--tf-color-primary-light, #818cf8);
+  }
+  .pc-camera-select option {
+    background: var(--tf-bg-surface, #111318);
+    color: var(--tf-text-primary, #e2e6f0);
   }
   .pc-controls {
     padding: 14px;
@@ -1236,6 +1406,7 @@ const ENGINE_CSS = `
     text-overflow: ellipsis;
   }
   .pc-transcript {
+    position: relative;
     min-height: 0;
     display: flex;
     flex-direction: column;
@@ -1640,7 +1811,7 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     padding: 0 10px;
-    height: 44px;
+    height: 22px;
     gap: 6px;
     border-bottom: 1px solid rgba(202,211,230,0.08);
     background: linear-gradient(180deg, rgba(15,18,28,0.82), rgba(11,13,18,0.62));
@@ -1652,15 +1823,13 @@ const ENGINE_CSS = `
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: 22px 20px 18px;
-    gap: 10px;
+    padding: 14px 16px 10px;
+    gap: 6px;
     border-bottom: 1px solid rgba(202,211,230,0.06);
-    background:
-      radial-gradient(circle at top left, rgba(99,102,241,0.12), transparent 54%),
-      linear-gradient(180deg, rgba(12,15,24,0.96), rgba(10,12,19,0.88));
+    background: linear-gradient(180deg, rgba(12,15,24,0.96), rgba(10,12,19,0.88));
     overflow: hidden;
-    flex: 2 1 0;
-    min-height: 80px;
+    flex: 0 0 auto;
+    min-height: clamp(70px, 9vh, 130px);
   }
 
   .pe-pip-meta-topline {
@@ -1681,7 +1850,7 @@ const ENGINE_CSS = `
   }
 
   .pe-pip-meta-lesson {
-    font-size: clamp(1rem, 2.15vh, 1.35rem);
+    font-size: clamp(1.1rem, 2.5vh, 1.5rem);
     font-weight: 700;
     color: var(--tf-text-primary, #e2e6f0);
     line-height: 1.14;
@@ -1689,6 +1858,19 @@ const ENGINE_CSS = `
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pe-pip-meta-slide-title {
+    font-size: clamp(1.3rem, 3vh, 1.8rem);
+    font-weight: 700;
+    color: var(--tf-text-primary, #e2e6f0);
+    line-height: 1.18;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -1784,14 +1966,16 @@ const ENGINE_CSS = `
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: clamp(0.5rem, 1.2vh, 0.875rem);
-    padding: clamp(1.2rem, 3vh, 2rem) 20px;
+    justify-content: flex-start;
+    gap: clamp(0.6rem, 1.5vh, 1.2rem);
+    padding: clamp(1.4rem, 3.5vh, 2.8rem) 16px clamp(1rem, 2vh, 1.6rem);
     flex: 1 1 0;
-    min-height: 100px;
+    min-height: 180px;
     overflow: hidden;
-    background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
-    border-top: 1px solid rgba(202,211,230,0.08);
+    background:
+      radial-gradient(ellipse 80% 100% at 50% 100%, rgba(99,102,241,0.14), transparent 70%),
+      linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
+    border-top: 1px solid rgba(129,140,248,0.22);
   }
   .pe-pip-footer-row {
     display: flex;
@@ -1807,8 +1991,8 @@ const ENGINE_CSS = `
     align-items: center;
     justify-content: center;
     gap: 0.4em;
-    flex-wrap: nowrap;
-    white-space: nowrap;
+    flex-wrap: wrap;
+    text-align: center;
   }
   .pe-pip-subscribe-icon {
     display: inline-flex;
@@ -1819,22 +2003,95 @@ const ENGINE_CSS = `
     flex-shrink: 0;
   }
   .pe-pip-subscribe-icon svg {
-    width: clamp(0.875rem, 1.8vh, 1.25rem);
-    height: clamp(0.875rem, 1.8vh, 1.25rem);
+    width: clamp(1.1rem, 2.6vh, 1.65rem);
+    height: clamp(1.1rem, 2.6vh, 1.65rem);
   }
   .pe-pip-subscribe-text {
-    font-size: clamp(0.6875rem, 1.4vh, 0.9375rem);
-    color: var(--tf-text-secondary, #bfc5d4);
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    white-space: nowrap;
-    flex-shrink: 0;
+    font-size: clamp(1rem, 2.4vh, 1.5rem);
+    color: var(--tf-text-primary, #e2e6f0);
+    font-weight: 800;
+    letter-spacing: -0.01em;
   }
   .pe-pip-subscribe-brand {
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
-    zoom: 0.72;
+    zoom: 1;
+  }
+  .pe-pip-footer-x-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--tf-text-secondary, #bfc5d4);
+  }
+  .pe-pip-footer-x-icon svg {
+    width: clamp(1rem, 2.2vh, 1.4rem);
+    height: clamp(1rem, 2.2vh, 1.4rem);
+  }
+  .pe-pip-footer-handle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(1rem, 2.2vh, 1.4rem);
+    font-weight: 700;
+    color: var(--tf-color-primary-light, #818cf8);
+  }
+  .pe-pip-footer-x-text {
+    font-size: clamp(0.65rem, 1.3vh, 0.85rem);
+    font-weight: 500;
+    color: var(--tf-text-muted, #8892a8);
+    text-align: center;
+    line-height: 1.3;
+  }
+  .pe-pip-footer-row3-text {
+    font-size: clamp(0.88rem, 2vh, 1.2rem);
+    font-weight: 500;
+    color: var(--tf-text-muted, #8892a8);
+  }
+  .pe-pip-footer-x-capsule {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(129,140,248,0.32);
+    background: rgba(20,24,36,0.72);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(0.88rem, 2vh, 1.2rem);
+    font-weight: 700;
+    color: var(--tf-color-primary-light, #818cf8);
+  }
+  .pe-pip-footer-x-capsule-icon {
+    display: none;
+  }
+  .pe-pip-footer-qr-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-evenly;
+    gap: clamp(0.8rem, 2vh, 1.5rem);
+    margin-top: auto;
+    width: 100%;
+  }
+  .pe-pip-footer-qr-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .pe-pip-footer-qr-item img {
+    width: clamp(80px, 12vh, 130px);
+    height: clamp(80px, 12vh, 130px);
+    border-radius: 6px;
+    border: 1px solid rgba(129,140,248,0.18);
+  }
+  .pe-pip-footer-qr-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(0.45rem, 0.9vh, 0.65rem);
+    max-width: clamp(80px, 12vh, 130px);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    color: var(--tf-text-muted, #8892a8);
+    letter-spacing: 0.02em;
   }
   .pe-pip-promo {
     display: flex;
@@ -2092,7 +2349,6 @@ const ENGINE_CSS = `
     align-items: center;
     justify-content: center;
     gap: clamp(0.25rem, 0.6vh, 0.5rem);
-    padding: clamp(0.5rem, 1.2vh, 1rem) 2.2vw;
     min-height: fit-content;
     flex-shrink: 0;
     border-top: 1px solid rgba(202,211,230,0.08);
@@ -2112,7 +2368,7 @@ const ENGINE_CSS = `
     color: var(--tf-text-muted, #64748b);
   }
 
-  /* Inline subscribe row: bell + "Subscribe to" + [brand] + "for ..." */
+  /* Inline subscribe row: bell + "Want more? Subscribe" */
   .pe-shorts-footer-row.subscribe {
     display: flex;
     align-items: center;
@@ -2135,7 +2391,6 @@ const ENGINE_CSS = `
   }
   @keyframes pe-shorts-bell-ring {
     0%, 72%, 100% { transform: rotate(0deg) scale(1); }
-    76% { transform: rotate(16deg) scale(1.04); }
     80% { transform: rotate(-14deg) scale(1.06); }
     84% { transform: rotate(12deg) scale(1.04); }
     88% { transform: rotate(-8deg) scale(1.02); }
@@ -2149,32 +2404,35 @@ const ENGINE_CSS = `
     white-space: nowrap;
     flex-shrink: 0;
   }
-  .pe-shorts-subscribe-brand {
-    display: inline-flex;
-    align-items: center;
-    flex-shrink: 0;
-    zoom: 0.72;
-  }
-  .pe-shorts-promo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4em;
-    width: 100%;
-    min-width: 0;
+  .pe-shorts-footer-row3-text {
     font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
     color: var(--tf-text-muted, #8892a8);
+    font-weight: 500;
     white-space: nowrap;
   }
-  .pe-shorts-promo-label {
+  .pe-shorts-footer-x-icon {
+    display: inline-flex;
+    align-items: center;
     color: var(--tf-text-secondary, #bfc5d4);
-    font-weight: 500;
   }
-  .pe-shorts-promo-site {
-    color: var(--tf-color-primary-light, #818cf8);
-    font-family: 'JetBrains Mono', 'Consolas', monospace;
+  .pe-shorts-footer-x-icon svg {
+    width: clamp(0.68rem, 1.3vh, 0.9rem);
+    height: clamp(0.68rem, 1.3vh, 0.9rem);
+  }
+  .pe-shorts-footer-x-capsule {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.18rem 0.42rem;
+    border-radius: 999px;
+    border: 1px solid rgba(129,140,248,0.2);
+    background: rgba(20,24,36,0.84);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(0.62rem, 1.2vh, 0.8rem);
     font-weight: 700;
-    letter-spacing: 0.01em;
+    color: var(--tf-color-primary-light, #818cf8);
+    white-space: nowrap;
   }
 
   /* Deck-type filter & badge styles in control panel */
@@ -2282,8 +2540,8 @@ const ENGINE_CSS = `
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding: clamp(2vh, 3.5vh, 5vh) clamp(1.5vw, 3vw, 5vw) clamp(1.5vh, 2.5vh, 4vh);
-    min-height: 0;
+    padding: clamp(3vh, 5vh, 7vh) clamp(1.5vw, 3vw, 5vw) clamp(2vh, 3.5vh, 5vh);
+    min-height: clamp(80px, 14vh, 180px);
     overflow: hidden;
     border-bottom: 1px solid rgba(202,211,230,0.06);
     background:
@@ -2353,12 +2611,14 @@ const ENGINE_CSS = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: clamp(0.25rem, 0.6vh, 0.5rem);
-    padding: clamp(0.5rem, 1.2vh, 1rem) 2.2vw;
+    gap: clamp(0.35rem, 0.8vh, 0.65rem);
+    padding: clamp(0.8rem, 2vh, 1.4rem) 2.2vw;
     min-height: fit-content;
     flex-shrink: 0;
-    border-top: 1px solid rgba(202,211,230,0.08);
-    background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
+    border-top: 1px solid rgba(129,140,248,0.22);
+    background:
+      radial-gradient(ellipse 80% 100% at 50% 100%, rgba(99,102,241,0.12), transparent 70%),
+      linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
   }
   .pe-feed-footer-row {
     display: flex;
@@ -2390,44 +2650,46 @@ const ENGINE_CSS = `
     animation: pe-shorts-bell-ring 4.8s ease-in-out infinite;
   }
   .pe-feed-subscribe-icon svg {
-    width: clamp(0.875rem, 1.8vh, 1.25rem);
-    height: clamp(0.875rem, 1.8vh, 1.25rem);
+    width: clamp(1rem, 2.4vh, 1.4rem);
+    height: clamp(1rem, 2.4vh, 1.4rem);
   }
   .pe-feed-subscribe-text {
-    font-size: clamp(0.6875rem, 1.4vh, 0.9375rem);
-    color: var(--tf-text-secondary, #bfc5d4);
-    font-weight: 500;
-    letter-spacing: 0.01em;
+    font-size: clamp(1rem, 2.4vh, 1.4rem);
+    color: var(--tf-text-primary, #e2e6f0);
+    font-weight: 800;
+    letter-spacing: -0.01em;
     white-space: nowrap;
     flex-shrink: 0;
   }
-  .pe-feed-subscribe-brand {
-    display: inline-flex;
-    align-items: center;
-    flex-shrink: 0;
-    zoom: 0.72;
-  }
-  .pe-feed-promo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4em;
-    width: 100%;
-    min-width: 0;
-    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
+  .pe-feed-footer-row3-text {
+    font-size: clamp(0.7rem, 1.4vh, 0.95rem);
+    font-weight: 500;
     color: var(--tf-text-muted, #8892a8);
     white-space: nowrap;
   }
-  .pe-feed-promo-label {
+  .pe-feed-footer-x-icon {
+    display: inline-flex;
+    align-items: center;
     color: var(--tf-text-secondary, #bfc5d4);
-    font-weight: 500;
   }
-  .pe-feed-footer-site {
-    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
-    color: var(--tf-color-primary-light, #818cf8);
-    font-family: 'JetBrains Mono', 'Consolas', monospace;
+  .pe-feed-footer-x-icon svg {
+    width: clamp(0.7rem, 1.4vh, 0.95rem);
+    height: clamp(0.7rem, 1.4vh, 0.95rem);
+  }
+  .pe-feed-footer-x-capsule {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.22rem 0.48rem;
+    border-radius: 999px;
+    border: 1px solid rgba(129,140,248,0.2);
+    background: rgba(20,24,36,0.84);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(0.72rem, 1.45vh, 0.96rem);
     font-weight: 700;
-    letter-spacing: 0.01em;
+    color: var(--tf-color-primary-light, #818cf8);
+    white-space: nowrap;
   }
 `;
 
@@ -2690,6 +2952,41 @@ const Icons = {
       <path d="M13.73 21a2 2 0 0 1-3.46 0" />
     </svg>
   ),
+  signal: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2 10a8.913 8.913 0 0 1 3-6.737" />
+      <path d="M5.636 7.636a5 5 0 0 1 0 7.072" />
+      <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
+      <path d="M18.364 7.636a5 5 0 0 1 0 7.072" />
+      <path d="M22 10a8.913 8.913 0 0 0-3-6.737" />
+    </svg>
+  ),
+  teleprompter: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="4" y="2" width="16" height="20" rx="2" />
+      <line x1="8" y1="7" x2="16" y2="7" />
+      <line x1="8" y1="11" x2="16" y2="11" />
+      <line x1="8" y1="15" x2="13" y2="15" />
+    </svg>
+  ),
 };
 
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -2947,6 +3244,8 @@ export function PresentationLayout({
   const siteUrlPhrases = branding?.siteUrlPhrases ?? [];
   const rootRef = useRef<HTMLDivElement>(null);
   const controlChannelRef = useRef<BroadcastChannel | null>(null);
+  const shortsPopupRef = useRef<Window | null>(null);
+  const feedPopupRef = useRef<Window | null>(null);
   const zoomStorageKey = getZoomStorageKey(controlChannelId, deck.id);
   const stateStorageKey = getControlStorageKey(controlChannelId, "state");
   const commandStorageKey = getControlStorageKey(controlChannelId, "command");
@@ -3298,25 +3597,45 @@ export function PresentationLayout({
   }, [postControlState, controlWindowName]);
 
   const openShortsWindow = useCallback(() => {
+    // Close feed window if open — only one slide window at a time
+    if (feedPopupRef.current && !feedPopupRef.current.closed) {
+      feedPopupRef.current.close();
+      feedPopupRef.current = null;
+    }
     const shortsUrl = `${window.location.pathname}?shorts=1${window.location.hash}`;
+    if (shortsPopupRef.current && !shortsPopupRef.current.closed) {
+      shortsPopupRef.current.focus();
+      return;
+    }
     const popup = window.open(
       shortsUrl,
       `${controlWindowName}-shorts`,
       "popup=yes,width=560,height=1000,resizable=yes,scrollbars=yes",
     );
     if (popup) {
+      shortsPopupRef.current = popup;
       popup.focus();
     }
   }, [controlWindowName]);
 
   const openFeedWindow = useCallback(() => {
+    // Close shorts window if open — only one slide window at a time
+    if (shortsPopupRef.current && !shortsPopupRef.current.closed) {
+      shortsPopupRef.current.close();
+      shortsPopupRef.current = null;
+    }
     const feedUrl = `${window.location.pathname}?shorts=45${window.location.hash}`;
+    if (feedPopupRef.current && !feedPopupRef.current.closed) {
+      feedPopupRef.current.focus();
+      return;
+    }
     const popup = window.open(
       feedUrl,
       `${controlWindowName}-feed`,
       "popup=yes,width=900,height=1125,resizable=yes,scrollbars=yes",
     );
     if (popup) {
+      feedPopupRef.current = popup;
       popup.focus();
     }
   }, [controlWindowName]);
@@ -3362,64 +3681,15 @@ export function PresentationLayout({
               {Icons.home}
               <span>Home</span>
             </button>
-            <span className="pe-header-sep">›</span>
-            <span className="pe-header-lesson">
-              {deck.number}. {sanitizePresentationTitle(deck.title)}
+          </div>
+
+          <div className="pe-header-center">
+            <span className="pe-header-slide-title" title={currentSlide?.title}>
+              {renderSlideTitle(currentSlide?.title)}
             </span>
           </div>
 
-          {!hideHeaderNav && (
-            <div className="pe-header-center">
-              <div className="pe-header-nav">
-                <button
-                  className="pe-nav-btn"
-                  onClick={goPrev}
-                  disabled={
-                    slideIndex <= 0 &&
-                    (currentStepCount === 0 || activeStepIndex <= 0)
-                  }
-                  aria-label="Previous"
-                >
-                  {Icons.chevLeft}
-                </button>
-                <span
-                  className={`pe-header-nav-prev ${prevSlide ? "" : "empty"}`}
-                  title={prevSlide?.title}
-                >
-                  {renderSlideTitle(prevSlide?.title)}
-                </span>
-                <span
-                  className="pe-header-nav-current"
-                  title={currentSlide?.title}
-                >
-                  {renderSlideTitle(currentSlide?.title)}
-                </span>
-                <span
-                  className={`pe-header-nav-next ${nextSlide ? "" : "empty"}`}
-                  title={nextSlide?.title}
-                >
-                  {renderSlideTitle(nextSlide?.title)}
-                </span>
-                <button
-                  className="pe-nav-btn"
-                  onClick={goNext}
-                  disabled={
-                    slideIndex >= slideCount - 1 &&
-                    (currentStepCount === 0 ||
-                      activeStepIndex >= currentStepCount - 1)
-                  }
-                  aria-label="Next"
-                >
-                  {Icons.chevRight}
-                </button>
-              </div>
-            </div>
-          )}
-
           <div className="pe-header-right">
-            <span className="pe-header-slide">
-              Slide {slideIndex + 1} / {slideCount}
-            </span>
             <button
               className="pe-control-btn"
               onClick={openControlWindow}
@@ -3675,24 +3945,10 @@ export function PresentationLayout({
                 </div>
 
                 <div className="pe-pip-meta">
-                  <div className="pe-pip-meta-topline">
-                    <span className="pe-pip-meta-course">{courseTitle}</span>
-                    <span className="pe-pip-meta-slide">
-                      Slide {slideIndex + 1} of {slideCount}
+                  {slideIndex > 0 && slideIndex < slideCount - 1 && (
+                    <span className="pe-pip-meta-slide-title">
+                      {renderSlideTitle(currentSlide?.title)}
                     </span>
-                  </div>
-                  <span className="pe-pip-meta-lesson">
-                    {deck.number}. {sanitizePresentationTitle(deck.title)}
-                  </span>
-                  {deck.objective && (
-                    <div className="pe-pip-meta-objective">
-                      <span className="pe-pip-meta-objective-label">
-                        Objective
-                      </span>
-                      <span className="pe-pip-meta-objective-body">
-                        {deck.objective}
-                      </span>
-                    </div>
                   )}
                 </div>
 
@@ -3787,78 +4043,46 @@ export function PresentationLayout({
               <div className="pe-pip-footer">
                 <div className="pe-pip-footer-row subscribe">
                   <span className="pe-pip-subscribe-icon">{Icons.bell}</span>
-                  <span className="pe-pip-subscribe-text">Subscribe to</span>
-                  <span className="pe-pip-subscribe-brand">
-                    {brandIconUrl ? (
-                      <BrandLockup
-                        iconUrl={brandIconUrl}
-                        size="sm"
-                        label={brandLabel}
-                      />
-                    ) : (
-                      <img
-                        className="pe-footer-logo"
-                        src={brandLogoSrc}
-                        alt={brandLabel}
-                      />
-                    )}
-                  </span>
                   <span className="pe-pip-subscribe-text">
-                    for more videos & tutorials
+                    Want more? Subscribe and press the bell
                   </span>
                 </div>
-                <div className="pe-pip-footer-row">
-                  <span className="pe-pip-promo">
-                    <span>Explore free interactive tutorials at</span>
-                    <span className="pe-pip-promo-site">{siteUrl}</span>
+                <div className="pe-pip-footer-row" style={{ gap: "0.4em" }}>
+                  <span className="pe-pip-footer-row3-text">
+                    Catch me live for Q&amp;As on
                   </span>
+                  <span className="pe-pip-footer-x-icon">{Icons.twitter}</span>
+                  <span className="pe-pip-footer-row3-text">Spaces</span>
+                  <span className="pe-pip-footer-x-capsule">@localm_tuts</span>
                 </div>
-                <div className="pe-pip-footer-row socials">
-                  {youtubeUrl ? (
-                    <a
-                      className="pe-footer-social-link"
-                      href={youtubeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="YouTube"
-                    >
-                      {Icons.youtube}
-                      <span className="pe-footer-social-text">
-                        {youtubeLabel}
-                      </span>
-                    </a>
-                  ) : null}
-                  {twitterUrl ? (
-                    <a
-                      className="pe-footer-social-link"
-                      href={twitterUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="X"
-                    >
-                      {Icons.twitter}
-                      <span className="pe-footer-social-text">
-                        {twitterLabel}
-                      </span>
-                    </a>
-                  ) : null}
-                  {linkedinUrl ? (
-                    <a
-                      className="pe-footer-social-link"
-                      href={linkedinUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="LinkedIn"
-                    >
-                      {Icons.linkedin}
-                      <span className="pe-footer-social-text">
-                        {linkedinLabel}
-                      </span>
-                    </a>
-                  ) : null}
-                </div>
-                <div className="pe-pip-footer-row copy">
-                  <span className="pe-footer-copy">{copyrightText}</span>
+                <div className="pe-pip-footer-qr-row">
+                  <div className="pe-pip-footer-qr-item">
+                    <img
+                      src="/brand/qr-nilayparikh-links.png"
+                      alt="nilayparikh.com/links"
+                    />
+                    <span className="pe-pip-footer-qr-label">
+                      nilayparikh.com/links
+                    </span>
+                  </div>
+                  <div className="pe-pip-footer-qr-item">
+                    <img
+                      src="/brand/qr-tuts-localm.png"
+                      alt="tuts.localm.dev"
+                    />
+                    <span className="pe-pip-footer-qr-label">
+                      tuts.localm.dev
+                    </span>
+                  </div>
+                  <div className="pe-pip-footer-qr-item">
+                    <img
+                      src="/brand/qr-blogs-nilayparikh.png"
+                      alt="blog.nilayparikh.com"
+                    />
+                    <span className="pe-pip-footer-qr-label">
+                      blog.nilayparikh.com
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3867,71 +4091,49 @@ export function PresentationLayout({
 
         {/* ── Footer ── */}
         <div className="pe-footer">
-          <div className="pe-footer-left">
-            {brandIconUrl ? (
-              <BrandLockup
-                iconUrl={brandIconUrl}
-                size="md"
-                label={brandLabel}
+          <div className="pe-footer-row1">
+            <span
+              style={{
+                color: "var(--tf-color-danger, #ef4444)",
+                display: "inline-flex",
+                alignItems: "center",
+                transformOrigin: "50% 10%",
+                animation: "pe-shorts-bell-ring 4.8s ease-in-out infinite",
+              }}
+            >
+              {Icons.bell}
+            </span>
+            <span className="pe-footer-subscribe-label">
+              Want more? Subscribe and press the bell
+            </span>
+          </div>
+          <div className="pe-footer-row3">
+            <span className="pe-footer-row3-text">
+              Catch me live for Q&amp;As on
+            </span>
+            <span className="pe-footer-x-icon">{Icons.twitter}</span>
+            <span className="pe-footer-row3-text">Spaces</span>
+            <span className="pe-footer-x-capsule">@localm_tuts</span>
+          </div>
+          <div className="pe-footer-qr-row">
+            <div className="pe-footer-qr-item">
+              <img
+                src="/brand/qr-nilayparikh-links.png"
+                alt="nilayparikh.com/links"
               />
-            ) : (
-              <>
-                <img
-                  className="pe-footer-logo"
-                  src={brandLogoSrc}
-                  alt={brandLabel}
-                />
-                {showBrandLabel ? (
-                  <span className="pe-footer-brand">{brandLabel}</span>
-                ) : null}
-              </>
-            )}
-          </div>
-          <div className="pe-footer-center">
-            {youtubeUrl ? (
-              <a
-                className="pe-footer-social-link"
-                href={youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="YouTube"
-              >
-                {Icons.youtube}
-                {youtubeHandle ? <span>{youtubeHandle}</span> : null}
-              </a>
-            ) : null}
-            {twitterUrl ? (
-              <a
-                className="pe-footer-social-link"
-                href={twitterUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="X (Twitter)"
-              >
-                {Icons.twitter}
-                {twitterLabel ? <span>{twitterLabel}</span> : null}
-              </a>
-            ) : null}
-            {linkedinUrl ? (
-              <a
-                className="pe-footer-social-link"
-                href={linkedinUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-              >
-                {Icons.linkedin}
-                {linkedinHandle ? <span>{linkedinHandle}</span> : null}
-              </a>
-            ) : null}
-          </div>
-          <div className="pe-footer-url-wrap">
-            {siteUrl ? (
-              <TypingPromotion url={siteUrl} phrases={siteUrlPhrases} />
-            ) : null}
-          </div>
-          <div className="pe-footer-right">
-            <span className="pe-footer-copy">{copyrightText}</span>
+              <span className="pe-footer-qr-label">nilayparikh.com/links</span>
+            </div>
+            <div className="pe-footer-qr-item">
+              <img src="/brand/qr-tuts-localm.png" alt="tuts.localm.dev" />
+              <span className="pe-footer-qr-label">tuts.localm.dev</span>
+            </div>
+            <div className="pe-footer-qr-item">
+              <img
+                src="/brand/qr-blogs-nilayparikh.png"
+                alt="blog.nilayparikh.com"
+              />
+              <span className="pe-footer-qr-label">blog.nilayparikh.com</span>
+            </div>
           </div>
         </div>
       </div>
@@ -4398,32 +4600,17 @@ export function ShortsLayout({
           <div className="pe-shorts-footer">
             <div className="pe-shorts-footer-row subscribe">
               <span className="pe-shorts-subscribe-icon">{Icons.bell}</span>
-              <span className="pe-shorts-subscribe-text">Subscribe to</span>
-              <span className="pe-shorts-subscribe-brand">
-                {brandIconUrl ? (
-                  <BrandLockup
-                    iconUrl={brandIconUrl}
-                    size="sm"
-                    label={brandLabel}
-                  />
-                ) : (
-                  <strong>{brandLabel}</strong>
-                )}
-              </span>
               <span className="pe-shorts-subscribe-text">
-                for more videos, interview tips & tutorials
+                Want more? Subscribe and press the bell
               </span>
             </div>
-            <div className="pe-shorts-footer-row">
-              <span className="pe-shorts-promo">
-                <span className="pe-shorts-promo-label">
-                  Explore free interactive tutorials at
-                </span>
-                <span className="pe-shorts-promo-site">{siteUrl}</span>
+            <div className="pe-shorts-footer-row" style={{ gap: "0.35em" }}>
+              <span className="pe-shorts-footer-row3-text">
+                Catch me live for Q&amp;As on
               </span>
-            </div>
-            <div className="pe-shorts-footer-row copy">
-              <span className="pe-footer-copy">{copyrightText}</span>
+              <span className="pe-shorts-footer-x-icon">{Icons.twitter}</span>
+              <span className="pe-shorts-footer-row3-text">Spaces</span>
+              <span className="pe-shorts-footer-x-capsule">@localm_tuts</span>
             </div>
           </div>
         </div>
@@ -4492,6 +4679,14 @@ export function ShortsFeedLayout({
   const activeStep = currentSteps[activeStepIndex] ?? null;
   const shortTitle = sanitizePresentationTitle(deck.title);
   const slideTitle = sanitizePresentationTitle(currentSlide?.title);
+  const blankSlideState =
+    deck.id === "default-blank"
+      ? getBlankSlideTitleState(slideIndex)
+      : { title: "", subtitle: "" };
+  const feedPrimaryTitle = blankSlideState.title.trim() || shortTitle;
+  const feedSecondaryTitle = blankSlideState.title.trim()
+    ? blankSlideState.subtitle.trim()
+    : slideTitle;
   const showTitleStack = slideIndex > 0 && !currentSlide?.hideTitleStack;
 
   const stepContextValue: PresentationStepContextValue = {
@@ -4782,13 +4977,10 @@ export function ShortsFeedLayout({
           {/* ── Title + description area (replaces slide content) ── */}
           <div className="pe-feed-title-area">
             <div className="pe-feed-title-inner">
-              <span className="pe-feed-deck-title">{shortTitle}</span>
-              {slideTitle && slideIndex > 0 && (
-                <span className="pe-feed-slide-title">{slideTitle}</span>
-              )}
-              {currentSlide?.narration && (
-                <span className="pe-feed-description">
-                  {currentSlide.narration}
+              <span className="pe-feed-deck-title">{feedPrimaryTitle}</span>
+              {feedSecondaryTitle && (
+                <span className="pe-feed-slide-title">
+                  {feedSecondaryTitle}
                 </span>
               )}
             </div>
@@ -4882,32 +5074,17 @@ export function ShortsFeedLayout({
           <div className="pe-feed-footer">
             <div className="pe-feed-footer-row subscribe">
               <span className="pe-feed-subscribe-icon">{Icons.bell}</span>
-              <span className="pe-feed-subscribe-text">Subscribe to</span>
-              <span className="pe-feed-subscribe-brand">
-                {brandIconUrl ? (
-                  <BrandLockup
-                    iconUrl={brandIconUrl}
-                    size="sm"
-                    label={brandLabel}
-                  />
-                ) : (
-                  <strong>{brandLabel}</strong>
-                )}
-              </span>
               <span className="pe-feed-subscribe-text">
-                for more videos, interview tips & tutorials
+                Want more? Subscribe and press the bell
               </span>
             </div>
-            <div className="pe-feed-footer-row">
-              <span className="pe-feed-promo">
-                <span className="pe-feed-promo-label">
-                  Explore free interactive tutorials at
-                </span>
-                <span className="pe-feed-footer-site">{siteUrl}</span>
+            <div className="pe-feed-footer-row" style={{ gap: "0.35em" }}>
+              <span className="pe-feed-footer-row3-text">
+                Catch me live for Q&amp;As on
               </span>
-            </div>
-            <div className="pe-feed-footer-row copy">
-              <span className="pe-footer-copy">{copyrightText}</span>
+              <span className="pe-feed-footer-x-icon">{Icons.twitter}</span>
+              <span className="pe-feed-footer-row3-text">Spaces</span>
+              <span className="pe-feed-footer-x-capsule">@localm_tuts</span>
             </div>
           </div>
         </div>
@@ -4930,6 +5107,8 @@ interface PresentationControlPanelProps {
   controlChannelId?: string;
   /** Optional React node rendered above the "Jump Lesson" section in the sidebar */
   headerSlot?: React.ReactNode;
+  /** External transcript text for the teleprompter (e.g. from IndexedDB for blank slides). */
+  teleprompterText?: string;
 }
 
 export function PresentationControlPanel({
@@ -4943,6 +5122,7 @@ export function PresentationControlPanel({
   branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   headerSlot,
+  teleprompterText,
 }: PresentationControlPanelProps) {
   const brandLogoSrc =
     branding?.logoSrc ?? "/brand/og-image-template-1200x630.png";
@@ -5051,6 +5231,84 @@ export function PresentationControlPanel({
       // Ignore localStorage access issues.
     }
   }, [transcriptScaleIndex, transcriptScaleStorageKey]);
+
+  /* ── Camera preview state ──────────────────────────────────────────── */
+  const [cameraDevices, setCameraDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedCameraId, setSelectedCameraId] = useState<string>("");
+  const cameraVideoRef = useRef<HTMLVideoElement | null>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+
+  // Enumerate video devices on mount
+  useEffect(() => {
+    let cancelled = false;
+    async function enumerate() {
+      try {
+        // Need a temporary stream to prompt permission so labels are populated
+        const tempStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+        tempStream.getTracks().forEach((t) => t.stop());
+
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        if (cancelled) return;
+        const videoDevices = devices.filter((d) => d.kind === "videoinput");
+        setCameraDevices(videoDevices);
+
+        // Auto-select OBS Virtual Camera if present
+        const obsDevice = videoDevices.find(
+          (d) =>
+            d.label.includes("OBS Virtual Camera") ||
+            d.label.includes("OBS-Camera"),
+        );
+        setSelectedCameraId((prev) => {
+          if (prev) return prev;
+          return obsDevice?.deviceId ?? videoDevices[0]?.deviceId ?? "";
+        });
+      } catch {
+        // Camera permission denied or not available — leave list empty.
+      }
+    }
+    enumerate();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Start / swap camera stream when selection changes
+  useEffect(() => {
+    if (!selectedCameraId) return;
+    let cancelled = false;
+    async function startCamera() {
+      // Stop any existing stream
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach((t) => t.stop());
+        cameraStreamRef.current = null;
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { deviceId: { exact: selectedCameraId } },
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        cameraStreamRef.current = stream;
+        if (cameraVideoRef.current) {
+          cameraVideoRef.current.srcObject = stream;
+        }
+      } catch {
+        // Camera start failed — ignore.
+      }
+    }
+    startCamera();
+    return () => {
+      cancelled = true;
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach((t) => t.stop());
+        cameraStreamRef.current = null;
+      }
+    };
+  }, [selectedCameraId]);
 
   /* ── Editable transcript state ─────────────────────────────────────── */
   const [transcriptEditMode, setTranscriptEditMode] = useState(false);
@@ -5267,6 +5525,7 @@ export function PresentationControlPanel({
     activeState.duration != null && activeState.elapsed > activeState.duration;
   const guidesOn = activeState.showGuides;
   const crossbarsOn = activeState.showCrossbars;
+  const [teleprompterOn, setTeleprompterOn] = useState(false);
   const fullscreenOn =
     activeState.fullscreenActive || activeState.fullscreenPromptVisible;
 
@@ -5442,6 +5701,14 @@ export function PresentationControlPanel({
           >
             {Icons.crossbars}
           </button>
+          <button
+            className={`pc-btn pc-btn-header pc-btn-icon${teleprompterOn ? " active" : ""}`}
+            onClick={() => setTeleprompterOn((v) => !v)}
+            title={teleprompterOn ? "Hide teleprompter" : "Show teleprompter"}
+            aria-label="Toggle teleprompter"
+          >
+            {Icons.teleprompter}
+          </button>
           <span
             className="pc-connection-dot"
             style={{
@@ -5463,6 +5730,29 @@ export function PresentationControlPanel({
 
         <div className="pc-body">
           <aside className="pc-sidebar">
+            <div className="pc-camera-preview">
+              <video
+                ref={cameraVideoRef}
+                className="pc-camera-video"
+                autoPlay
+                muted
+                playsInline
+              />
+              {cameraDevices.length > 0 && (
+                <select
+                  className="pc-camera-select"
+                  value={selectedCameraId}
+                  onChange={(e) => setSelectedCameraId(e.target.value)}
+                  aria-label="Select camera"
+                >
+                  {cameraDevices.map((d) => (
+                    <option key={d.deviceId} value={d.deviceId}>
+                      {d.label || `Camera ${d.deviceId.slice(0, 8)}`}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
             <div className="pc-lessons">
               {headerSlot}
               {showFilter && (
@@ -5881,6 +6171,20 @@ export function PresentationControlPanel({
               </div>
             )}
           </section>
+          {teleprompterOn && activeState.stepCount === 0 && (
+            <TeleprompterOverlay
+              text={
+                teleprompterText !== undefined
+                  ? teleprompterText
+                  : getEditedTranscript(activeState.slideIndex) ||
+                    activeState.narration ||
+                    ""
+              }
+              visible={teleprompterOn}
+              onClose={() => setTeleprompterOn(false)}
+              baseFontSize={14 * transcriptFontScale}
+            />
+          )}
         </div>
       </div>
     </>
