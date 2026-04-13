@@ -19,7 +19,9 @@ import React, { useRef, useEffect, useCallback, useState } from "react";
 /** How many full text lines are visible at once. */
 const VISIBLE_LINES = 3;
 /** Accumulated wheel deltaY required to advance one line. */
-const WHEEL_THRESHOLD = 100;
+const WHEEL_THRESHOLD = 30;
+/** How many lines each arrow-key press advances. */
+const ARROW_STEP = 3;
 /** Smooth-scroll lerp factor per animation frame (0–1). */
 const SCROLL_LERP = 0.12;
 /** Horizontal padding inside the canvas (px). */
@@ -192,7 +194,7 @@ export function TeleprompterOverlay({
     const targetY = lines[Math.min(scroll.targetLine, maxLineIndex)]?.y ?? 0;
     scroll.currentY += (targetY - scroll.currentY) * SCROLL_LERP;
 
-    const focusCentreCanvas = canvasSize.h * 0.28;
+    const focusCentreCanvas = Math.max(lineHeight * 2, canvasSize.h * 0.06);
     const offsetY = focusCentreCanvas - scroll.currentY;
 
     ctx.save();
@@ -202,9 +204,9 @@ export function TeleprompterOverlay({
     ctx.fillStyle = BG;
     ctx.fillRect(0, 0, canvasSize.w, canvasSize.h);
 
-    /* Focus band highlight */
-    const bandTop = focusCentreCanvas - lineHeight * 0.75;
-    const bandBot = focusCentreCanvas + lineHeight * 0.75;
+    /* Focus band highlight — covers 3 lines */
+    const bandTop = focusCentreCanvas - lineHeight * 1.5;
+    const bandBot = focusCentreCanvas + lineHeight * 1.5;
     ctx.fillStyle = "rgba(99, 102, 241, 0.10)";
     ctx.fillRect(0, bandTop, canvasSize.w, bandBot - bandTop);
     ctx.fillStyle = "rgba(99, 102, 241, 0.55)";
@@ -249,7 +251,7 @@ export function TeleprompterOverlay({
     ctx.font = `10px 'Inter', system-ui, sans-serif`;
     ctx.fillStyle = "rgba(226, 230, 240, 0.30)";
     ctx.textBaseline = "bottom";
-    const hint = "Scroll ↕  ·  Esc close";
+    const hint = "Scroll ↕  ·  ↑↓ 3 lines  ·  ←→ prev/next  ·  Esc close";
     ctx.fillText(
       hint,
       (canvasSize.w - ctx.measureText(hint).width) / 2,
@@ -320,12 +322,12 @@ export function TeleprompterOverlay({
       const maxLine = layoutRef.current.maxLineIndex;
       if (e.key === "ArrowDown" || e.key === "j") {
         e.preventDefault();
-        scroll.targetLine = Math.min(maxLine, scroll.targetLine + 1);
+        scroll.targetLine = Math.min(maxLine, scroll.targetLine + ARROW_STEP);
         cancelAnimationFrame(rafRef.current);
         rafRef.current = requestAnimationFrame(paint);
       } else if (e.key === "ArrowUp" || e.key === "k") {
         e.preventDefault();
-        scroll.targetLine = Math.max(0, scroll.targetLine - 1);
+        scroll.targetLine = Math.max(0, scroll.targetLine - ARROW_STEP);
         cancelAnimationFrame(rafRef.current);
         rafRef.current = requestAnimationFrame(paint);
       }

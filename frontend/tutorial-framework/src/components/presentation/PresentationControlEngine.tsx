@@ -5465,6 +5465,23 @@ export function PresentationControlPanel({
     channelRef.current?.postMessage({ type: "request-state", deckId: deck.id });
   }, [deck.id]);
 
+  /* ── Keyboard: ArrowLeft / ArrowRight → prev / next slide ──────── */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        send({ type: "command", deckId: deck.id, action: "prev" });
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        send({ type: "command", deckId: deck.id, action: "next" });
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [deck.id, send]);
+
   const handleSelectDeck = useCallback(
     (nextDeckId: string) => {
       if (!nextDeckId || nextDeckId === deck.id) return;
