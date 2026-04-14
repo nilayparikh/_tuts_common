@@ -434,7 +434,7 @@ const ENGINE_CSS = `
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    background: #000;
+    background: var(--tf-bg-base, #0b0d12);
     padding: 8px;
   }
   .pe-slide-box {
@@ -5040,6 +5040,10 @@ interface PresentationControlPanelProps {
   controlChannelId?: string;
   /** Optional React node rendered above the "Jump Lesson" section in the sidebar */
   headerSlot?: React.ReactNode;
+  /** Optional React node rendered in the pc-header bar after the spacer, before the home button */
+  headerBarSlot?: React.ReactNode;
+  /** Hide the slide count / timer / zoom meta row in the header. */
+  showHeaderMeta?: boolean;
   /** External transcript text for the teleprompter (e.g. from IndexedDB for blank slides). */
   teleprompterText?: string;
 }
@@ -5055,6 +5059,8 @@ export function PresentationControlPanel({
   branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   headerSlot,
+  headerBarSlot,
+  showHeaderMeta = true,
   teleprompterText,
 }: PresentationControlPanelProps) {
   const brandLogoSrc =
@@ -5490,31 +5496,39 @@ export function PresentationControlPanel({
               {deck.number}. {sanitizePresentationTitle(deck.title)}
             </span>
           </div>
-          <span className="pc-header-separator" aria-hidden="true" />
-          <div className="pc-meta">
-            <span className="pc-meta-item">
-              {activeState.slideIndex + 1}/{activeState.slideCount}
-            </span>
-            <span className="pc-meta-divider" aria-hidden="true" />
-            <span
-              className="pc-meta-item"
-              style={{
-                color: timerOver
-                  ? "var(--tf-color-danger, #ef4444)"
-                  : "var(--tf-text-muted, #8892a8)",
-              }}
-            >
-              {formatTime(activeState.elapsed)}
-              {activeState.duration != null
-                ? ` / ${formatTime(activeState.duration)}`
-                : ""}
-            </span>
-            <span className="pc-meta-divider" aria-hidden="true" />
-            <span className="pc-meta-item">
-              Zoom {activeState.zoom.toFixed(2)}x
-            </span>
-          </div>
+          {showHeaderMeta && (
+            <>
+              <span className="pc-header-separator" aria-hidden="true" />
+              <div className="pc-meta">
+                <span className="pc-meta-item">
+                  {activeState.slideIndex + 1}/{activeState.slideCount}
+                </span>
+                <span className="pc-meta-divider" aria-hidden="true" />
+                <span
+                  className="pc-meta-item"
+                  style={{
+                    color: timerOver
+                      ? "var(--tf-color-danger, #ef4444)"
+                      : "var(--tf-text-muted, #8892a8)",
+                  }}
+                >
+                  {formatTime(activeState.elapsed)}
+                  {activeState.duration != null
+                    ? ` / ${formatTime(activeState.duration)}`
+                    : ""}
+                </span>
+                <span className="pc-meta-divider" aria-hidden="true" />
+                <span className="pc-meta-item">
+                  Zoom {activeState.zoom.toFixed(2)}x
+                </span>
+              </div>
+            </>
+          )}
           <div className="pc-header-spacer" />
+          {headerBarSlot}
+          {headerBarSlot && (
+            <span className="pc-header-separator" aria-hidden="true" />
+          )}
           {onExplore && (
             <button
               className="pc-btn pc-btn-header pc-btn-icon"

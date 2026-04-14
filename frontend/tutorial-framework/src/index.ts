@@ -168,12 +168,23 @@ export {
   Arrow,
   TwoColumn,
   Timeline,
+  ColorLegend,
+  ComparisonPipeline,
+  PillarGrid,
 } from "./components/presentation";
 export type {
   PresentationConfig,
   DeckEntry,
   SlideBaseProps,
   BulletItem,
+  ColorLegendItem,
+  ColorLegendProps,
+  PipelineNode,
+  PipelineStep,
+  PipelineCompareRow,
+  ComparisonPipelineProps,
+  PillarData,
+  PillarGridProps,
 } from "./components/presentation";
 
 // Course

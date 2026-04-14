@@ -80,6 +80,19 @@ export {
   type AnimatedMermaidEdge,
 } from "./AnimatedMermaidWidget";
 export { ProcessStagesWidget, type ProcessStage } from "./ProcessStagesWidget";
+export {
+  ColorLegend,
+  ComparisonPipeline,
+  PillarGrid,
+  type ColorLegendItem,
+  type ColorLegendProps,
+  type PipelineNode,
+  type PipelineStep,
+  type PipelineCompareRow,
+  type ComparisonPipelineProps,
+  type PillarData,
+  type PillarGridProps,
+} from "./ComparisonWidgets";
 
 // Teleprompter
 export {
