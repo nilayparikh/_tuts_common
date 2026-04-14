@@ -461,6 +461,8 @@ interface MermaidDiagramProps {
   maxWidth?: string;
   /** Optional caption below the diagram */
   caption?: string;
+  /** Compact layout for dense presentation widgets */
+  compact?: boolean;
 }
 
 let mermaidCounter = 0;
@@ -480,6 +482,7 @@ export function MermaidDiagram({
   chart,
   maxWidth = "100%",
   caption,
+  compact = false,
 }: MermaidDiagramProps) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [id] = React.useState(() => `mermaid-${++mermaidCounter}`);
@@ -535,7 +538,7 @@ export function MermaidDiagram({
           background: v.bgElevated,
           borderRadius: v.radiusLg,
           border: `1px solid ${v.borderDefault}`,
-          padding: "24px",
+          padding: compact ? "12px" : "24px",
           overflow: "auto",
         }}
       >
@@ -544,7 +547,7 @@ export function MermaidDiagram({
           style={{
             display: "flex",
             justifyContent: "center",
-            minHeight: "100px",
+            minHeight: compact ? "72px" : "100px",
           }}
         >
           <span style={{ color: v.textMuted, fontSize: "14px" }}>
