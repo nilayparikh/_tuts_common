@@ -2345,37 +2345,16 @@ const ENGINE_CSS = `
 
   .pe-shorts-footer {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: clamp(0.25rem, 0.6vh, 0.5rem);
+    gap: 0.6em;
+    padding: clamp(0.5rem, 1.2vh, 0.85rem) 1.5vw;
     min-height: fit-content;
     flex-shrink: 0;
+    white-space: nowrap;
     border-top: 1px solid rgba(202,211,230,0.08);
     background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
-  }
-  .pe-shorts-footer-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5em;
-    flex-wrap: wrap;
-    width: 100%;
-    text-align: center;
-  }
-  .pe-shorts-footer .pe-footer-copy {
-    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
-    color: var(--tf-text-muted, #64748b);
-  }
-
-  /* Inline subscribe row: bell + "Want more? Subscribe" */
-  .pe-shorts-footer-row.subscribe {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4em;
-    flex-wrap: nowrap;
-    white-space: nowrap;
   }
   .pe-shorts-subscribe-icon {
     display: flex;
@@ -2401,14 +2380,10 @@ const ENGINE_CSS = `
     color: var(--tf-text-secondary, #bfc5d4);
     font-weight: 500;
     letter-spacing: 0.01em;
-    white-space: nowrap;
-    flex-shrink: 0;
   }
-  .pe-shorts-footer-row3-text {
+  .pe-shorts-footer-dot {
     font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
     color: var(--tf-text-muted, #8892a8);
-    font-weight: 500;
-    white-space: nowrap;
   }
   .pe-shorts-footer-x-icon {
     display: inline-flex;
@@ -2608,38 +2583,18 @@ const ENGINE_CSS = `
   /* Footer bar at the bottom of the 4:5 frame */
   .pe-feed-footer {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: clamp(0.35rem, 0.8vh, 0.65rem);
+    gap: 0.6em;
     padding: clamp(0.8rem, 2vh, 1.4rem) 2.2vw;
     min-height: fit-content;
     flex-shrink: 0;
+    white-space: nowrap;
     border-top: 1px solid rgba(129,140,248,0.22);
     background:
       radial-gradient(ellipse 80% 100% at 50% 100%, rgba(99,102,241,0.12), transparent 70%),
       linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
-  }
-  .pe-feed-footer-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5em;
-    flex-wrap: wrap;
-    width: 100%;
-    text-align: center;
-  }
-  .pe-feed-footer .pe-footer-copy {
-    font-size: clamp(0.625rem, 1.2vh, 0.8125rem);
-    color: var(--tf-text-muted, #64748b);
-  }
-  .pe-feed-footer-row.subscribe {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4em;
-    flex-wrap: nowrap;
-    white-space: nowrap;
   }
   .pe-feed-subscribe-icon {
     display: flex;
@@ -2658,14 +2613,10 @@ const ENGINE_CSS = `
     color: var(--tf-text-primary, #e2e6f0);
     font-weight: 800;
     letter-spacing: -0.01em;
-    white-space: nowrap;
-    flex-shrink: 0;
   }
-  .pe-feed-footer-row3-text {
+  .pe-feed-footer-dot {
     font-size: clamp(0.7rem, 1.4vh, 0.95rem);
-    font-weight: 500;
     color: var(--tf-text-muted, #8892a8);
-    white-space: nowrap;
   }
   .pe-feed-footer-x-icon {
     display: inline-flex;
@@ -4598,20 +4549,11 @@ export function ShortsLayout({
 
           {/* ── Footer ── */}
           <div className="pe-shorts-footer">
-            <div className="pe-shorts-footer-row subscribe">
-              <span className="pe-shorts-subscribe-icon">{Icons.bell}</span>
-              <span className="pe-shorts-subscribe-text">
-                Want more? Subscribe and press the bell
-              </span>
-            </div>
-            <div className="pe-shorts-footer-row" style={{ gap: "0.35em" }}>
-              <span className="pe-shorts-footer-row3-text">
-                Catch me live for Q&amp;As on
-              </span>
-              <span className="pe-shorts-footer-x-icon">{Icons.twitter}</span>
-              <span className="pe-shorts-footer-row3-text">Spaces</span>
-              <span className="pe-shorts-footer-x-capsule">@localm_tuts</span>
-            </div>
+            <span className="pe-shorts-subscribe-icon">{Icons.bell}</span>
+            <span className="pe-shorts-subscribe-text">Subscribe</span>
+            <span className="pe-shorts-footer-dot">·</span>
+            <span className="pe-shorts-footer-x-icon">{Icons.twitter}</span>
+            <span className="pe-shorts-footer-x-capsule">@localm_tuts</span>
           </div>
         </div>
       </div>
@@ -5072,20 +5014,11 @@ export function ShortsFeedLayout({
 
           {/* ── Footer ── */}
           <div className="pe-feed-footer">
-            <div className="pe-feed-footer-row subscribe">
-              <span className="pe-feed-subscribe-icon">{Icons.bell}</span>
-              <span className="pe-feed-subscribe-text">
-                Want more? Subscribe and press the bell
-              </span>
-            </div>
-            <div className="pe-feed-footer-row" style={{ gap: "0.35em" }}>
-              <span className="pe-feed-footer-row3-text">
-                Catch me live for Q&amp;As on
-              </span>
-              <span className="pe-feed-footer-x-icon">{Icons.twitter}</span>
-              <span className="pe-feed-footer-row3-text">Spaces</span>
-              <span className="pe-feed-footer-x-capsule">@localm_tuts</span>
-            </div>
+            <span className="pe-feed-subscribe-icon">{Icons.bell}</span>
+            <span className="pe-feed-subscribe-text">Subscribe</span>
+            <span className="pe-feed-footer-dot">·</span>
+            <span className="pe-feed-footer-x-icon">{Icons.twitter}</span>
+            <span className="pe-feed-footer-x-capsule">@localm_tuts</span>
           </div>
         </div>
       </div>
