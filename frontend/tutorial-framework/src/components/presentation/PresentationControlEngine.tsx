@@ -3551,6 +3551,7 @@ function applyLayoutOverride(
 
   const rowElements = populatedRows.map((row, ri) => {
     const hasMultipleCols = row.columns > 1;
+    const isLastRow = ri === populatedRows.length - 1;
 
     // Build only the cells that actually have content
     const cellElements: React.ReactElement[] = [];
@@ -3567,8 +3568,12 @@ function applyLayoutOverride(
       }
     }
 
-    // Row flex: use stored height %, or equal distribution
-    const rowFlex = hasHeights ? `0 0 ${layout.rowHeights![ri]}%` : "1 1 0";
+    // Row flex: use stored height %, or last-row-absorbs model
+    const rowFlex = hasHeights
+      ? `0 0 ${layout.rowHeights![ri]}%`
+      : isLastRow
+        ? "1 1 0"
+        : "0 0 auto";
 
     return React.createElement(
       "div",
