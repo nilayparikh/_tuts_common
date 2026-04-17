@@ -1092,81 +1092,6 @@ const ENGINE_CSS = `
     color: var(--tf-text-primary, #e2e6f0);
     font-family: 'Inter', system-ui, sans-serif;
   }
-  .pc-header {
-    height: 60px;
-    min-height: 60px;
-    padding: 0 18px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid rgba(202,211,230,0.10);
-    background: linear-gradient(180deg, rgba(15,18,28,0.86), rgba(12,15,24,0.68));
-    backdrop-filter: blur(20px) saturate(150%);
-    box-shadow: 0 10px 28px rgba(0,0,0,0.30);
-  }
-  .pc-header-separator {
-    width: 1px;
-    height: 22px;
-    background: var(--tf-border-default, rgba(202,211,230,0.14));
-    opacity: 0.95;
-    flex-shrink: 0;
-  }
-  .pc-pill {
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(0,245,255,0.20);
-    background: linear-gradient(135deg, rgba(0,245,255,0.18), rgba(168,56,255,0.16));
-    color: #f8fbff;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-  }
-  .pc-title-wrap {
-    min-width: 0;
-    max-width: min(38vw, 620px);
-    display: flex;
-    align-items: center;
-  }
-  .pc-title {
-    font-size: 15px;
-    color: var(--tf-text-primary, #e2e6f0);
-    font-weight: 700;
-    font-family: 'Inter', system-ui, sans-serif;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .pc-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--tf-text-muted, #8892a8);
-  }
-  .pc-meta-item {
-    white-space: nowrap;
-  }
-  .pc-meta-divider {
-    width: 1px;
-    height: 14px;
-    background: var(--tf-border-default, rgba(202,211,230,0.14));
-    opacity: 0.85;
-    flex-shrink: 0;
-  }
-  .pc-header-spacer {
-    flex: 1;
-    min-width: 12px;
-  }
-  .pc-header-logo {
-    width: 108px;
-    height: 24px;
-    object-fit: contain;
-    display: block;
-    margin-left: 8px;
-  }
   .pc-body {
     position: relative;
     flex: 1;
@@ -1192,9 +1117,31 @@ const ENGINE_CSS = `
   }
   .pc-camera-video {
     width: 100%;
+    aspect-ratio: 16/9;
     border-radius: 10px;
     background: #000;
     object-fit: contain;
+  }
+  .pc-camera-placeholder {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(16,19,29,0.95), rgba(11,13,20,0.90));
+    border: 1px dashed rgba(202,211,230,0.14);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--tf-text-muted, #8892a8);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .pc-camera-placeholder svg {
+    width: 24px;
+    height: 24px;
+    opacity: 0.4;
   }
   .pc-camera-select {
     width: 100%;
@@ -1415,55 +1362,206 @@ const ENGINE_CSS = `
   .pc-transcript {
     position: relative;
     min-height: 0;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 52px;
     overflow: hidden;
     background: var(--tf-bg-base, #0b0d12);
   }
-  .pc-step-controls {
+  .pc-transcript-main {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .pc-transcript-rail {
+    width: 52px;
+    min-width: 52px;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 0;
+    gap: 2px;
+    border-left: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    background: linear-gradient(180deg, rgba(16,19,29,0.92), rgba(11,13,20,0.80));
+    backdrop-filter: blur(18px) saturate(145%);
+  }
+  .pc-transcript-rail::-webkit-scrollbar { width: 0; }
+
+  /* ── Dock button (icon-only, tooltip on hover) ── */
+  .pc-dock-btn {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
-    background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0d12));
-  }
-  .pc-step-counter {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--tf-color-primary-light, #818cf8);
-    white-space: nowrap;
-  }
-  .pc-step-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .pc-step-btn {
-    height: 34px;
-    padding: 0 14px;
-    border-radius: 999px;
-    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
-    background: var(--tf-bg-elevated, #191c23);
-    color: var(--tf-text-primary, #e2e6f0);
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--tf-text-muted, #8892a8);
     cursor: pointer;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    transition: all 150ms;
+    transition: all 120ms ease;
+    flex-shrink: 0;
   }
-  .pc-step-btn:hover:not(:disabled) {
-    border-color: var(--tf-color-primary-light, #818cf8);
-    color: var(--tf-color-primary-light, #818cf8);
+  .pc-dock-btn svg,
+  .pc-dock-btn img {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
   }
-  .pc-step-btn:disabled {
-    opacity: 0.35;
+  .pc-dock-btn:hover:not(:disabled) {
+    color: #fff;
+    background: rgba(99,102,241,0.14);
+    border-color: rgba(99,102,241,0.22);
+  }
+  .pc-dock-btn.active {
+    color: #fff;
+    background: linear-gradient(135deg, rgba(0,245,255,0.20), rgba(168,56,255,0.18));
+    border-color: rgba(0,245,255,0.36);
+    box-shadow: 0 0 8px rgba(0,245,255,0.12);
+  }
+  .pc-dock-btn:disabled {
+    opacity: 0.28;
     cursor: default;
   }
+
+  /* ── Dock tooltip (above icon) ── */
+  .pc-dock-btn[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    right: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    color: #e2e6f0;
+    background: rgba(23,28,42,0.95);
+    border: 1px solid rgba(129,140,248,0.22);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 100ms ease;
+    z-index: 50;
+  }
+  .pc-dock-btn[data-tip]:hover::after {
+    opacity: 1;
+  }
+  .pc-dock-btn[data-tip]:disabled:hover::after {
+    opacity: 0;
+  }
+
+  /* ── Dock divider (thin line between groups) ── */
+  .pc-dock-divider {
+    width: 24px;
+    height: 1px;
+    background: var(--tf-border-subtle, rgba(202,211,230,0.10));
+    flex-shrink: 0;
+    margin: 3px 0;
+  }
+
+  /* ── Dock connection dot ── */
+  .pc-dock-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin: 4px 0 2px;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  /* ── Dock step counter ── */
+  .pc-dock-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--tf-text-muted, #8892a8);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    text-align: center;
+  }
+
+  /* ── Dock spacer ── */
+  .pc-dock-spacer {
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ── Dock brand ── */
+  .pc-dock-brand {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    border-radius: 6px;
+    opacity: 0.35;
+    transition: opacity 0.2s;
+    margin: 4px 0;
+    flex-shrink: 0;
+  }
+  .pc-dock-brand:hover {
+    opacity: 0.7;
+  }
+
+  /* ── Settings dialog (centered modal) ── */
+  .pc-settings-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pc-fade-in 120ms ease;
+  }
+  .pc-settings-dialog {
+    position: relative;
+    width: min(460px, calc(100vw - 48px));
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(129,140,248,0.22);
+    background: linear-gradient(180deg, rgba(23,28,42,0.99), rgba(12,15,24,0.99));
+    box-shadow: 0 24px 64px rgba(0,0,0,0.55);
+    color: var(--tf-text-primary, #e2e6f0);
+    animation: pc-scale-in 150ms ease;
+  }
+  .pc-settings-dialog::-webkit-scrollbar { width: 4px; }
+  .pc-settings-dialog::-webkit-scrollbar-thumb {
+    background: rgba(202,211,230,0.18);
+    border-radius: 999px;
+  }
+  .pc-settings-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid rgba(202,211,230,0.12);
+    background: rgba(255,255,255,0.04);
+    color: var(--tf-text-muted, #8892a8);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
+    transition: all 120ms;
+  }
+  .pc-settings-close:hover {
+    color: #fff;
+    border-color: rgba(239,68,68,0.4);
+    background: rgba(239,68,68,0.12);
+  }
+  @keyframes pc-fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes pc-scale-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
   .pc-transcript-header {
     height: 44px;
     min-height: 44px;
@@ -1774,6 +1872,24 @@ const ENGINE_CSS = `
     100% {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 1480px) {
+    .pc-body {
+      grid-template-columns: 320px 1fr;
+    }
+  }
+
+  @media (max-width: 1120px) {
+    .pc-body {
+      grid-template-columns: 260px 1fr;
+    }
+  }
+
+  @media (max-width: 820px) {
+    .pc-body {
+      grid-template-columns: 200px 1fr;
     }
   }
 
@@ -2943,6 +3059,96 @@ const Icons = {
       <line x1="8" y1="7" x2="16" y2="7" />
       <line x1="8" y1="11" x2="16" y2="11" />
       <line x1="8" y1="15" x2="13" y2="15" />
+    </svg>
+  ),
+  reset: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2.5 7a4.5 4.5 0 1 1 1.4 3.2" />
+      <polyline points="2.5 4.5 2.5 7 5 7" />
+    </svg>
+  ),
+  edit: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M10 2.5a1.7 1.7 0 0 1 2.4 2.4L5.1 12.2 2 13l.8-3.1L10 2.5z" />
+    </svg>
+  ),
+  textUp: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2 12L5 3l3 9" />
+      <path d="M3.2 9.5h3.6" />
+      <path d="M11 10V4M9 6l2-2 2 2" />
+    </svg>
+  ),
+  textDown: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2 12L5 3l3 9" />
+      <path d="M3.2 9.5h3.6" />
+      <path d="M11 4v6M9 8l2 2 2-2" />
+    </svg>
+  ),
+  back: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 2.5L4.5 7 9 11.5" />
+    </svg>
+  ),
+  settings: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
   ),
 };
@@ -6652,6 +6858,7 @@ export function PresentationControlPanel({
   const guidesOn = activeState.showGuides;
   const crossbarsOn = activeState.showCrossbars;
   const [teleprompterOn, setTeleprompterOn] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const fullscreenOn =
     activeState.fullscreenActive || activeState.fullscreenPromptVisible;
 
@@ -6659,232 +6866,47 @@ export function PresentationControlPanel({
     <>
       <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
       <div className="pc-root">
-        <div className="pc-header">
-          <span className="pc-pill">Control</span>
-          <div className="pc-title-wrap">
-            <span className="pc-title">
-              {deck.number}. {sanitizePresentationTitle(deck.title)}
-            </span>
-          </div>
-          {showHeaderMeta && (
-            <>
-              <span className="pc-header-separator" aria-hidden="true" />
-              <div className="pc-meta">
-                <span className="pc-meta-item">
-                  {activeState.slideIndex + 1}/{activeState.slideCount}
-                </span>
-                <span className="pc-meta-divider" aria-hidden="true" />
-                <span
-                  className="pc-meta-item"
-                  style={{
-                    color: timerOver
-                      ? "var(--tf-color-danger, #ef4444)"
-                      : "var(--tf-text-muted, #8892a8)",
-                  }}
-                >
-                  {formatTime(activeState.elapsed)}
-                  {activeState.duration != null
-                    ? ` / ${formatTime(activeState.duration)}`
-                    : ""}
-                </span>
-                <span className="pc-meta-divider" aria-hidden="true" />
-                <span className="pc-meta-item">
-                  Zoom {activeState.zoom.toFixed(2)}x
-                </span>
-              </div>
-            </>
-          )}
-          <div className="pc-header-spacer" />
-          {headerBarSlot}
-          {headerBarSlot && (
-            <span className="pc-header-separator" aria-hidden="true" />
-          )}
-          {onExplore && (
-            <button
-              className="pc-btn pc-btn-header pc-btn-icon"
-              onClick={onExplore}
-              title="Home"
-              aria-label="Home"
-            >
-              {Icons.home}
-            </button>
-          )}
-          <span className="pc-header-separator" aria-hidden="true" />
-          {brandIconUrl ? (
-            <BrandLockup iconUrl={brandIconUrl} size="sm" label={brandLabel} />
-          ) : (
-            <img
-              className="pc-header-logo"
-              src={brandLogoSrc}
-              alt={brandLabel}
-            />
-          )}
-          {onOpenPresenter && (
-            <>
-              <span className="pc-header-separator" aria-hidden="true" />
-              <button
-                className={`pc-btn pc-btn-header pc-btn-ratio${activeSurface === "presentation" ? " active" : ""}`}
-                onClick={() => {
-                  selectSurface("presentation");
-                  onOpenPresenter();
-                }}
-                title="Open or focus 16:9 slide window"
-                aria-label="Open or focus 16 by 9 slide window"
-              >
-                {Icons.pip}
-                <span className="pc-btn-label">16:9</span>
-              </button>
-            </>
-          )}
-          {onOpenShorts && isShortDeck(deck.deckType) && (
-            <button
-              className={`pc-btn pc-btn-header pc-btn-ratio${activeSurface === "shorts" ? " active" : ""}`}
-              onClick={() => {
-                selectSurface("shorts");
-                onOpenShorts();
-              }}
-              title="Open or focus 9:16 slide window"
-              aria-label="Open or focus 9 by 16 slide window"
-            >
-              {Icons.shorts}
-              <span className="pc-btn-label">9:16</span>
-            </button>
-          )}
-          {onOpenFeed && isFeedCapable(deck.deckType) && (
-            <button
-              className={`pc-btn pc-btn-header pc-btn-ratio${activeSurface === "feed" ? " active" : ""}`}
-              onClick={() => {
-                selectSurface("feed");
-                onOpenFeed();
-              }}
-              title="Open or focus 4:5 slide window"
-              aria-label="Open or focus 4 by 5 slide window"
-            >
-              {Icons.shorts}
-              <span className="pc-btn-label">4:5</span>
-            </button>
-          )}
-          <span className="pc-header-separator" aria-hidden="true" />
-          <button
-            className={`pc-btn pc-btn-header pc-btn-icon${fullscreenOn ? " active" : ""}`}
-            onClick={() =>
-              send({
-                type: "command",
-                deckId: deck.id,
-                action: "toggle-fullscreen",
-                targetSurface: activeSurfaceRef.current,
-              })
-            }
-            disabled={!connected}
-            title={
-              activeConnected
-                ? activeState.fullscreenActive
-                  ? "Exit fullscreen on slide window"
-                  : activeState.fullscreenPromptVisible
-                    ? "Slide window is waiting for one click to enter fullscreen"
-                    : "Toggle fullscreen on slide window"
-                : connected
-                  ? "Selected slide window is still connecting"
-                  : "No slide window connected"
-            }
-            aria-label="Toggle fullscreen on slide window"
-          >
-            {Icons.fullscreen}
-          </button>
-          <button
-            className={`pc-btn pc-btn-header pc-btn-icon${guidesOn ? " active" : ""}`}
-            onClick={() => {
-              send({
-                type: "command",
-                deckId: deck.id,
-                action: "toggle-guides",
-                targetSurface: activeSurfaceRef.current,
-              });
-            }}
-            disabled={!connected}
-            title={
-              activeConnected
-                ? "Toggle L-corner guides"
-                : connected
-                  ? "Selected slide window is still connecting"
-                  : "No slide window connected"
-            }
-            aria-label="Toggle L-corner guides"
-          >
-            {Icons.guides}
-          </button>
-          <button
-            className={`pc-btn pc-btn-header pc-btn-icon${crossbarsOn ? " active" : ""}`}
-            onClick={() => {
-              send({
-                type: "command",
-                deckId: deck.id,
-                action: "toggle-crossbars",
-                targetSurface: activeSurfaceRef.current,
-              });
-            }}
-            disabled={!connected}
-            title={
-              activeConnected
-                ? "Toggle center crossbar alignment marks"
-                : connected
-                  ? "Selected slide window is still connecting"
-                  : "No slide window connected"
-            }
-            aria-label="Toggle center crossbar alignment marks"
-          >
-            {Icons.crossbars}
-          </button>
-          <button
-            className={`pc-btn pc-btn-header pc-btn-icon${teleprompterOn ? " active" : ""}`}
-            onClick={() => setTeleprompterOn((v) => !v)}
-            title={teleprompterOn ? "Hide teleprompter" : "Show teleprompter"}
-            aria-label="Toggle teleprompter"
-          >
-            {Icons.teleprompter}
-          </button>
-          <span
-            className="pc-connection-dot"
-            style={{
-              display: "inline-block",
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              marginLeft: 8,
-              background: connected ? "#22c55e" : "#6b7280",
-              boxShadow: connected ? "0 0 6px #22c55e88" : "none",
-              transition: "background 0.3s, box-shadow 0.3s",
-            }}
-            title={
-              connected ? "Slide window connected" : "No slide window connected"
-            }
-            aria-label={connected ? "Connected" : "Disconnected"}
-          />
-        </div>
-
         <div className="pc-body">
           <aside className="pc-sidebar">
             <div className="pc-camera-preview">
-              <video
-                ref={cameraVideoRef}
-                className="pc-camera-video"
-                autoPlay
-                muted
-                playsInline
-              />
-              {cameraDevices.length > 0 && (
-                <select
-                  className="pc-camera-select"
-                  value={selectedCameraId}
-                  onChange={(e) => setSelectedCameraId(e.target.value)}
-                  aria-label="Select camera"
-                >
-                  {cameraDevices.map((d) => (
-                    <option key={d.deviceId} value={d.deviceId}>
-                      {d.label || `Camera ${d.deviceId.slice(0, 8)}`}
-                    </option>
-                  ))}
-                </select>
+              {cameraDevices.length > 0 ? (
+                <>
+                  <video
+                    ref={cameraVideoRef}
+                    className="pc-camera-video"
+                    autoPlay
+                    muted
+                    playsInline
+                  />
+                  <select
+                    className="pc-camera-select"
+                    value={selectedCameraId}
+                    onChange={(e) => setSelectedCameraId(e.target.value)}
+                    aria-label="Select camera"
+                  >
+                    {cameraDevices.map((d) => (
+                      <option key={d.deviceId} value={d.deviceId}>
+                        {d.label || `Camera ${d.deviceId.slice(0, 8)}`}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              ) : (
+                <div className="pc-camera-placeholder">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="2" y="4" width="15" height="14" rx="2" />
+                    <path d="M17 9l5-3v12l-5-3" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                  Camera off
+                </div>
               )}
             </div>
             <div className="pc-lessons">
@@ -7116,16 +7138,328 @@ export function PresentationControlPanel({
               } as React.CSSProperties
             }
           >
-            {activeState.stepCount > 0 ? (
-              <div className="pc-step-controls">
-                <span className="pc-step-counter">
-                  Step{" "}
-                  {Math.min(activeState.stepIndex + 1, activeState.stepCount)} /{" "}
-                  {activeState.stepCount}
-                </span>
-                <div className="pc-step-actions">
+            <div className="pc-transcript-main">
+              {transcriptEditMode ? (
+                <>
+                  <textarea
+                    className="pc-transcript-textarea"
+                    value={editDraft}
+                    onChange={(e) =>
+                      handleTranscriptDraftChange(e.target.value)
+                    }
+                    placeholder="Type your updated transcript here…"
+                    spellCheck
+                  />
+                  {activeState.narration &&
+                    getEditedTranscript(activeState.slideIndex) != null && (
+                      <div className="pc-transcript-original">
+                        <div className="pc-transcript-original-label">
+                          Original
+                        </div>
+                        <div className="pc-transcript-original-text">
+                          {activeState.narration}
+                        </div>
+                        <button
+                          type="button"
+                          className="pc-transcript-revert-btn"
+                          onClick={revertTranscriptEdit}
+                        >
+                          Revert to original
+                        </button>
+                      </div>
+                    )}
+                </>
+              ) : (
+                <div className="pc-transcript-body">
+                  {(() => {
+                    const editedText = getEditedTranscript(
+                      activeState.slideIndex,
+                    );
+                    if (
+                      activeState.stepCount > 0 &&
+                      activeState.steps?.length
+                    ) {
+                      return (
+                        <>
+                          <div
+                            className="pc-transcript-current"
+                            key={
+                              activeState.steps[activeState.stepIndex]?.id ??
+                              `step-${activeState.stepIndex}`
+                            }
+                          >
+                            <div className="pc-transcript-current-title">
+                              <span className="pc-transcript-current-label">
+                                Active Transcript
+                              </span>
+                              <span className="pc-transcript-current-step">
+                                Step{" "}
+                                {Math.min(
+                                  activeState.stepIndex + 1,
+                                  activeState.stepCount,
+                                )}{" "}
+                                / {activeState.stepCount}
+                              </span>
+                            </div>
+                            <div className="pc-transcript-current-heading">
+                              {activeState.steps[activeState.stepIndex]?.title}
+                            </div>
+                            <div className="pc-transcript-current-text">
+                              {
+                                activeState.steps[activeState.stepIndex]
+                                  ?.transcript
+                              }
+                            </div>
+                          </div>
+
+                          <div className="pc-transcript-steps-header">
+                            <span className="pc-transcript-steps-label">
+                              All Steps
+                            </span>
+                            <span className="pc-transcript-steps-hint">
+                              Click any step to jump
+                            </span>
+                          </div>
+
+                          <div className="pc-transcript-steps">
+                            {activeState.steps.map((step, index) => (
+                              <button
+                                key={step.id}
+                                type="button"
+                                className={`pc-transcript-step ${index === activeState.stepIndex ? "active" : ""} ${index < activeState.stepIndex ? "complete" : ""}`}
+                                onClick={() =>
+                                  send({
+                                    type: "command",
+                                    deckId: deck.id,
+                                    action: "step-goto",
+                                    index,
+                                  })
+                                }
+                              >
+                                <div className="pc-transcript-step-title">
+                                  <span className="pc-transcript-step-index">
+                                    Step {index + 1}
+                                  </span>
+                                  <span className="pc-transcript-step-label">
+                                    {step.title}
+                                  </span>
+                                </div>
+                                <div className="pc-transcript-step-text">
+                                  {step.transcript}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      );
+                    }
+                    const displayText = editedText ?? activeState.narration;
+                    if (editedText != null && activeState.narration) {
+                      return (
+                        <>
+                          <div className="pc-transcript-split-section">
+                            <div className="pc-transcript-split-label edited">
+                              Edited
+                            </div>
+                            <div className="pc-transcript-split-text edited">
+                              {editedText}
+                            </div>
+                          </div>
+                          <div className="pc-transcript-split-section">
+                            <div className="pc-transcript-split-label original">
+                              Original
+                            </div>
+                            <div className="pc-transcript-split-text original">
+                              {activeState.narration}
+                            </div>
+                            <button
+                              type="button"
+                              className="pc-transcript-revert-btn"
+                              onClick={revertTranscriptEdit}
+                              style={{ marginTop: "8px" }}
+                            >
+                              Revert to original
+                            </button>
+                          </div>
+                        </>
+                      );
+                    }
+                    if (displayText) {
+                      return (
+                        <div className="pc-transcript-text">{displayText}</div>
+                      );
+                    }
+                    return (
+                      <div className="pc-transcript-empty">
+                        No transcript for this slide.
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+              {teleprompterOn && activeState.stepCount === 0 && (
+                <TeleprompterOverlay
+                  text={
+                    teleprompterText !== undefined
+                      ? teleprompterText
+                      : getEditedTranscript(activeState.slideIndex) ||
+                        activeState.narration ||
+                        ""
+                  }
+                  visible={teleprompterOn}
+                  onClose={() => setTeleprompterOn(false)}
+                  baseFontSize={14 * transcriptFontScale}
+                />
+              )}
+            </div>
+
+            <aside className="pc-transcript-rail">
+              {/* ── Connection ── */}
+              <div
+                className="pc-dock-dot"
+                style={{
+                  background: connected ? "#22c55e" : "#6b7280",
+                  boxShadow: connected ? "0 0 8px #22c55e88" : "none",
+                }}
+                title={
+                  connected
+                    ? `Connected · ${activeSurface}`
+                    : "No slide window connected"
+                }
+                aria-label={connected ? "Connected" : "Disconnected"}
+              />
+
+              <div className="pc-dock-divider" aria-hidden="true" />
+
+              {/* ── Navigation ── */}
+              {onExplore ? (
+                <button
+                  className="pc-dock-btn"
+                  onClick={onExplore}
+                  data-tip="Back"
+                  aria-label="Back to explore"
+                >
+                  {Icons.back}
+                </button>
+              ) : null}
+              <button
+                className="pc-dock-btn"
+                onClick={() => setSettingsOpen(true)}
+                data-tip="Settings"
+                aria-label="Open settings"
+              >
+                {Icons.settings}
+              </button>
+
+              <div className="pc-dock-divider" aria-hidden="true" />
+
+              {/* ── Windows ── */}
+              {onOpenPresenter ? (
+                <button
+                  className={`pc-dock-btn${activeSurface === "presentation" ? " active" : ""}`}
+                  onClick={() => {
+                    selectSurface("presentation");
+                    onOpenPresenter();
+                  }}
+                  data-tip="16:9"
+                  aria-label="Open 16:9 slide window"
+                >
+                  {Icons.pip}
+                </button>
+              ) : null}
+              {onOpenShorts && isShortDeck(deck.deckType) ? (
+                <button
+                  className={`pc-dock-btn${activeSurface === "shorts" ? " active" : ""}`}
+                  onClick={() => {
+                    selectSurface("shorts");
+                    onOpenShorts();
+                  }}
+                  data-tip="9:16"
+                  aria-label="Open 9:16 slide window"
+                >
+                  {Icons.shorts}
+                </button>
+              ) : null}
+              {onOpenFeed && isFeedCapable(deck.deckType) ? (
+                <button
+                  className={`pc-dock-btn${activeSurface === "feed" ? " active" : ""}`}
+                  onClick={() => {
+                    selectSurface("feed");
+                    onOpenFeed();
+                  }}
+                  data-tip="4:5"
+                  aria-label="Open 4:5 slide window"
+                >
+                  {Icons.shorts}
+                </button>
+              ) : null}
+
+              <div className="pc-dock-divider" aria-hidden="true" />
+
+              {/* ── View ── */}
+              <button
+                className={`pc-dock-btn${fullscreenOn ? " active" : ""}`}
+                onClick={() =>
+                  send({
+                    type: "command",
+                    deckId: deck.id,
+                    action: "toggle-fullscreen",
+                    targetSurface: activeSurfaceRef.current,
+                  })
+                }
+                disabled={!connected}
+                data-tip="Fullscreen"
+                aria-label="Toggle fullscreen"
+              >
+                {Icons.fullscreen}
+              </button>
+              <button
+                className={`pc-dock-btn${guidesOn ? " active" : ""}`}
+                onClick={() =>
+                  send({
+                    type: "command",
+                    deckId: deck.id,
+                    action: "toggle-guides",
+                    targetSurface: activeSurfaceRef.current,
+                  })
+                }
+                disabled={!connected}
+                data-tip="Guides"
+                aria-label="Toggle guides"
+              >
+                {Icons.guides}
+              </button>
+              <button
+                className={`pc-dock-btn${crossbarsOn ? " active" : ""}`}
+                onClick={() =>
+                  send({
+                    type: "command",
+                    deckId: deck.id,
+                    action: "toggle-crossbars",
+                    targetSurface: activeSurfaceRef.current,
+                  })
+                }
+                disabled={!connected}
+                data-tip="Crossbars"
+                aria-label="Toggle crossbars"
+              >
+                {Icons.crossbars}
+              </button>
+              <button
+                className={`pc-dock-btn${teleprompterOn ? " active" : ""}`}
+                onClick={() => setTeleprompterOn((v) => !v)}
+                data-tip="Teleprompter"
+                aria-label="Toggle teleprompter"
+              >
+                {Icons.teleprompter}
+              </button>
+
+              {/* ── Steps ── */}
+              {activeState.stepCount > 0 ? (
+                <>
+                  <div className="pc-dock-divider" aria-hidden="true" />
                   <button
-                    className="pc-step-btn"
+                    className="pc-dock-btn"
                     onClick={() =>
                       send({
                         type: "command",
@@ -7135,11 +7469,17 @@ export function PresentationControlPanel({
                       })
                     }
                     disabled={!connected || activeState.stepIndex <= 0}
+                    data-tip="Step back"
+                    aria-label="Step back"
                   >
-                    Back
+                    {Icons.chevLeft}
                   </button>
+                  <span className="pc-dock-counter">
+                    {Math.min(activeState.stepIndex + 1, activeState.stepCount)}
+                    /{activeState.stepCount}
+                  </span>
                   <button
-                    className="pc-step-btn"
+                    className="pc-dock-btn"
                     data-testid="presentation-step-next"
                     onClick={() =>
                       send({
@@ -7156,11 +7496,13 @@ export function PresentationControlPanel({
                       !connected ||
                       activeState.stepIndex >= activeState.stepCount - 1
                     }
+                    data-tip="Next step"
+                    aria-label="Next step"
                   >
-                    Step
+                    {Icons.chevRight}
                   </button>
                   <button
-                    className="pc-step-btn"
+                    className="pc-dock-btn"
                     onClick={() =>
                       send({
                         type: "command",
@@ -7169,232 +7511,94 @@ export function PresentationControlPanel({
                       })
                     }
                     disabled={!connected || activeState.stepIndex <= 0}
+                    data-tip="Reset"
+                    aria-label="Reset steps"
                   >
-                    Reset
+                    {Icons.reset}
                   </button>
-                </div>
-              </div>
-            ) : null}
-            <div className="pc-transcript-header">
-              <span className="pc-transcript-header-title">
-                {activeState.stepCount > 0 ? "Step Transcript" : "Transcript"}
-              </span>
-              <div className="pc-transcript-header-tools">
-                <button
-                  type="button"
-                  className={`pc-transcript-edit-btn${transcriptEditMode ? " active" : ""}`}
-                  onClick={() => setTranscriptEditMode((m) => !m)}
-                  title={
-                    transcriptEditMode ? "Exit edit mode" : "Edit transcript"
-                  }
-                  disabled={
-                    !transcriptEditMode &&
-                    currentSlideIdx !== 0 &&
-                    currentSlideIdx !== deck.slides.length - 1
-                  }
-                >
-                  {hasAnyTranscriptEdits() && !transcriptEditMode && (
-                    <span className="pc-edit-dot" />
-                  )}
-                  {transcriptEditMode ? "Done" : "Edit"}
-                </button>
-                <div className="pc-slider-row compact">
-                  <label
-                    className="pc-slider-label"
-                    htmlFor="pc-transcript-size-slider"
+                </>
+              ) : null}
+
+              <div className="pc-dock-divider" aria-hidden="true" />
+
+              {/* ── Transcript ── */}
+              <button
+                className={`pc-dock-btn${transcriptEditMode ? " active" : ""}`}
+                onClick={() => setTranscriptEditMode((m) => !m)}
+                data-tip={transcriptEditMode ? "Done editing" : "Edit"}
+                aria-label="Edit transcript"
+                disabled={
+                  !transcriptEditMode &&
+                  currentSlideIdx !== 0 &&
+                  currentSlideIdx !== deck.slides.length - 1
+                }
+              >
+                {hasAnyTranscriptEdits() && !transcriptEditMode && (
+                  <span className="pc-edit-dot" />
+                )}
+                {Icons.edit}
+              </button>
+              <button
+                className="pc-dock-btn"
+                onClick={() =>
+                  setTranscriptScaleIndex(Math.max(0, transcriptScaleIndex - 1))
+                }
+                disabled={transcriptScaleIndex <= 0}
+                data-tip="Smaller text"
+                aria-label="Decrease transcript size"
+              >
+                {Icons.textDown}
+              </button>
+              <button
+                className="pc-dock-btn"
+                onClick={() =>
+                  setTranscriptScaleIndex(
+                    Math.min(
+                      TRANSCRIPT_FONT_SCALE_STOPS.length - 1,
+                      transcriptScaleIndex + 1,
+                    ),
+                  )
+                }
+                disabled={
+                  transcriptScaleIndex >= TRANSCRIPT_FONT_SCALE_STOPS.length - 1
+                }
+                data-tip="Larger text"
+                aria-label="Increase transcript size"
+              >
+                {Icons.textUp}
+              </button>
+
+              {/* ── Brand ── */}
+              <div className="pc-dock-spacer" />
+              <img
+                className="pc-dock-brand"
+                src={brandIconUrl || brandLogoSrc}
+                alt={brandLabel}
+                title={brandLabel}
+              />
+            </aside>
+
+            {/* ── Settings dialog ── */}
+            {settingsOpen && (
+              <div
+                className="pc-settings-backdrop"
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) setSettingsOpen(false);
+                }}
+              >
+                <div className="pc-settings-dialog">
+                  <button
+                    className="pc-settings-close"
+                    onClick={() => setSettingsOpen(false)}
+                    aria-label="Close settings"
                   >
-                    Size
-                  </label>
-                  <input
-                    id="pc-transcript-size-slider"
-                    className="pc-slider"
-                    type="range"
-                    min="0"
-                    max={String(TRANSCRIPT_FONT_SCALE_STOPS.length - 1)}
-                    step="1"
-                    value={String(transcriptScaleIndex)}
-                    onChange={(e) =>
-                      setTranscriptScaleIndex(
-                        Number.parseInt(e.target.value, 10),
-                      )
-                    }
-                    aria-label="Transcript size"
-                  />
-                  <span className="pc-slider-value">
-                    {transcriptFontScaleLabel}
-                  </span>
+                    ×
+                  </button>
+                  {headerBarSlot}
                 </div>
-              </div>
-            </div>
-            {transcriptEditMode ? (
-              /* ── Editable transcript mode ──────────────────────── */
-              <>
-                <textarea
-                  className="pc-transcript-textarea"
-                  value={editDraft}
-                  onChange={(e) => handleTranscriptDraftChange(e.target.value)}
-                  placeholder="Type your updated transcript here…"
-                  spellCheck
-                />
-                {activeState.narration &&
-                  getEditedTranscript(activeState.slideIndex) != null && (
-                    <div className="pc-transcript-original">
-                      <div className="pc-transcript-original-label">
-                        Original
-                      </div>
-                      <div className="pc-transcript-original-text">
-                        {activeState.narration}
-                      </div>
-                      <button
-                        type="button"
-                        className="pc-transcript-revert-btn"
-                        onClick={revertTranscriptEdit}
-                      >
-                        Revert to original
-                      </button>
-                    </div>
-                  )}
-              </>
-            ) : (
-              <div className="pc-transcript-body">
-                {(() => {
-                  const editedText = getEditedTranscript(
-                    activeState.slideIndex,
-                  );
-                  if (activeState.stepCount > 0 && activeState.steps?.length) {
-                    return (
-                      <>
-                        <div
-                          className="pc-transcript-current"
-                          key={
-                            activeState.steps[activeState.stepIndex]?.id ??
-                            `step-${activeState.stepIndex}`
-                          }
-                        >
-                          <div className="pc-transcript-current-title">
-                            <span className="pc-transcript-current-label">
-                              Active Transcript
-                            </span>
-                            <span className="pc-transcript-current-step">
-                              Step{" "}
-                              {Math.min(
-                                activeState.stepIndex + 1,
-                                activeState.stepCount,
-                              )}{" "}
-                              / {activeState.stepCount}
-                            </span>
-                          </div>
-                          <div className="pc-transcript-current-heading">
-                            {activeState.steps[activeState.stepIndex]?.title}
-                          </div>
-                          <div className="pc-transcript-current-text">
-                            {
-                              activeState.steps[activeState.stepIndex]
-                                ?.transcript
-                            }
-                          </div>
-                        </div>
-
-                        <div className="pc-transcript-steps-header">
-                          <span className="pc-transcript-steps-label">
-                            All Steps
-                          </span>
-                          <span className="pc-transcript-steps-hint">
-                            Click any step to jump
-                          </span>
-                        </div>
-
-                        <div className="pc-transcript-steps">
-                          {activeState.steps.map((step, index) => (
-                            <button
-                              key={step.id}
-                              type="button"
-                              className={`pc-transcript-step ${index === activeState.stepIndex ? "active" : ""} ${index < activeState.stepIndex ? "complete" : ""}`}
-                              onClick={() =>
-                                send({
-                                  type: "command",
-                                  deckId: deck.id,
-                                  action: "step-goto",
-                                  index,
-                                })
-                              }
-                            >
-                              <div className="pc-transcript-step-title">
-                                <span className="pc-transcript-step-index">
-                                  Step {index + 1}
-                                </span>
-                                <span className="pc-transcript-step-label">
-                                  {step.title}
-                                </span>
-                              </div>
-                              <div className="pc-transcript-step-text">
-                                {step.transcript}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    );
-                  }
-                  const displayText = editedText ?? activeState.narration;
-                  if (editedText != null && activeState.narration) {
-                    return (
-                      <>
-                        <div className="pc-transcript-split-section">
-                          <div className="pc-transcript-split-label edited">
-                            Edited
-                          </div>
-                          <div className="pc-transcript-split-text edited">
-                            {editedText}
-                          </div>
-                        </div>
-                        <div className="pc-transcript-split-section">
-                          <div className="pc-transcript-split-label original">
-                            Original
-                          </div>
-                          <div className="pc-transcript-split-text original">
-                            {activeState.narration}
-                          </div>
-                          <button
-                            type="button"
-                            className="pc-transcript-revert-btn"
-                            onClick={revertTranscriptEdit}
-                            style={{ marginTop: "8px" }}
-                          >
-                            Revert to original
-                          </button>
-                        </div>
-                      </>
-                    );
-                  }
-                  if (displayText) {
-                    return (
-                      <div className="pc-transcript-text">{displayText}</div>
-                    );
-                  }
-                  return (
-                    <div className="pc-transcript-empty">
-                      No transcript for this slide.
-                    </div>
-                  );
-                })()}
               </div>
             )}
           </section>
-          {teleprompterOn && activeState.stepCount === 0 && (
-            <TeleprompterOverlay
-              text={
-                teleprompterText !== undefined
-                  ? teleprompterText
-                  : getEditedTranscript(activeState.slideIndex) ||
-                    activeState.narration ||
-                    ""
-              }
-              visible={teleprompterOn}
-              onClose={() => setTeleprompterOn(false)}
-              baseFontSize={14 * transcriptFontScale}
-            />
-          )}
         </div>
       </div>
     </>

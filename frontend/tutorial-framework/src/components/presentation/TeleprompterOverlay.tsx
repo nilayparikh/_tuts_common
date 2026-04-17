@@ -194,7 +194,7 @@ export function TeleprompterOverlay({
     const targetY = lines[Math.min(scroll.targetLine, maxLineIndex)]?.y ?? 0;
     scroll.currentY += (targetY - scroll.currentY) * SCROLL_LERP;
 
-    const focusCentreCanvas = Math.max(lineHeight * 2, canvasSize.h * 0.06);
+    const focusCentreCanvas = Math.max(lineHeight * 2, canvasSize.h * 0.35);
     const offsetY = focusCentreCanvas - scroll.currentY;
 
     ctx.save();
@@ -346,12 +346,54 @@ export function TeleprompterOverlay({
         top: 0,
         right: 0,
         bottom: 0,
-        left: 368,
+        left: 0,
         zIndex: 30,
         cursor: "ns-resize",
         overflow: "hidden",
       }}
     >
+      <button
+        onClick={onClose}
+        aria-label="Close teleprompter"
+        style={{
+          position: "absolute",
+          top: 10,
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 32,
+          width: 32,
+          height: 32,
+          borderRadius: 8,
+          border: "1px solid rgba(202,211,230,0.16)",
+          background: "rgba(23,28,42,0.85)",
+          color: "rgba(226,230,240,0.7)",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 18,
+          lineHeight: 1,
+          backdropFilter: "blur(8px)",
+          transition: "all 120ms",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.color = "#fff";
+          (e.currentTarget as HTMLButtonElement).style.borderColor =
+            "rgba(239,68,68,0.5)";
+          (e.currentTarget as HTMLButtonElement).style.background =
+            "rgba(239,68,68,0.18)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.color =
+            "rgba(226,230,240,0.7)";
+          (e.currentTarget as HTMLButtonElement).style.borderColor =
+            "rgba(202,211,230,0.16)";
+          (e.currentTarget as HTMLButtonElement).style.background =
+            "rgba(23,28,42,0.85)";
+        }}
+      >
+        ×
+      </button>
       <canvas
         ref={canvasRef}
         style={{ display: "block", width: "100%", height: "100%" }}
