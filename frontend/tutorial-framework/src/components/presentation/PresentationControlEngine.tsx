@@ -455,6 +455,7 @@ const ENGINE_CSS = `
     inset: 0;
     width: 100%;
     height: 100%;
+    --pe-slide-enlarge: 1;
     min-width: 0;
     min-height: 0;
     overflow: hidden;
@@ -3015,6 +3016,13 @@ type ControlCommand =
   | {
       type: "command";
       deckId: string;
+      action: "set-enlarge";
+      slideId: string;
+      enlarge: number;
+    }
+  | {
+      type: "command";
+      deckId: string;
       action: "switch-deck";
       targetDeckId: string;
     }
@@ -3036,7 +3044,20 @@ type ControlCommand =
       action: "toggle-crossbars";
       targetSurface?: PresentationSurface;
     }
-  | { type: "request-state"; deckId: string };
+  | { type: "request-state"; deckId: string }
+  | {
+      type: "command";
+      deckId: string;
+      action: "set-layout";
+      slideId: string;
+      layout: SlideLayoutOverride | null;
+    }
+  | {
+      type: "command";
+      deckId: string;
+      action: "set-adjust-mode";
+      adjustMode: boolean;
+    };
 
 type PresentationSurface = "presentation" | "shorts" | "feed";
 
@@ -3049,6 +3070,7 @@ type ControlState = {
   elapsed: number;
   duration?: number;
   zoom: number;
+  enlarge: number;
   slideTitle?: string;
   narration?: string;
   steps?: PresentationStep[];
@@ -3064,6 +3086,10 @@ type ControlState = {
 const DEFAULT_CONTROL_CHANNEL = "tf-slides-control";
 const DEFAULT_CONTROL_WINDOW_NAME = "tf-slide-control-window";
 const DEFAULT_SLIDE_ZOOM = 1.15;
+const ENLARGE_MIN = 0.5;
+const ENLARGE_MAX = 5;
+const ENLARGE_STEP = 0.05;
+const DEFAULT_ENLARGE = 1;
 const TRANSCRIPT_FONT_SCALE_STOPS = [1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7];
 const DEFAULT_TRANSCRIPT_FONT_SCALE_INDEX = 1;
 
@@ -3088,6 +3114,1107 @@ function readStoredSlideZoom(storageKey: string): number {
     // Ignore localStorage access issues.
   }
   return DEFAULT_SLIDE_ZOOM;
+}
+
+function getEnlargeSessionKey(
+  channelId: string,
+  deckId: string,
+  slideId: string,
+) {
+  return `tf-enlarge:${channelId}:${deckId}:${slideId}`;
+}
+
+function getEnlargePersistKey(
+  channelId: string,
+  deckId: string,
+  slideId: string,
+) {
+  return `tf-enlarge-persist:${channelId}:${deckId}:${slideId}`;
+}
+
+function readSlideEnlarge(
+  channelId: string,
+  deckId: string,
+  slideId: string,
+): number {
+  const sessionKey = getEnlargeSessionKey(channelId, deckId, slideId);
+  const persistKey = getEnlargePersistKey(channelId, deckId, slideId);
+  try {
+    const sessionVal = sessionStorage.getItem(sessionKey);
+    if (sessionVal != null) {
+      const v = Number(sessionVal);
+      if (!Number.isNaN(v) && v > 0) return v;
+    }
+    const localVal = localStorage.getItem(persistKey);
+    if (localVal != null) {
+      const v = Number(localVal);
+      if (!Number.isNaN(v) && v > 0) return v;
+    }
+  } catch {
+    // Ignore storage access issues.
+  }
+  return DEFAULT_ENLARGE;
+}
+
+function writeSlideEnlarge(
+  channelId: string,
+  deckId: string,
+  slideId: string,
+  value: number,
+): void {
+  try {
+    sessionStorage.setItem(
+      getEnlargeSessionKey(channelId, deckId, slideId),
+      String(value),
+    );
+  } catch {
+    // Ignore storage access issues.
+  }
+}
+
+function persistAllEnlargeValues(
+  channelId: string,
+  deckId: string,
+  slides: { id: string }[],
+): void {
+  for (const slide of slides) {
+    const sessionKey = getEnlargeSessionKey(channelId, deckId, slide.id);
+    const persistKey = getEnlargePersistKey(channelId, deckId, slide.id);
+    try {
+      const val = sessionStorage.getItem(sessionKey);
+      if (val != null) {
+        localStorage.setItem(persistKey, val);
+      }
+    } catch {
+      // Ignore storage access issues.
+    }
+  }
+}
+
+/* ── Layout Override Types & Helpers ───────────────────────────────────── */
+
+/**
+ * A user-defined grid layout override for a single slide.
+ * Each cell holds an *array* of block indices so multiple blocks
+ * can stack inside a single grid cell.
+ */
+export interface SlideLayoutOverride {
+  /** Preset mode that produced this layout. */
+  mode: "simple" | "advanced";
+  /** Grid rows. Empty rows (all cells empty) are skipped at render time. */
+  rows: SlideLayoutRow[];
+  /**
+   * Optional per-row height percentages set via the on-slide drag handle.
+   * Length matches the number of POPULATED rows at the time of saving.
+   * Values are raw percentages that sum to ~100 (e.g. [30, 50, 20]).
+   * When absent, rows use their default flex behaviour.
+   */
+  rowHeights?: number[];
+}
+
+export interface SlideLayoutRow {
+  /** Human label shown in the editor (e.g. "Top", "Middle", "Bottom"). */
+  label: string;
+  /** Number of columns in this row (1 or 2). */
+  columns: number;
+  /** Each entry is an array of 0-based block indices. Length === columns. */
+  cells: number[][];
+}
+
+/** Simple layout: one row, one column. */
+function buildSimpleLayout(): SlideLayoutOverride {
+  return {
+    mode: "simple",
+    rows: [{ label: "Content", columns: 1, cells: [[]] }],
+  };
+}
+
+/** Advanced layout: 3 rows — top (1 col), middle (2 col), bottom (1 col). */
+function buildAdvancedLayout(): SlideLayoutOverride {
+  return {
+    mode: "advanced",
+    rows: [
+      { label: "Top", columns: 1, cells: [[]] },
+      { label: "Middle", columns: 2, cells: [[], []] },
+      { label: "Bottom", columns: 1, cells: [[]] },
+    ],
+  };
+}
+
+function getLayoutStorageKey(
+  channelId: string,
+  deckId: string,
+  slideId: string,
+): string {
+  return `tf-layout:${channelId}:${deckId}:${slideId}`;
+}
+
+function readSlideLayout(
+  channelId: string,
+  deckId: string,
+  slideId: string,
+): SlideLayoutOverride | null {
+  try {
+    const raw = localStorage.getItem(
+      getLayoutStorageKey(channelId, deckId, slideId),
+    );
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.rows)) {
+      // Migrate v1 format: cells was (number|null)[] → now number[][]
+      for (const row of parsed.rows as SlideLayoutRow[]) {
+        row.cells = row.cells.map((c: number | null | number[]) =>
+          Array.isArray(c) ? c : c != null ? [c] : [],
+        );
+      }
+      return parsed as SlideLayoutOverride;
+    }
+  } catch {
+    // Ignore.
+  }
+  return null;
+}
+
+function writeSlideLayout(
+  channelId: string,
+  deckId: string,
+  slideId: string,
+  layout: SlideLayoutOverride | null,
+): void {
+  const key = getLayoutStorageKey(channelId, deckId, slideId);
+  try {
+    if (layout) {
+      localStorage.setItem(key, JSON.stringify(layout));
+    } else {
+      localStorage.removeItem(key);
+    }
+  } catch {
+    // Ignore.
+  }
+}
+
+/**
+ * Returns true if a React element is a trivial spacer / empty wrapper
+ * that should NOT be surfaced as a layout block.
+ * Detects: plain `<div>` / `<span>` with no children or only whitespace,
+ * elements whose sole purpose is spacing (height/margin-only style).
+ */
+function isTrivialElement(el: React.ReactElement): boolean {
+  // Only inspect plain HTML tags — components are always meaningful
+  if (typeof el.type !== "string") return false;
+  const tag = el.type as string;
+  if (tag !== "div" && tag !== "span") return false;
+
+  const props = el.props as Record<string, unknown>;
+  const childCount = React.Children.count(props.children as React.ReactNode);
+
+  // No children at all → spacer div
+  if (childCount === 0) return true;
+
+  // Check if children are only whitespace strings
+  let onlyWhitespace = true;
+  React.Children.forEach(props.children as React.ReactNode, (c) => {
+    if (typeof c === "string") {
+      if (c.trim().length > 0) onlyWhitespace = false;
+    } else if (c != null && c !== false && c !== true) {
+      onlyWhitespace = false;
+    }
+  });
+  return onlyWhitespace;
+}
+
+/**
+ * Extracts top-level React children from a slide's content tree.
+ * ContentSlide wraps in SurfaceSlide > Slide; we unwrap the outermost
+ * component's props.children, then filter out:
+ *  - Spectacle internals (Heading used as the title)
+ *  - Trivial spacer divs / spans
+ *  - null / boolean / empty nodes
+ */
+function extractContentBlocks(content: React.ReactNode): React.ReactNode[] {
+  const blocks: React.ReactNode[] = [];
+
+  const processChildren = (children: React.ReactNode) => {
+    React.Children.forEach(children, (inner) => {
+      if (inner == null || inner === false || inner === true) return;
+      if (typeof inner === "string" && inner.trim() === "") return;
+      if (!React.isValidElement(inner)) return;
+
+      // Skip Spectacle Heading used as the slide title (ContentSlide adds one)
+      const typeName =
+        typeof inner.type !== "string"
+          ? ((inner.type as { displayName?: string }).displayName ??
+            (inner.type as { name?: string }).name ??
+            "")
+          : "";
+      if (typeName === "Heading") return;
+
+      // Skip trivial spacer elements
+      if (isTrivialElement(inner)) return;
+
+      blocks.push(inner);
+    });
+  };
+
+  React.Children.forEach(content, (child) => {
+    if (!React.isValidElement(child)) return;
+    const childProps = child.props as Record<string, unknown>;
+    if (childProps.children) {
+      processChildren(childProps.children as React.ReactNode);
+    } else if (!isTrivialElement(child)) {
+      blocks.push(child);
+    }
+  });
+  return blocks;
+}
+
+/**
+ * Generates human-readable labels for content blocks by inspecting
+ * React element type display names and props.
+ */
+function getBlockLabels(content: React.ReactNode): string[] {
+  const blocks = extractContentBlocks(content);
+  let compIdx = 0;
+  return blocks.map((block) => {
+    compIdx++;
+    if (!React.isValidElement(block)) return `Block ${compIdx}`;
+    const typeName =
+      typeof block.type === "string"
+        ? block.type
+        : ((block.type as { displayName?: string; name?: string })
+            .displayName ??
+          (block.type as { name?: string }).name ??
+          "Component");
+    const props = block.props as Record<string, unknown>;
+    const label =
+      (props.label as string) ??
+      (props.title as string) ??
+      (props.name as string) ??
+      "";
+    return label ? `${typeName}: ${label}` : `${typeName} #${compIdx}`;
+  });
+}
+
+/** Check whether a row has any assigned blocks. */
+function isRowPopulated(row: SlideLayoutRow, blockCount: number): boolean {
+  return row.cells.some((cell) =>
+    cell.some((idx) => idx >= 0 && idx < blockCount),
+  );
+}
+
+/** Consistent padding matching Spectacle's <Slide padding="48px 64px">. */
+const LO_PADDING = "48px 64px";
+/** Uniform gap between ALL layout elements: rows, columns, stacked blocks. */
+const LO_GAP = 12;
+
+/**
+ * Renders content with a layout override applied.
+ *
+ * Padding: uses LO_PADDING (same as SurfaceSlide / DarkSlide) so the
+ * layout-overridden slide has identical insets to a normal slide.
+ *
+ * Flex model (advanced):
+ *  - Wrapper is a flex column that fills the slide (100 % × 100 %).
+ *  - If `rowHeights` are present, each row gets a fixed percentage height.
+ *    Otherwise the last row absorbs remaining space; others size to content.
+ *  - Within a multi-column row, CSS grid + `align-items: stretch` ensures
+ *    both columns share the tallest column's height.
+ *  - Gap is uniform (LO_GAP) for rows, columns, and stacked blocks.
+ *  - No background is set — the underlying Spectacle Slide provides its own.
+ *
+ * Empty rows and empty cells are completely omitted from the DOM.
+ */
+function applyLayoutOverride(
+  content: React.ReactNode,
+  layout: SlideLayoutOverride,
+  adjustMode?: boolean,
+  onRowResize?: (heights: number[]) => void,
+): React.ReactNode {
+  const blocks = extractContentBlocks(content);
+  if (blocks.length === 0) return content;
+
+  // Collect all assigned indices across all rows
+  const allAssigned = layout.rows.flatMap((r) =>
+    r.cells.flatMap((cell) =>
+      cell.filter((idx) => idx >= 0 && idx < blocks.length),
+    ),
+  );
+  if (allAssigned.length === 0) return content;
+
+  /** Render a list of block indices stacked vertically inside one cell. */
+  const renderCell = (
+    indices: number[],
+    keyPrefix: string,
+  ): React.ReactElement =>
+    React.createElement(
+      "div",
+      {
+        key: keyPrefix,
+        style: {
+          display: "flex",
+          flexDirection: "column" as const,
+          gap: `${LO_GAP}px`,
+          minHeight: 0,
+          minWidth: 0,
+          flex: "1 1 0",
+          overflow: "hidden",
+        },
+      },
+      ...indices.map((idx, bi) =>
+        React.createElement(
+          "div",
+          {
+            key: `${keyPrefix}-b${bi}`,
+            style: {
+              minWidth: 0,
+              minHeight: 0,
+              flex: "1 1 0",
+              overflow: "hidden",
+            },
+          },
+          blocks[idx],
+        ),
+      ),
+    );
+
+  /** Shared wrapper style (no background — slide provides its own). */
+  const wrapperStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    gap: `${LO_GAP}px`,
+    width: "100%",
+    height: "100%",
+    padding: LO_PADDING,
+    boxSizing: "border-box",
+    overflow: "hidden",
+    position: "relative",
+  };
+
+  // ── Simple mode ──────────────────────────────────────────────────────
+  if (layout.mode === "simple") {
+    const hasHeights =
+      layout.rowHeights && layout.rowHeights.length === allAssigned.length;
+    const children = allAssigned.map((idx, i) =>
+      React.createElement(
+        "div",
+        {
+          key: `sb-${i}`,
+          style: {
+            minWidth: 0,
+            minHeight: 0,
+            flex: hasHeights ? `0 0 ${layout.rowHeights![i]}%` : "1 1 0",
+            overflow: "hidden",
+          },
+        },
+        blocks[idx],
+      ),
+    );
+
+    return React.createElement(
+      "div",
+      { className: "lo-wrapper", style: wrapperStyle },
+      ...children,
+      adjustMode
+        ? React.createElement(LayoutResizeHandles, {
+            direction: "column",
+            count: allAssigned.length,
+            gap: LO_GAP,
+            padding: LO_PADDING,
+            initialHeights: layout.rowHeights,
+            onCommit: onRowResize,
+          })
+        : null,
+    );
+  }
+
+  // ── Advanced mode ────────────────────────────────────────────────────
+  const populatedRows = layout.rows.filter((row) =>
+    isRowPopulated(row, blocks.length),
+  );
+  if (populatedRows.length === 0) return content;
+
+  const hasHeights =
+    layout.rowHeights && layout.rowHeights.length === populatedRows.length;
+
+  const rowElements = populatedRows.map((row, ri) => {
+    const hasMultipleCols = row.columns > 1;
+    const isLastRow = ri === populatedRows.length - 1;
+
+    // Build only the cells that actually have content
+    const cellElements: React.ReactElement[] = [];
+    for (let ci = 0; ci < row.cells.length; ci++) {
+      const valid = row.cells[ci].filter(
+        (idx) => idx >= 0 && idx < blocks.length,
+      );
+      if (valid.length === 0 && hasMultipleCols) {
+        cellElements.push(
+          React.createElement("div", { key: `lc-${ri}-${ci}` }),
+        );
+      } else if (valid.length > 0) {
+        cellElements.push(renderCell(valid, `lc-${ri}-${ci}`));
+      }
+    }
+
+    // Row flex: use stored height %, or last-row-absorbs model
+    const rowFlex = hasHeights
+      ? `0 0 ${layout.rowHeights![ri]}%`
+      : isLastRow
+        ? "1 1 0"
+        : "0 0 auto";
+
+    return React.createElement(
+      "div",
+      {
+        key: `lr-${ri}`,
+        style: {
+          display: hasMultipleCols ? "grid" : "flex",
+          ...(hasMultipleCols
+            ? {
+                gridTemplateColumns: Array.from(
+                  { length: row.columns },
+                  () => "1fr",
+                ).join(" "),
+                gap: `${LO_GAP}px`,
+                alignItems: "stretch",
+              }
+            : {
+                flexDirection: "column" as const,
+                gap: `${LO_GAP}px`,
+              }),
+          flex: rowFlex,
+          minHeight: 0,
+          overflow: "hidden",
+        },
+      },
+      ...cellElements,
+    );
+  });
+
+  return React.createElement(
+    "div",
+    { className: "lo-wrapper", style: wrapperStyle },
+    ...rowElements,
+    adjustMode
+      ? React.createElement(LayoutResizeHandles, {
+          direction: "column",
+          count: populatedRows.length,
+          gap: LO_GAP,
+          padding: LO_PADDING,
+          initialHeights: layout.rowHeights,
+          onCommit: onRowResize,
+        })
+      : null,
+  );
+}
+
+/* ── On-slide drag resize handles ─────────────────────────────────────── */
+
+/**
+ * Overlay that renders draggable handles between layout rows (or blocks in
+ * simple mode).  Dragging a handle redistributes the percentage heights of
+ * the two neighbouring items.  On pointer-up the final percentages are
+ * passed to `onCommit`.
+ */
+function LayoutResizeHandles({
+  direction: _direction,
+  count,
+  gap,
+  padding,
+  initialHeights,
+  onCommit,
+}: {
+  direction: "column";
+  count: number;
+  gap: number;
+  padding: string;
+  initialHeights?: number[];
+  onCommit?: (heights: number[]) => void;
+}) {
+  // Parse padding "48px 64px" → top/bottom and left/right
+  const [padY, padX] = React.useMemo(() => {
+    const parts = padding.split(/\s+/).map(parseFloat);
+    return parts.length >= 2 ? [parts[0], parts[1]] : [parts[0], parts[0]];
+  }, [padding]);
+
+  // Manage heights as percentages that sum to 100
+  const [heights, setHeights] = React.useState<number[]>(() => {
+    if (initialHeights && initialHeights.length === count) {
+      return [...initialHeights];
+    }
+    return Array.from({ length: count }, () => 100 / count);
+  });
+
+  // Ref to track the wrapper bounding rect during drag
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const draggingRef = React.useRef<{
+    handleIndex: number;
+    startY: number;
+    startHeights: number[];
+  } | null>(null);
+
+  const handlePointerDown = React.useCallback(
+    (handleIndex: number, e: React.PointerEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      draggingRef.current = {
+        handleIndex,
+        startY: e.clientY,
+        startHeights: [...heights],
+      };
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    },
+    [heights],
+  );
+
+  const handlePointerMove = React.useCallback(
+    (e: React.PointerEvent) => {
+      const drag = draggingRef.current;
+      if (!drag) return;
+      const wrapper = wrapperRef.current;
+      if (!wrapper) return;
+
+      const totalGaps = (count - 1) * gap;
+      const available = wrapper.clientHeight - padY * 2 - totalGaps;
+      if (available <= 0) return;
+
+      const deltaY = e.clientY - drag.startY;
+      const deltaPct = (deltaY / available) * 100;
+
+      const idx = drag.handleIndex;
+      const minPct = 5; // minimum 5% per row
+      let newAbove = drag.startHeights[idx] + deltaPct;
+      let newBelow = drag.startHeights[idx + 1] - deltaPct;
+
+      // Clamp
+      if (newAbove < minPct) {
+        newBelow += newAbove - minPct;
+        newAbove = minPct;
+      }
+      if (newBelow < minPct) {
+        newAbove += newBelow - minPct;
+        newBelow = minPct;
+      }
+
+      const next = [...drag.startHeights];
+      next[idx] = Math.round(newAbove * 100) / 100;
+      next[idx + 1] = Math.round(newBelow * 100) / 100;
+      setHeights(next);
+    },
+    [count, gap, padY],
+  );
+
+  const handlePointerUp = React.useCallback(() => {
+    draggingRef.current = null;
+    onCommit?.(heights);
+  }, [heights, onCommit]);
+
+  if (count < 2) return null;
+
+  // Compute cumulative top offsets for each handle
+  const handleElements: React.ReactElement[] = [];
+  let cumPct = 0;
+  for (let i = 0; i < count - 1; i++) {
+    cumPct += heights[i];
+    // Position at cumulative % within the content area (inside padding)
+    // Handle sits on the gap between rows
+    const topPct = cumPct;
+    handleElements.push(
+      React.createElement("div", {
+        key: `rh-${i}`,
+        "data-resize-handle": i,
+        style: {
+          position: "absolute",
+          left: padX,
+          right: padX,
+          top: `calc(${padY}px + (100% - ${padY * 2}px - ${(count - 1) * gap}px) * ${topPct / 100} + ${i * gap + gap / 2}px)`,
+          height: gap + 8,
+          marginTop: -(gap + 8) / 2,
+          cursor: "row-resize",
+          zIndex: 10,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        onPointerDown: (ev: React.PointerEvent) => handlePointerDown(i, ev),
+        onPointerMove: handlePointerMove,
+        onPointerUp: handlePointerUp,
+        children: React.createElement("div", {
+          style: {
+            width: 48,
+            height: 4,
+            borderRadius: 2,
+            background: "rgba(99, 102, 241, 0.7)",
+            boxShadow: "0 0 8px rgba(99, 102, 241, 0.4)",
+            transition: "background 0.15s",
+          },
+        }),
+      }),
+    );
+  }
+
+  return React.createElement("div", {
+    ref: wrapperRef,
+    style: {
+      position: "absolute",
+      inset: 0,
+      pointerEvents: "none",
+      zIndex: 5,
+    },
+    children: handleElements.map((h) =>
+      React.cloneElement(h, {
+        style: { ...h.props.style, pointerEvents: "auto" },
+      }),
+    ),
+  });
+}
+
+/* ── Layout Editor Dialog ─────────────────────────────────────────────── */
+
+interface LayoutEditorProps {
+  slideId: string;
+  blockCount: number;
+  blockLabels: string[];
+  initial: SlideLayoutOverride | null;
+  onSave: (layout: SlideLayoutOverride | null) => void;
+  onClose: () => void;
+  /** Whether the on-slide drag adjust mode is active. */
+  adjustMode?: boolean;
+  /** Toggle the on-slide drag adjust mode on/off. */
+  onToggleAdjust?: () => void;
+}
+
+function LayoutEditorDialog({
+  slideId,
+  blockCount,
+  blockLabels,
+  initial,
+  onSave,
+  onClose,
+  adjustMode,
+  onToggleAdjust,
+}: LayoutEditorProps) {
+  const [mode, setMode] = useState<"simple" | "advanced">(
+    initial?.mode ?? "simple",
+  );
+  const [simpleRows, setSimpleRows] = useState<SlideLayoutRow[]>(
+    initial?.mode === "simple" ? initial.rows : buildSimpleLayout().rows,
+  );
+  const [advancedRows, setAdvancedRows] = useState<SlideLayoutRow[]>(
+    initial?.mode === "advanced" ? initial.rows : buildAdvancedLayout().rows,
+  );
+
+  const activeRows = mode === "simple" ? simpleRows : advancedRows;
+  const setActiveRows = mode === "simple" ? setSimpleRows : setAdvancedRows;
+
+  // All blocks currently assigned to any cell
+  const usedBlocks = new Set(
+    activeRows.flatMap((r) => r.cells.flatMap((cell) => cell)),
+  );
+
+  const toggleBlock = (ri: number, ci: number, blockIdx: number) => {
+    setActiveRows((prev) =>
+      prev.map((r, i) => {
+        if (i !== ri) return r;
+        const newCells = r.cells.map((cell, j) => {
+          if (j !== ci) {
+            // Remove from other cells in same row if it was there
+            return cell.filter((b) => b !== blockIdx);
+          }
+          // Toggle in target cell
+          return cell.includes(blockIdx)
+            ? cell.filter((b) => b !== blockIdx)
+            : [...cell, blockIdx];
+        });
+        return { ...r, cells: newCells };
+      }),
+    );
+    // Also remove from other rows
+    setActiveRows((prev) =>
+      prev.map((r, i) => {
+        if (i === ri) return r;
+        return {
+          ...r,
+          cells: r.cells.map((cell) => cell.filter((b) => b !== blockIdx)),
+        };
+      }),
+    );
+  };
+
+  /* ── Styles ── */
+  const overlayStyle: React.CSSProperties = {
+    position: "fixed",
+    inset: 0,
+    zIndex: 99999,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
+    backdropFilter: "blur(4px)",
+    padding: 24,
+  };
+  const panelStyle: React.CSSProperties = {
+    background: "#13151a",
+    border: "1px solid #2a2d36",
+    borderRadius: 16,
+    padding: 32,
+    width: 620,
+    maxWidth: "100%",
+    maxHeight: "calc(100vh - 48px)",
+    overflow: "auto",
+    color: "#e2e6f0",
+    fontFamily: "Segoe UI, Roboto, Arial, sans-serif",
+    fontSize: 14,
+    boxShadow: "0 24px 64px rgba(0, 0, 0, 0.6)",
+  };
+  const headerStyle: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottom: "1px solid #2a2d36",
+  };
+  const btnBase: React.CSSProperties = {
+    background: "#1e2028",
+    border: "1px solid #3a3d46",
+    borderRadius: 8,
+    color: "#e2e6f0",
+    padding: "8px 16px",
+    cursor: "pointer",
+    fontSize: 13,
+    fontFamily: "inherit",
+    transition: "all 0.15s",
+    lineHeight: "1.4",
+  };
+  const modeCardStyle = (active: boolean): React.CSSProperties => ({
+    flex: 1,
+    padding: "16px 20px",
+    borderRadius: 12,
+    border: active ? "2px solid #6366f1" : "1px solid #2a2d36",
+    background: active ? "#1a1c2e" : "#16181e",
+    cursor: "pointer",
+    transition: "all 0.15s",
+    textAlign: "center" as const,
+  });
+  const sectionLabelStyle: React.CSSProperties = {
+    fontSize: 11,
+    fontWeight: 600,
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.08em",
+    color: "#6b7280",
+    marginBottom: 12,
+  };
+  const rowCardStyle: React.CSSProperties = {
+    background: "#16181e",
+    border: "1px solid #2a2d36",
+    borderRadius: 12,
+    padding: "16px 20px",
+    marginBottom: 12,
+  };
+  const rowHeaderStyle: React.CSSProperties = {
+    fontSize: 12,
+    fontWeight: 600,
+    color: "#9ca3af",
+    marginBottom: 12,
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.04em",
+  };
+  const chipBaseStyle = (
+    selected: boolean,
+    disabled: boolean,
+  ): React.CSSProperties => ({
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "6px 12px",
+    borderRadius: 8,
+    fontSize: 12,
+    lineHeight: "1.4",
+    border: selected
+      ? "1px solid #6366f1"
+      : disabled
+        ? "1px solid #1e2028"
+        : "1px solid #3a3d46",
+    background: selected ? "#1e1f3a" : disabled ? "#111318" : "#1e2028",
+    color: selected ? "#a5b4fc" : disabled ? "#4b5563" : "#d1d5db",
+    cursor: disabled ? "not-allowed" : "pointer",
+    opacity: disabled ? 0.5 : 1,
+    transition: "all 0.12s",
+    whiteSpace: "nowrap" as const,
+  });
+  const footerStyle: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 24,
+    paddingTop: 16,
+    borderTop: "1px solid #2a2d36",
+    gap: 12,
+  };
+
+  const renderCellEditor = (
+    ri: number,
+    ci: number,
+    cell: number[],
+    colLabel?: string,
+  ) => {
+    return (
+      <div key={ci} style={{ minWidth: 0 }}>
+        {colLabel && (
+          <div
+            style={{
+              fontSize: 11,
+              color: "#4b5563",
+              marginBottom: 8,
+              fontWeight: 500,
+            }}
+          >
+            {colLabel}
+          </div>
+        )}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 6,
+          }}
+        >
+          {Array.from({ length: blockCount }, (_, idx) => {
+            const isInThisCell = cell.includes(idx);
+            const isUsedElsewhere = usedBlocks.has(idx) && !isInThisCell;
+            return (
+              <div
+                key={idx}
+                style={chipBaseStyle(isInThisCell, isUsedElsewhere)}
+                onClick={() => {
+                  if (!isUsedElsewhere) toggleBlock(ri, ci, idx);
+                }}
+                role="checkbox"
+                aria-checked={isInThisCell}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (
+                    (e.key === "Enter" || e.key === " ") &&
+                    !isUsedElsewhere
+                  ) {
+                    e.preventDefault();
+                    toggleBlock(ri, ci, idx);
+                  }
+                }}
+                title={
+                  isUsedElsewhere
+                    ? "Already assigned to another cell"
+                    : blockLabels[idx]
+                }
+              >
+                {isInThisCell && (
+                  <span style={{ color: "#6366f1", fontSize: 14 }}>✓</span>
+                )}
+                {blockLabels[idx] ?? `Block ${idx + 1}`}
+              </div>
+            );
+          })}
+        </div>
+        {cell.length > 0 && (
+          <div
+            style={{
+              marginTop: 8,
+              fontSize: 11,
+              color: "#6b7280",
+            }}
+          >
+            {cell.length} block{cell.length !== 1 ? "s" : ""} — stacked
+            vertically
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div style={overlayStyle} onClick={onClose}>
+      <div
+        style={panelStyle}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label={`Edit layout for slide ${slideId}`}
+      >
+        {/* Header */}
+        <div style={headerStyle}>
+          <div>
+            <h3
+              style={{
+                margin: 0,
+                fontSize: 18,
+                fontWeight: 600,
+                color: "#f3f4f6",
+                lineHeight: "1.3",
+              }}
+            >
+              Slide Layout
+            </h3>
+            <p
+              style={{
+                margin: "4px 0 0",
+                fontSize: 13,
+                color: "#6b7280",
+              }}
+            >
+              {slideId}
+            </p>
+          </div>
+          <button
+            style={{
+              ...btnBase,
+              padding: "6px 10px",
+              fontSize: 16,
+              lineHeight: "1",
+            }}
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Mode selector */}
+        <div style={sectionLabelStyle}>Layout Mode</div>
+        <div style={{ display: "flex", gap: 12, marginBottom: 28 }}>
+          <div
+            style={modeCardStyle(mode === "simple")}
+            onClick={() => setMode("simple")}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && setMode("simple")}
+          >
+            <div
+              style={{
+                fontSize: 22,
+                marginBottom: 6,
+                filter:
+                  mode === "simple" ? "none" : "grayscale(1) opacity(0.5)",
+              }}
+            >
+              ▬
+            </div>
+            <div style={{ fontWeight: 600, fontSize: 14 }}>Simple</div>
+            <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>
+              Single column, stacked
+            </div>
+          </div>
+          <div
+            style={modeCardStyle(mode === "advanced")}
+            onClick={() => setMode("advanced")}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && setMode("advanced")}
+          >
+            <div
+              style={{
+                fontSize: 22,
+                marginBottom: 6,
+                filter:
+                  mode === "advanced" ? "none" : "grayscale(1) opacity(0.5)",
+              }}
+            >
+              ▦
+            </div>
+            <div style={{ fontWeight: 600, fontSize: 14 }}>Advanced</div>
+            <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>
+              Top · Middle (2-col) · Bottom
+            </div>
+          </div>
+        </div>
+
+        {/* Block assignment */}
+        <div style={sectionLabelStyle}>
+          Assign Blocks ({blockCount} available)
+        </div>
+
+        {activeRows.map((row, ri) => {
+          const rowLabel = mode === "simple" ? "Content" : row.label;
+          return (
+            <div key={`${mode}-${ri}`} style={rowCardStyle}>
+              <div style={rowHeaderStyle}>
+                {rowLabel}
+                {row.columns > 1 && (
+                  <span style={{ fontWeight: 400, color: "#4b5563" }}>
+                    {" "}
+                    — {row.columns} columns
+                  </span>
+                )}
+              </div>
+              {row.columns === 1 ? (
+                renderCellEditor(ri, 0, row.cells[0])
+              ) : (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: 16,
+                  }}
+                >
+                  {row.cells.map((cell, ci) =>
+                    renderCellEditor(ri, ci, cell, ci === 0 ? "Left" : "Right"),
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Footer */}
+        <div style={footerStyle}>
+          <button
+            style={{ ...btnBase, color: "#f87171", borderColor: "#7f1d1d44" }}
+            onClick={() => {
+              onSave(null);
+              onClose();
+            }}
+          >
+            Reset Default
+          </button>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {onToggleAdjust && initial && (
+              <button
+                style={{
+                  ...btnBase,
+                  background: adjustMode
+                    ? "rgba(234, 179, 8, 0.2)"
+                    : "transparent",
+                  borderColor: adjustMode ? "#eab308" : "#ffffff22",
+                  color: adjustMode ? "#eab308" : "#94a3b8",
+                  fontWeight: adjustMode ? 600 : 400,
+                }}
+                onClick={onToggleAdjust}
+                title="Drag row dividers on the slide to adjust heights"
+              >
+                {adjustMode ? "✦ Adjusting…" : "↕ Adjust on Slide"}
+              </button>
+            )}
+            <button style={btnBase} onClick={onClose}>
+              Cancel
+            </button>
+            <button
+              style={{
+                ...btnBase,
+                background: "#6366f1",
+                borderColor: "#818cf8",
+                color: "#fff",
+                fontWeight: 600,
+              }}
+              onClick={() => {
+                onSave({ mode, rows: activeRows });
+                onClose();
+              }}
+            >
+              Save Layout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function shouldHandleSurfaceCommand(
@@ -3224,10 +4351,27 @@ export function PresentationLayout({
   const [slideZoom, setSlideZoom] = useState<number>(() =>
     readStoredSlideZoom(zoomStorageKey),
   );
+  const [enlargeMap, setEnlargeMap] = useState<Record<string, number>>(() => {
+    const map: Record<string, number> = {};
+    for (const s of deck.slides) {
+      map[s.id] = readSlideEnlarge(controlChannelId, deck.id, s.id);
+    }
+    return map;
+  });
+  const [layoutMap, setLayoutMap] = useState<
+    Record<string, SlideLayoutOverride | null>
+  >(() => {
+    const map: Record<string, SlideLayoutOverride | null> = {};
+    for (const s of deck.slides) {
+      map[s.id] = readSlideLayout(controlChannelId, deck.id, s.id);
+    }
+    return map;
+  });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [pipMode, setPipMode] = useState(!!headless);
   const [showGuides, setShowGuides] = useState(false);
   const [showCrossbars, setShowCrossbars] = useState(false);
+  const [layoutAdjustMode, setLayoutAdjustMode] = useState(false);
   const [fullscreenPromptVisible, setFullscreenPromptVisible] = useState(false);
   useFullscreenFallbackArm(
     fullscreenPromptVisible,
@@ -3239,6 +4383,30 @@ export function PresentationLayout({
 
   /* ── Derived slide data ── */
   const currentSlide = deck.slides[slideIndex];
+  const currentSlideEnlarge =
+    enlargeMap[currentSlide?.id ?? ""] ?? DEFAULT_ENLARGE;
+  const currentSlideLayout = layoutMap[currentSlide?.id ?? ""] ?? null;
+
+  /** Commit drag-resized row heights to the current slide's layout. */
+  const handleRowResize = useCallback(
+    (heights: number[]) => {
+      if (!currentSlide || !currentSlideLayout) return;
+      const updated: SlideLayoutOverride = {
+        ...currentSlideLayout,
+        rowHeights: heights,
+      };
+      setLayoutMap((prev) => ({ ...prev, [currentSlide.id]: updated }));
+      writeSlideLayout(controlChannelId, deck.id, currentSlide.id, updated);
+      // Broadcast so the control panel stays in sync
+      controlChannelRef.current?.postMessage({
+        action: "set-layout",
+        slideId: currentSlide.id,
+        layout: updated,
+      });
+    },
+    [currentSlide, currentSlideLayout, controlChannelId, deck.id],
+  );
+
   const currentSteps = currentSlide?.steps ?? [];
   const currentStepCount = currentSteps.length;
   const activeStepIndex =
@@ -3254,6 +4422,7 @@ export function PresentationLayout({
       const clamped = Math.max(0, Math.min(idx, slideCount - 1));
       setSlideIndex(clamped);
       setStepIndex(0);
+      setLayoutAdjustMode(false); // exit adjust mode on navigate
       window.location.hash = hashPrefix
         ? `${hashPrefix}/${deck.id}/${clamped}`
         : `#/${deck.id}/${clamped}`;
@@ -3312,6 +4481,7 @@ export function PresentationLayout({
       elapsed,
       duration: slide?.duration,
       zoom: slideZoom,
+      enlarge: currentSlideEnlarge,
       slideTitle: slide?.title,
       narration: slide?.narration,
       steps: slide?.steps,
@@ -3331,6 +4501,7 @@ export function PresentationLayout({
     slideCount,
     elapsed,
     slideZoom,
+    currentSlideEnlarge,
     activeStepIndex,
     stateStorageKey,
     fullscreenPromptVisible,
@@ -3458,6 +4629,22 @@ export function PresentationLayout({
       } else if (msg.action === "set-zoom") {
         const nextZoom = Math.max(0.85, Math.min(msg.zoom, 1.4));
         setSlideZoom(nextZoom);
+      } else if (msg.action === "set-enlarge") {
+        const slideId = msg.slideId;
+        const raw = Number(msg.enlarge);
+        const value =
+          !Number.isNaN(raw) && raw >= ENLARGE_MIN && raw <= ENLARGE_MAX
+            ? Math.round(raw * 100) / 100
+            : DEFAULT_ENLARGE;
+        setEnlargeMap((prev) => ({ ...prev, [slideId]: value }));
+        writeSlideEnlarge(controlChannelId, deck.id, slideId, value);
+      } else if (msg.action === "set-layout") {
+        const slideId = msg.slideId;
+        const layout = msg.layout;
+        setLayoutMap((prev) => ({ ...prev, [slideId]: layout }));
+        writeSlideLayout(controlChannelId, deck.id, slideId, layout);
+      } else if (msg.action === "set-adjust-mode") {
+        setLayoutAdjustMode(!!msg.adjustMode);
       } else if (
         msg.action === "toggle-fullscreen" &&
         shouldHandleSurfaceCommand(msg, "presentation")
@@ -3742,12 +4929,26 @@ export function PresentationLayout({
             {/* Slide viewport */}
             <div className="pe-viewport">
               <div className="pe-slide-box" style={{ zoom: slideZoom }}>
-                <div className="pe-slide-stage">
+                <div
+                  className="pe-slide-stage"
+                  style={
+                    {
+                      "--pe-slide-enlarge": String(currentSlideEnlarge),
+                    } as React.CSSProperties
+                  }
+                >
                   <PresentationStepContext.Provider
                     key={`${deck.id}:${currentSlide?.id ?? slideIndex}`}
                     value={stepContextValue}
                   >
-                    {currentSlide?.content}
+                    {currentSlideLayout && currentSlide
+                      ? applyLayoutOverride(
+                          currentSlide.content,
+                          currentSlideLayout,
+                          layoutAdjustMode,
+                          handleRowResize,
+                        )
+                      : currentSlide?.content}
                   </PresentationStepContext.Provider>
                 </div>
                 <svg
@@ -4220,6 +5421,7 @@ export function ShortsLayout({
       elapsed,
       duration: slide?.duration,
       zoom: 1,
+      enlarge: DEFAULT_ENLARGE,
       slideTitle: slide?.title,
       narration: slide?.narration,
       steps: slide?.steps,
@@ -4695,6 +5897,7 @@ export function ShortsFeedLayout({
       elapsed,
       duration: slide?.duration,
       zoom: 1,
+      enlarge: DEFAULT_ENLARGE,
       slideTitle: slide?.title,
       narration: slide?.narration,
       steps: slide?.steps,
@@ -5083,6 +6286,11 @@ export function PresentationControlPanel({
     elapsed: 0,
     duration: deck.slides[0]?.duration,
     zoom: readStoredSlideZoom(zoomStorageKey),
+    enlarge: readSlideEnlarge(
+      controlChannelId,
+      deck.id,
+      deck.slides[0]?.id ?? "",
+    ),
     slideTitle: deck.slides[0]?.title,
     narration: deck.slides[0]?.narration,
     steps: deck.slides[0]?.steps,
@@ -5811,6 +7019,72 @@ export function PresentationControlPanel({
                 <option value="1.25">1.25x</option>
                 <option value="1.30">1.30x</option>
               </select>
+
+              <span className="pc-section-label" style={{ marginTop: 8 }}>
+                Slide Enlarge
+              </span>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <input
+                  type="number"
+                  className="pc-lesson-select"
+                  style={{ flex: 1 }}
+                  value={activeState.enlarge}
+                  min={ENLARGE_MIN}
+                  max={ENLARGE_MAX}
+                  step={ENLARGE_STEP}
+                  onChange={(e) => {
+                    const raw = parseFloat(e.target.value);
+                    if (Number.isNaN(raw)) return;
+                    const nextEnlarge =
+                      Math.round(
+                        Math.max(ENLARGE_MIN, Math.min(ENLARGE_MAX, raw)) * 100,
+                      ) / 100;
+                    const slideId =
+                      deck.slides[activeState.slideIndex]?.id ?? "";
+                    setSurfaceStates((current) => ({
+                      ...current,
+                      [activeSurface]: {
+                        ...current[activeSurface],
+                        enlarge: nextEnlarge,
+                      },
+                    }));
+                    writeSlideEnlarge(
+                      controlChannelId,
+                      deck.id,
+                      slideId,
+                      nextEnlarge,
+                    );
+                    send({
+                      type: "command",
+                      deckId: deck.id,
+                      action: "set-enlarge",
+                      slideId,
+                      enlarge: nextEnlarge,
+                    });
+                  }}
+                  aria-label="Slide enlarge"
+                />
+                <button
+                  className="pc-btn"
+                  style={{
+                    fontSize: 11,
+                    padding: "4px 8px",
+                    minWidth: 0,
+                    whiteSpace: "nowrap",
+                  }}
+                  onClick={() =>
+                    persistAllEnlargeValues(
+                      controlChannelId,
+                      deck.id,
+                      deck.slides,
+                    )
+                  }
+                  title="Persist all slide enlarge values to local storage"
+                  aria-label="Persist enlarge"
+                >
+                  Save
+                </button>
+              </div>
             </div>
 
             <div className="pc-controls">
