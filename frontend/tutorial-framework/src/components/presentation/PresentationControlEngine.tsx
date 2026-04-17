@@ -2951,7 +2951,13 @@ const Icons = {
 /*  Typing Promotion — animated footer URL with rotating phrases          */
 /* ═══════════════════════════════════════════════════════════════════════ */
 
-function TypingPromotion({ url, phrases }: { url: string; phrases: string[] }) {
+export function TypingPromotion({
+  url,
+  phrases,
+}: {
+  url: string;
+  phrases: string[];
+}) {
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [charIdx, setCharIdx] = useState(0);
   const [deleting, setDeleting] = useState(false);
@@ -3382,7 +3388,7 @@ function extractContentBlocks(content: React.ReactNode): React.ReactNode[] {
  * Generates human-readable labels for content blocks by inspecting
  * React element type display names and props.
  */
-function getBlockLabels(content: React.ReactNode): string[] {
+export function getBlockLabels(content: React.ReactNode): string[] {
   const blocks = extractContentBlocks(content);
   let compIdx = 0;
   return blocks.map((block) => {
@@ -3747,6 +3753,7 @@ function LayoutResizeHandles({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          pointerEvents: "auto",
         },
         onPointerDown: (ev: React.PointerEvent) => handlePointerDown(i, ev),
         onPointerMove: handlePointerMove,
@@ -3773,11 +3780,7 @@ function LayoutResizeHandles({
       pointerEvents: "none",
       zIndex: 5,
     },
-    children: handleElements.map((h) =>
-      React.cloneElement(h, {
-        style: { ...h.props.style, pointerEvents: "auto" },
-      }),
-    ),
+    children: handleElements,
   });
 }
 
@@ -3796,7 +3799,7 @@ interface LayoutEditorProps {
   onToggleAdjust?: () => void;
 }
 
-function LayoutEditorDialog({
+export function LayoutEditorDialog({
   slideId,
   blockCount,
   blockLabels,
@@ -4309,30 +4312,11 @@ export function PresentationLayout({
   courseTitle,
   deck,
   onHome,
-  branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   controlWindowName = DEFAULT_CONTROL_WINDOW_NAME,
-  hideHeaderNav = false,
   hashPrefix,
   headless = false,
 }: PresentationLayoutProps) {
-  const brandLogoSrc =
-    branding?.logoSrc ?? "/brand/og-image-template-1200x630.png";
-  const brandIconUrl = branding?.brandIconUrl;
-  const brandLabel = branding?.brandLabel ?? "Tutorial";
-  const showBrandLabel =
-    branding?.brandLabel != null && !brandLogoSrc.includes("og-image-template");
-  const linkedinUrl = branding?.linkedinUrl;
-  const twitterUrl = branding?.twitterUrl;
-  const twitterHandle = branding?.twitterHandle;
-  const twitterLabelOverride = branding?.twitterLabel;
-  const linkedinHandle = branding?.linkedinHandle;
-  const copyrightText =
-    branding?.copyright ?? `\u00A9 ${new Date().getFullYear()} ${brandLabel}`;
-  const youtubeUrl = branding?.youtubeUrl;
-  const youtubeHandle = branding?.youtubeHandle;
-  const siteUrl = branding?.siteUrl;
-  const siteUrlPhrases = branding?.siteUrlPhrases ?? [];
   const rootRef = useRef<HTMLDivElement>(null);
   const controlChannelRef = useRef<BroadcastChannel | null>(null);
   const shortsPopupRef = useRef<Window | null>(null);
@@ -4340,17 +4324,6 @@ export function PresentationLayout({
   const zoomStorageKey = getZoomStorageKey(controlChannelId, deck.id);
   const stateStorageKey = getControlStorageKey(controlChannelId, "state");
   const commandStorageKey = getControlStorageKey(controlChannelId, "command");
-  const youtubeLabel = youtubeHandle
-    ? `yt/${youtubeHandle.replace(/^@/, "")}`
-    : "YouTube";
-  const twitterLabel =
-    twitterLabelOverride ??
-    (twitterHandle ? `x/${twitterHandle.replace(/^@/, "")}` : "X");
-  const linkedinLabel = linkedinHandle
-    ? linkedinHandle.startsWith("in/")
-      ? linkedinHandle
-      : `in/${linkedinHandle.replace(/^@/, "")}`
-    : "LinkedIn";
 
   /* ── Parse initial slide from hash ── */
   const getIndexFromHash = useCallback((): number => {
@@ -4425,9 +4398,6 @@ export function PresentationLayout({
   const activeStepIndex =
     currentStepCount > 0 ? Math.min(stepIndex, currentStepCount - 1) : 0;
   const activeStep = currentSteps[activeStepIndex] ?? null;
-  const prevSlide = slideIndex > 0 ? deck.slides[slideIndex - 1] : null;
-  const nextSlide =
-    slideIndex < slideCount - 1 ? deck.slides[slideIndex + 1] : null;
 
   /* ── Navigation ── */
   const goTo = useCallback(
@@ -5323,17 +5293,10 @@ interface ShortsLayoutProps {
 export function ShortsLayout({
   courseTitle,
   deck,
-  branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   commandChannelId = controlChannelId,
   hashPrefix,
 }: ShortsLayoutProps) {
-  const brandIconUrl = branding?.brandIconUrl;
-  const brandLabel = branding?.brandLabel ?? "Tutorial";
-  const siteUrl = branding?.siteUrl ?? "tuts.localm.dev";
-  const copyrightText =
-    branding?.copyright ?? `\u00A9 ${new Date().getFullYear()} ${brandLabel}`;
-
   const rootRef = useRef<HTMLDivElement>(null);
   const stateChannelRef = useRef<BroadcastChannel | null>(null);
   const commandChannelRef = useRef<BroadcastChannel | null>(null);
@@ -5792,17 +5755,10 @@ interface ShortsFeedLayoutProps {
 export function ShortsFeedLayout({
   courseTitle,
   deck,
-  branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   commandChannelId = controlChannelId,
   hashPrefix,
 }: ShortsFeedLayoutProps) {
-  const brandIconUrl = branding?.brandIconUrl;
-  const brandLabel = branding?.brandLabel ?? "Tutorial";
-  const siteUrl = branding?.siteUrl ?? "tuts.localm.dev";
-  const copyrightText =
-    branding?.copyright ?? `\u00A9 ${new Date().getFullYear()} ${brandLabel}`;
-
   const rootRef = useRef<HTMLDivElement>(null);
   const stateChannelRef = useRef<BroadcastChannel | null>(null);
   const commandChannelRef = useRef<BroadcastChannel | null>(null);
@@ -5833,7 +5789,6 @@ export function ShortsFeedLayout({
   const currentStepCount = currentSteps.length;
   const activeStepIndex =
     currentStepCount > 0 ? Math.min(stepIndex, currentStepCount - 1) : 0;
-  const activeStep = currentSteps[activeStepIndex] ?? null;
   const shortTitle = sanitizePresentationTitle(deck.title);
   const slideTitle = sanitizePresentationTitle(currentSlide?.title);
   const blankSlideState =
@@ -5844,14 +5799,6 @@ export function ShortsFeedLayout({
   const feedSecondaryTitle = blankSlideState.title.trim()
     ? blankSlideState.subtitle.trim()
     : slideTitle;
-  const showTitleStack = slideIndex > 0 && !currentSlide?.hideTitleStack;
-
-  const stepContextValue: PresentationStepContextValue = {
-    stepIndex: activeStepIndex,
-    stepCount: currentStepCount,
-    activeStep,
-    steps: currentSteps,
-  };
 
   /* ── Navigation ── */
   const goTo = useCallback(
