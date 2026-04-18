@@ -23,6 +23,7 @@ import React, {
 import { BrandLockup } from "../layout/BrandLockup";
 import { ShortsTitleStack } from "./ShortsTitleStack";
 import { TeleprompterOverlay } from "./TeleprompterOverlay";
+import { resolveTranscriptContent } from "./transcript-utils";
 
 export interface PresentationSlide {
   id: string;
@@ -6413,6 +6414,10 @@ interface PresentationControlPanelProps {
   headerBarSlot?: React.ReactNode;
   /** Hide the slide count / timer / zoom meta row in the header. */
   showHeaderMeta?: boolean;
+  /** Optional transcript text to display instead of slide narration. */
+  transcriptText?: string;
+  /** Disable transcript editing controls while still showing transcript content. */
+  allowTranscriptEditing?: boolean;
   /** External transcript text for the teleprompter (e.g. from IndexedDB for blank slides). */
   teleprompterText?: string;
 }
@@ -6430,6 +6435,8 @@ export function PresentationControlPanel({
   headerSlot,
   headerBarSlot,
   showHeaderMeta = true,
+  transcriptText,
+  allowTranscriptEditing = true,
   teleprompterText,
 }: PresentationControlPanelProps) {
   const brandLogoSrc =
@@ -6711,6 +6718,12 @@ export function PresentationControlPanel({
     setEditedTranscript(currentSlideIdx, "");
     setEditDraft(deck.slides[currentSlideIdx]?.narration ?? "");
   }, [currentSlideIdx, setEditedTranscript, deck.slides]);
+
+  useEffect(() => {
+    if (!allowTranscriptEditing && transcriptEditMode) {
+      setTranscriptEditMode(false);
+    }
+  }, [allowTranscriptEditing, transcriptEditMode]);
 
   useEffect(() => {
     const channel = new BroadcastChannel(controlChannelId);
@@ -7253,8 +7266,16 @@ export function PresentationControlPanel({
                         </>
                       );
                     }
-                    const displayText = editedText ?? activeState.narration;
-                    if (editedText != null && activeState.narration) {
+                    const transcriptContent = resolveTranscriptContent({
+                      narration: activeState.narration,
+                      transcriptText,
+                      editedText,
+                    });
+                    if (
+                      !transcriptContent.usesExternalTranscript &&
+                      editedText != null &&
+                      activeState.narration
+                    ) {
                       return (
                         <>
                           <div className="pc-transcript-split-section">
@@ -7284,9 +7305,11 @@ export function PresentationControlPanel({
                         </>
                       );
                     }
-                    if (displayText) {
+                    if (transcriptContent.displayText) {
                       return (
-                        <div className="pc-transcript-text">{displayText}</div>
+                        <div className="pc-transcript-text">
+                          {transcriptContent.displayText}
+                        </div>
                       );
                     }
                     return (
@@ -7302,9 +7325,13 @@ export function PresentationControlPanel({
                   text={
                     teleprompterText !== undefined
                       ? teleprompterText
-                      : getEditedTranscript(activeState.slideIndex) ||
-                        activeState.narration ||
-                        ""
+                      : resolveTranscriptContent({
+                          narration: activeState.narration,
+                          transcriptText,
+                          editedText: getEditedTranscript(
+                            activeState.slideIndex,
+                          ),
+                        }).displayText
                   }
                   visible={teleprompterOn}
                   onClose={() => setTeleprompterOn(false)}
@@ -7522,22 +7549,24 @@ export function PresentationControlPanel({
               <div className="pc-dock-divider" aria-hidden="true" />
 
               {/* ── Transcript ── */}
-              <button
-                className={`pc-dock-btn${transcriptEditMode ? " active" : ""}`}
-                onClick={() => setTranscriptEditMode((m) => !m)}
-                data-tip={transcriptEditMode ? "Done editing" : "Edit"}
-                aria-label="Edit transcript"
-                disabled={
-                  !transcriptEditMode &&
-                  currentSlideIdx !== 0 &&
-                  currentSlideIdx !== deck.slides.length - 1
-                }
-              >
-                {hasAnyTranscriptEdits() && !transcriptEditMode && (
-                  <span className="pc-edit-dot" />
-                )}
-                {Icons.edit}
-              </button>
+              {allowTranscriptEditing ? (
+                <button
+                  className={`pc-dock-btn${transcriptEditMode ? " active" : ""}`}
+                  onClick={() => setTranscriptEditMode((m) => !m)}
+                  data-tip={transcriptEditMode ? "Done editing" : "Edit"}
+                  aria-label="Edit transcript"
+                  disabled={
+                    !transcriptEditMode &&
+                    currentSlideIdx !== 0 &&
+                    currentSlideIdx !== deck.slides.length - 1
+                  }
+                >
+                  {hasAnyTranscriptEdits() && !transcriptEditMode && (
+                    <span className="pc-edit-dot" />
+                  )}
+                  {Icons.edit}
+                </button>
+              ) : null}
               <button
                 className="pc-dock-btn"
                 onClick={() =>
