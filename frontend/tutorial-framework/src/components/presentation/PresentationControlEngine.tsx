@@ -44,9 +44,25 @@ export interface PresentationStep {
 
 export type DeckType = "course" | "mono" | "short" | "short-single";
 
+const BLANK_TOOLKIT_DECK_ID = "default-blank";
+
 /** Returns true for any short-family deck type ("short" or "short-single"). */
 export function isShortDeck(dt?: DeckType): boolean {
   return dt === "short" || dt === "short-single";
+}
+
+/**
+ * Returns true for decks that can open the dedicated 9:16 portrait capture window.
+ *
+ * Most decks use `deckType` to drive this. The blank toolkit is a built-in
+ * capture utility, so it stays a `mono` deck for navigation but still exposes
+ * the portrait surface.
+ */
+export function supportsShortsCapture(deck: {
+  id: string;
+  deckType?: DeckType;
+}): boolean {
+  return isShortDeck(deck.deckType) || deck.id === BLANK_TOOLKIT_DECK_ID;
 }
 
 /** Returns true for deck types that support the 4:5 feed view (shorts + mono). */
@@ -119,6 +135,22 @@ function sanitizePresentationTitle(title: string | undefined): string {
   if (!title) return "";
   const m = title.match(TITLE_PREFIX_RE);
   return m ? title.slice(m[0].length) : title;
+}
+
+function getCaptureFooterHandle(branding?: PresentationBranding): string {
+  const handle = branding?.twitterHandle?.trim();
+  return handle || "@localm_tuts";
+}
+
+function getCaptureFooterLabel(
+  deck: PresentationDeck,
+  surface: "shorts" | "feed",
+): string {
+  if (deck.id === BLANK_TOOLKIT_DECK_ID && surface === "feed") {
+    return "Subscribe for more slide tools";
+  }
+
+  return "Subscribe";
 }
 
 function getBlankSlideTitleState(slideIndex: number): {
@@ -5033,7 +5065,7 @@ export function PresentationLayout({
             >
               {Icons.pip}
             </button>
-            {isShortDeck(deck.deckType) && (
+            {supportsShortsCapture(deck) && (
               <>
                 <button
                   className="pe-shorts-btn ratio"
@@ -5500,6 +5532,7 @@ interface ShortsLayoutProps {
 export function ShortsLayout({
   courseTitle,
   deck,
+  branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   commandChannelId = controlChannelId,
   hashPrefix,
@@ -5529,6 +5562,8 @@ export function ShortsLayout({
   );
   const slideCount = deck.slides.length;
   const elapsed = useSlideTimer(slideIndex);
+  const captureFooterHandle = getCaptureFooterHandle(branding);
+  const captureFooterLabel = getCaptureFooterLabel(deck, "shorts");
 
   const currentSlide = deck.slides[slideIndex];
   const currentSteps = currentSlide?.steps ?? [];
@@ -5935,10 +5970,14 @@ export function ShortsLayout({
           {/* ── Footer ── */}
           <div className="pe-shorts-footer">
             <span className="pe-shorts-subscribe-icon">{Icons.bell}</span>
-            <span className="pe-shorts-subscribe-text">Subscribe</span>
+            <span className="pe-shorts-subscribe-text">
+              {captureFooterLabel}
+            </span>
             <span className="pe-shorts-footer-dot">·</span>
             <span className="pe-shorts-footer-x-icon">{Icons.twitter}</span>
-            <span className="pe-shorts-footer-x-capsule">@localm_tuts</span>
+            <span className="pe-shorts-footer-x-capsule">
+              {captureFooterHandle}
+            </span>
           </div>
         </div>
       </div>
@@ -5962,6 +6001,7 @@ interface ShortsFeedLayoutProps {
 export function ShortsFeedLayout({
   courseTitle,
   deck,
+  branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   commandChannelId = controlChannelId,
   hashPrefix,
@@ -6002,6 +6042,8 @@ export function ShortsFeedLayout({
     deck.id === "default-blank"
       ? getBlankSlideTitleState(slideIndex)
       : { title: "", subtitle: "" };
+  const captureFooterHandle = getCaptureFooterHandle(branding);
+  const captureFooterLabel = getCaptureFooterLabel(deck, "feed");
   const feedPrimaryTitle = blankSlideState.title.trim() || shortTitle;
   const feedSecondaryTitle = blankSlideState.title.trim()
     ? blankSlideState.subtitle.trim()
@@ -6385,10 +6427,12 @@ export function ShortsFeedLayout({
           {/* ── Footer ── */}
           <div className="pe-feed-footer">
             <span className="pe-feed-subscribe-icon">{Icons.bell}</span>
-            <span className="pe-feed-subscribe-text">Subscribe</span>
+            <span className="pe-feed-subscribe-text">{captureFooterLabel}</span>
             <span className="pe-feed-footer-dot">·</span>
             <span className="pe-feed-footer-x-icon">{Icons.twitter}</span>
-            <span className="pe-feed-footer-x-capsule">@localm_tuts</span>
+            <span className="pe-feed-footer-x-capsule">
+              {captureFooterHandle}
+            </span>
           </div>
         </div>
       </div>
@@ -7394,7 +7438,7 @@ export function PresentationControlPanel({
                   {Icons.pip}
                 </button>
               ) : null}
-              {onOpenShorts && isShortDeck(deck.deckType) ? (
+              {onOpenShorts && supportsShortsCapture(deck) ? (
                 <button
                   className={`pc-dock-btn${activeSurface === "shorts" ? " active" : ""}`}
                   onClick={() => {

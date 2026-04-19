@@ -24,6 +24,7 @@ export {
   ShortsFeedLayout,
   usePresentationStep,
   isShortDeck,
+  supportsShortsCapture,
   isFeedCapable,
   type DeckType,
   type PresentationDeck,
