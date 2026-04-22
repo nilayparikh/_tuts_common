@@ -310,6 +310,20 @@ Interactive timeline-style guide with checkable steps and code blocks.
 />
 ```
 
+#### `PracticalNoteCallout`
+
+Shared intro-slide follow-along note surface for presentation decks.
+
+```tsx
+<PracticalNoteCallout
+  title="Practical Note"
+  note="This lesson explains the three labs and the shared setup. The real CleanLoop build starts in lesson 03."
+/>
+```
+
+Use this through `WelcomeSlide`'s `practicalNote` prop for course intros rather
+than creating deck-local callout cards.
+
 #### `MermaidDiagram`
 
 Client-side Mermaid.js diagram renderer. Loads mermaid@11 from CDN on demand.

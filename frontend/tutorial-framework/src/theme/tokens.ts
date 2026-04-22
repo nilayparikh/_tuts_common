@@ -11,6 +11,37 @@
 
 import { palette } from "./colors";
 
+function withAlpha(hex: string, alpha: number): string {
+  const normalized = hex.replace("#", "");
+  const expanded =
+    normalized.length === 3
+      ? normalized
+          .split("")
+          .map((segment) => `${segment}${segment}`)
+          .join("")
+      : normalized;
+  const r = parseInt(expanded.slice(0, 2), 16);
+  const g = parseInt(expanded.slice(2, 4), 16);
+  const b = parseInt(expanded.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function pickOnColor(hex: string): string {
+  const normalized = hex.replace("#", "");
+  const expanded =
+    normalized.length === 3
+      ? normalized
+          .split("")
+          .map((segment) => `${segment}${segment}`)
+          .join("")
+      : normalized;
+  const r = parseInt(expanded.slice(0, 2), 16);
+  const g = parseInt(expanded.slice(2, 4), 16);
+  const b = parseInt(expanded.slice(4, 6), 16);
+  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  return luminance < 0.55 ? palette.white : palette.text.inverse;
+}
+
 // ─── Semantic token map ────────────────────────────────────────────────────
 
 export const tokens = {
@@ -77,6 +108,137 @@ export const tokens = {
     successContainerHigh: "rgba(0,255,178,0.15)",
     warningContainerHigh: "rgba(255,176,58,0.14)",
     dangerContainerHigh: "rgba(239,68,68,0.12)",
+
+    // On-color pairs for filled or strongly tinted surfaces
+    textOnPrimary: pickOnColor(palette.primary[500]),
+    textOnSecondary: pickOnColor(palette.secondary[500]),
+    textOnAccent: pickOnColor(palette.accent[500]),
+    textOnSuccess: pickOnColor(palette.success[500]),
+    textOnWarning: pickOnColor(palette.warning[500]),
+    textOnDanger: pickOnColor(palette.danger[500]),
+    textOnEmphasis: pickOnColor(palette.semantic.emphasis),
+    textOnInfo: pickOnColor(palette.semantic.info),
+    textOnRecommendation: pickOnColor(palette.semantic.recommendation),
+    textOnEvidence: pickOnColor(palette.semantic.evidence),
+
+    // Shared semantic state families
+    stateNeutralBg: withAlpha(palette.semantic.neutral, 0.08),
+    stateNeutralBorder: withAlpha(palette.semantic.neutral, 0.22),
+    stateNeutralAccent: palette.semantic.neutral,
+    stateNeutralText: palette.text.primary,
+    stateNeutralIcon: palette.semantic.neutral,
+
+    stateEmphasisBg: withAlpha(palette.semantic.emphasis, 0.14),
+    stateEmphasisBorder: withAlpha(palette.semantic.emphasis, 0.35),
+    stateEmphasisAccent: palette.semantic.emphasis,
+    stateEmphasisText: palette.text.primary,
+    stateEmphasisIcon: palette.semantic.emphasis,
+
+    stateInfoBg: withAlpha(palette.semantic.info, 0.12),
+    stateInfoBorder: withAlpha(palette.semantic.info, 0.35),
+    stateInfoAccent: palette.semantic.info,
+    stateInfoText: palette.text.primary,
+    stateInfoIcon: palette.semantic.info,
+
+    stateSuccessBg: withAlpha(palette.semantic.trendPositive, 0.12),
+    stateSuccessBorder: withAlpha(palette.semantic.trendPositive, 0.35),
+    stateSuccessAccent: palette.semantic.trendPositive,
+    stateSuccessText: palette.text.primary,
+    stateSuccessIcon: palette.semantic.trendPositive,
+
+    stateWarningBg: withAlpha(palette.warning[500], 0.12),
+    stateWarningBorder: withAlpha(palette.warning[500], 0.35),
+    stateWarningAccent: palette.warning[500],
+    stateWarningText: palette.text.primary,
+    stateWarningIcon: palette.warning[500],
+
+    stateDangerBg: withAlpha(palette.semantic.trendNegative, 0.1),
+    stateDangerBorder: withAlpha(palette.semantic.trendNegative, 0.35),
+    stateDangerAccent: palette.semantic.trendNegative,
+    stateDangerText: palette.text.primary,
+    stateDangerIcon: palette.semantic.trendNegative,
+
+    stateRecommendationBg: withAlpha(palette.semantic.recommendation, 0.12),
+    stateRecommendationBorder: withAlpha(
+      palette.semantic.recommendation,
+      0.35,
+    ),
+    stateRecommendationAccent: palette.semantic.recommendation,
+    stateRecommendationText: palette.text.primary,
+    stateRecommendationIcon: palette.semantic.recommendation,
+
+    stateEvidenceBg: withAlpha(palette.semantic.evidence, 0.12),
+    stateEvidenceBorder: withAlpha(palette.semantic.evidence, 0.35),
+    stateEvidenceAccent: palette.semantic.evidence,
+    stateEvidenceText: palette.text.primary,
+    stateEvidenceIcon: palette.semantic.evidence,
+
+    stateTrendPositiveBg: withAlpha(palette.semantic.trendPositive, 0.12),
+    stateTrendPositiveBorder: withAlpha(
+      palette.semantic.trendPositive,
+      0.35,
+    ),
+    stateTrendPositiveAccent: palette.semantic.trendPositive,
+    stateTrendPositiveText: palette.text.primary,
+    stateTrendPositiveIcon: palette.semantic.trendPositive,
+
+    stateTrendNegativeBg: withAlpha(palette.semantic.trendNegative, 0.1),
+    stateTrendNegativeBorder: withAlpha(
+      palette.semantic.trendNegative,
+      0.35,
+    ),
+    stateTrendNegativeAccent: palette.semantic.trendNegative,
+    stateTrendNegativeText: palette.text.primary,
+    stateTrendNegativeIcon: palette.semantic.trendNegative,
+
+    stateTrendNeutralBg: withAlpha(palette.semantic.trendNeutral, 0.08),
+    stateTrendNeutralBorder: withAlpha(palette.semantic.trendNeutral, 0.22),
+    stateTrendNeutralAccent: palette.semantic.trendNeutral,
+    stateTrendNeutralText: palette.text.primary,
+    stateTrendNeutralIcon: palette.semantic.trendNeutral,
+
+    // Shared runtime surface aliases
+    surfaceStageBg: palette.background.base,
+    surfaceStageBorder: palette.border.subtle,
+    surfaceStageText: palette.text.primary,
+    surfaceCardBg: palette.background.elevated,
+    surfaceCardBorder: palette.border.default,
+    surfaceCardText: palette.text.primary,
+    surfacePanelBg: palette.background.surface,
+    surfacePanelBorder: palette.border.default,
+    surfacePanelText: palette.text.primary,
+    surfaceControlBg: palette.background.overlay,
+    surfaceControlBorder: palette.border.default,
+    surfaceControlText: palette.text.primary,
+    surfaceOverlayBg: palette.background.overlay,
+    surfaceOverlayBorder: palette.border.strong,
+    surfaceOverlayText: palette.text.primary,
+    surfaceShortsBg: palette.background.surface,
+    surfaceShortsBorder: palette.border.default,
+    surfaceShortsText: palette.text.primary,
+    surfaceFeedBg: palette.background.surface,
+    surfaceFeedBorder: palette.border.default,
+    surfaceFeedText: palette.text.primary,
+    surfaceEndScreenBg: palette.background.elevated,
+    surfaceEndScreenBorder: palette.border.default,
+    surfaceEndScreenText: palette.text.primary,
+
+    // Decorative gradients, glass, and backdrop tokens
+    gradientBrand: `linear-gradient(135deg, ${palette.primary[500]} 0%, ${palette.accent[500]} 55%, ${palette.secondary[500]} 100%)`,
+    gradientStage: `linear-gradient(135deg, ${palette.background.base} 0%, ${palette.background.surface} 46%, ${palette.background.overlay} 100%)`,
+    gradientOverlay: `linear-gradient(180deg, ${withAlpha(palette.background.overlay, 0.96)} 0%, ${withAlpha(palette.background.base, 0.98)} 100%)`,
+    glassBg: withAlpha(palette.background.surface, 0.72),
+    glassBorder: palette.border.default,
+    glassHighlight:
+      "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 52%)",
+    glassBlur: "20px",
+    glowPrimary: `0 0 40px ${withAlpha(palette.primary[500], 0.12)}, 0 0 80px ${withAlpha(palette.primary[500], 0.04)}`,
+    bgBackdrop: `radial-gradient(circle at top left, ${withAlpha(palette.primary[500], 0.16)}, transparent 32%), radial-gradient(circle at top right, ${withAlpha(palette.accent[500], 0.12)}, transparent 36%), radial-gradient(circle at bottom center, ${withAlpha(palette.secondary[500], 0.14)}, transparent 42%), linear-gradient(135deg, ${palette.background.base} 0%, ${palette.background.surface} 46%, ${palette.background.overlay} 100%)`,
+
+    // Focus system
+    focusRing: palette.semantic.focus,
+    focusRingOffset: "0.125rem",
+    focusRingShadow: `0 0 0 0.25rem ${withAlpha(palette.primary[500], 0.22)}`,
 
     // Brand — LocalM (canonical identity colors)
     brandLocalmCyan: palette.localm.cyan,
@@ -219,7 +381,7 @@ export function tokensToCSS(t: typeof tokens): string {
   }
   // typography
   for (const [k, v] of Object.entries(t.typography)) {
-    lines.push(`  --tf-${camel2kebab(k)}: ${v};`);
+    lines.push(`  ${typographyVarName(k)}: ${v};`);
   }
   // spacing
   for (const [k, v] of Object.entries(t.spacing)) {
@@ -248,4 +410,24 @@ export function tokensToCSS(t: typeof tokens): string {
 
 function camel2kebab(s: string): string {
   return s.replace(/([A-Z])/g, (m) => `-${m.toLowerCase()}`);
+}
+
+function typographyVarName(key: string): string {
+  if (key.startsWith("font")) {
+    return `--tf-${camel2kebab(key)}`;
+  }
+  if (key.startsWith("size")) {
+    return `--tf-text-${camel2kebab(key.slice(4))}`;
+  }
+  if (key.startsWith("weight")) {
+    return `--tf-font-${camel2kebab(key.slice(6))}`;
+  }
+  if (key.startsWith("line")) {
+    return `--tf-leading-${camel2kebab(key.slice(4))}`;
+  }
+  if (key.startsWith("tracking")) {
+    return `--tf-tracking-${camel2kebab(key.slice(8))}`;
+  }
+
+  return `--tf-${camel2kebab(key)}`;
 }

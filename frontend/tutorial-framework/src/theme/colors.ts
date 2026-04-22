@@ -35,8 +35,8 @@ export const palette = {
   // ── Text (MD3 on-surface roles) ─────────────────────────────────────────
   text: {
     primary: "#FFFFFF", // brand.textPrimary
-    secondary: "#94A3B8", // brand.textSecondary
-    muted: "#64748B", // subdued supporting text
+    secondary: "#A7B4C8", // lifted neutral body text on dark surfaces
+    muted: "#7B8AA2", // clearer supporting text on dark surfaces
     inverse: "#0B0B0F", // brand.base
   },
 
@@ -105,6 +105,19 @@ export const palette = {
     400: "#f87171",
     500: "#ef4444",
     600: "#dc2626",
+  },
+
+  // ── Shared semantic aliases for framework state families ───────────────
+  semantic: {
+    neutral: "#A7B4C8",
+    emphasis: "#A838FF",
+    info: "#00F5FF",
+    recommendation: "#2932FF",
+    evidence: "#00F5FF",
+    trendPositive: "#00FFB2",
+    trendNegative: "#ef4444",
+    trendNeutral: "#A7B4C8",
+    focus: "#626bff",
   },
 
   // ── Deep Ocean (callout backgrounds) ───────────────────────────────────

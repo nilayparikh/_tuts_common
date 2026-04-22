@@ -172,20 +172,82 @@ function getBlankSlideTitleState(slideIndex: number): {
 /*  CSS                                                                   */
 /* ═══════════════════════════════════════════════════════════════════════ */
 
-const ENGINE_CSS = `
+export const PRESENTATION_ENGINE_CSS = `
   /* ── Reset ─────────────────────────── */
   .pe-root {
     --pe-slide-stage-ratio: 1.4;
     --pe-standard-stage-height: calc(100vh - 134px);
+    --pe-shell-bg: var(--tf-bg-backdrop, var(--tf-gradient-stage, linear-gradient(135deg, var(--tf-bg-base, #0b0d12) 0%, var(--tf-bg-surface, #111318) 46%, var(--tf-bg-overlay, #1f222a) 100%)));
+    --pe-shell-panel-bg: var(--tf-glass-highlight, none), var(--tf-glass-bg, linear-gradient(180deg, var(--tf-surface-panel-bg, #111318) 0%, var(--tf-surface-control-bg, #1f222a) 100%));
+    --pe-shell-panel-border: var(--tf-glass-border, var(--tf-surface-panel-border, rgba(202,211,230,0.14)));
+    --pe-shell-panel-shadow: var(--tf-shadow-level3, 0 10px 28px rgba(0,0,0,0.32)), var(--tf-glow-primary, none);
+    --pe-panel-inset-highlight: inset 0 1px 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 5%, transparent);
+    --pe-shell-muted: var(--tf-text-secondary, #bfc5d4);
+    --pe-shell-note: var(--tf-text-muted, #8892a8);
+    --pe-prompt-overlay-bg: var(--tf-gradient-overlay, rgba(6, 8, 14, 0.64));
+    --pe-prompt-card-bg: linear-gradient(180deg, var(--tf-surface-control-bg, #1b1f2c) 0%, var(--tf-surface-panel-bg, #0e1019) 100%);
+    --pe-prompt-card-accent: linear-gradient(135deg, var(--tf-state-info-bg, rgba(0,245,255,0.14)) 0%, var(--tf-state-emphasis-bg, rgba(168,56,255,0.16)) 100%);
+    --pe-prompt-card-border: var(--tf-state-info-border, rgba(0,245,255,0.28));
+    --pe-prompt-card-shadow: var(--pe-panel-inset-highlight), var(--tf-shadow-level4, 0 22px 56px rgba(0,0,0,0.34)), var(--tf-glow-primary, none);
+    --pe-prompt-btn-border: var(--tf-state-info-border, rgba(0,245,255,0.38));
+    --pe-prompt-btn-bg: linear-gradient(135deg, var(--tf-state-info-bg, rgba(0,245,255,0.22)) 0%, var(--tf-state-emphasis-bg, rgba(168,56,255,0.22)) 100%);
+    --pe-prompt-btn-text: var(--tf-text-primary, #ffffff);
+    --pe-header-nav-current-shadow: var(--pe-panel-inset-highlight), var(--tf-shadow-level2, 0 8px 18px rgba(0,0,0,0.22));
+    --pe-pip-header-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, var(--tf-surface-control-bg, #1b1f2c), color-mix(in srgb, var(--tf-surface-stage-bg, #0b0d12) 72%, var(--tf-surface-panel-bg, #111318) 28%));
+    --pe-pip-panel-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 84%, var(--tf-surface-stage-bg, #0b0d12) 16%), color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 88%, var(--tf-surface-stage-bg, #0b0d12) 12%));
+    --pe-pip-panel-border: var(--tf-surface-panel-border, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 10%, transparent));
+    --pe-pip-chip-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 78%, var(--tf-surface-stage-bg, #0b0d12) 22%), color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 82%, var(--tf-surface-stage-bg, #0b0d12) 18%));
+    --pe-pip-chip-border: var(--tf-surface-panel-border, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 14%, transparent));
+    --pe-pip-chip-shadow: var(--pe-panel-inset-highlight), var(--tf-shadow-level1, 0 4px 12px rgba(0,0,0,0.16));
+    --pe-pip-objective-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 82%, var(--tf-color-secondary, #14b8a6) 18%), color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 84%, var(--tf-color-primary, #6366f1) 16%));
+    --pe-pip-objective-border: var(--tf-state-success-border, color-mix(in srgb, var(--tf-color-secondary, #14b8a6) 26%, transparent));
+    --pe-pip-objective-pill-bg: var(--tf-state-success-bg, color-mix(in srgb, var(--tf-color-secondary, #14b8a6) 14%, transparent));
+    --pe-pip-inset-bg: radial-gradient(ellipse at 30% 20%, color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 22%, transparent) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, color-mix(in srgb, var(--tf-color-accent, #f59e0b) 16%, transparent) 0%, transparent 60%), linear-gradient(135deg, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 68%, var(--tf-color-primary, #6366f1) 32%) 0%, color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 62%, var(--tf-color-secondary, #14b8a6) 38%) 50%, color-mix(in srgb, var(--tf-surface-stage-bg, #0b0d12) 72%, var(--tf-color-accent, #f59e0b) 28%) 100%);
+    --pe-pip-footer-bg: var(--pe-footer-accent), var(--pe-footer-bg);
+    --pe-drawer-scrim: color-mix(in srgb, var(--tf-surface-stage-bg, var(--tf-bg-base, #0b0d12)) 64%, transparent);
+    --pe-footer-bg: linear-gradient(180deg, var(--tf-surface-control-bg, #1b1f2c) 0%, var(--tf-surface-stage-bg, #0b0d12) 100%);
+    --pe-footer-accent: radial-gradient(ellipse 70% 100% at 50% 100%, var(--tf-state-recommendation-bg, rgba(99,102,241,0.14)), transparent 70%);
+    --pe-footer-border: var(--tf-surface-panel-border, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 16%, transparent));
+    --pc-panel-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 90%, var(--tf-surface-stage-bg, #0b0d12) 10%) 0%, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 82%, var(--tf-surface-stage-bg, #0b0d12) 18%) 100%);
+    --pc-panel-border: var(--tf-glass-border, var(--tf-surface-panel-border, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 16%, transparent)));
+    --pc-panel-shadow: var(--pe-panel-inset-highlight), var(--tf-shadow-level3, 0 10px 28px rgba(0,0,0,0.32)), var(--tf-glow-primary, none);
+    --pc-section-bg: linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 92%, var(--tf-surface-stage-bg, #0b0d12) 8%) 0%, color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 88%, var(--tf-surface-stage-bg, #0b0d12) 12%) 100%);
+    --pc-sidebar-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, var(--tf-bg-base, #0b0d12) 0%, var(--tf-bg-surface, #111318) 100%);
+    --pc-sidebar-border: color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 18%, transparent);
+    --pc-sidebar-section-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, var(--tf-bg-elevated, #191c23) 0%, var(--tf-bg-overlay, #1f222a) 100%);
+    --pc-sidebar-section-border: var(--tf-glass-border, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 36%, transparent));
+    --pc-sidebar-section-shadow: var(--pe-panel-inset-highlight), 0 20px 36px rgba(0,0,0,0.26);
+    --pc-sidebar-control-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, var(--tf-bg-overlay, #1f222a) 0%, var(--tf-bg-elevated, #191c23) 100%);
+    --pc-sidebar-control-border: var(--tf-glass-border, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 40%, transparent));
+    --pc-sidebar-control-shadow: var(--pe-panel-inset-highlight), 0 12px 24px rgba(0,0,0,0.24);
+    --pc-dialog-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 94%, var(--tf-surface-stage-bg, #0b0d12) 6%) 0%, color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 86%, var(--tf-surface-stage-bg, #0b0d12) 14%) 100%);
+    --pc-dialog-border: var(--tf-glass-border, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 18%, transparent));
+    --pc-dialog-shadow: var(--pe-panel-inset-highlight), var(--tf-shadow-level4, 0 22px 56px rgba(0,0,0,0.34)), var(--tf-glow-primary, none);
+    --pc-dialog-section-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 88%, var(--tf-surface-stage-bg, #0b0d12) 12%) 0%, color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 82%, var(--tf-surface-stage-bg, #0b0d12) 18%) 100%);
+    --pc-dialog-section-border: var(--tf-glass-border, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 15%, transparent));
+    --pc-dialog-section-shadow: var(--pe-panel-inset-highlight), var(--tf-shadow-level2, 0 8px 18px rgba(0,0,0,0.22));
+    --pc-transcript-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 94%, var(--tf-surface-stage-bg, #0b0d12) 6%) 0%, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 86%, var(--tf-surface-stage-bg, #0b0d12) 14%) 100%);
+    --pc-transcript-shell-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, var(--tf-bg-surface, #111318) 0%, var(--tf-bg-elevated, #191c23) 100%);
+    --pc-transcript-shell-border: color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 22%, transparent);
+    --pc-transcript-header-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, var(--tf-bg-overlay, #1f222a) 0%, var(--tf-bg-elevated, #191c23) 100%);
+    --pc-placeholder-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-overlay-bg, #1f222a) 92%, var(--tf-surface-stage-bg, #0b0d12) 8%) 0%, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 84%, var(--tf-surface-stage-bg, #0b0d12) 16%) 100%);
+    --pc-placeholder-border: var(--tf-surface-overlay-border, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 14%, transparent));
+    --pc-action-surface-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 90%, var(--tf-surface-stage-bg, #0b0d12) 10%) 0%, color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 84%, var(--tf-surface-stage-bg, #0b0d12) 16%) 100%);
+    --pc-action-surface-border: var(--tf-glass-border, var(--tf-surface-card-border, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 18%, transparent)));
+    --pc-action-surface-shadow: var(--pe-panel-inset-highlight), var(--tf-shadow-level1, 0 4px 12px rgba(0,0,0,0.16));
+    --pc-action-surface-hover-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 72%, var(--tf-state-recommendation-bg, rgba(99,102,241,0.14)) 28%) 0%, color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 78%, var(--tf-state-info-bg, rgba(0,245,255,0.12)) 22%) 100%);
+    --pc-action-surface-hover-border: var(--tf-state-recommendation-border, color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 40%, transparent));
+    --pc-action-surface-hover-text: var(--tf-text-primary, #ffffff);
+    --pc-rail-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, var(--tf-bg-overlay, #1f222a) 0%, var(--tf-bg-elevated, #191c23) 100%);
+    --pc-rail-chip-bg: var(--tf-glass-highlight, none), linear-gradient(180deg, var(--tf-bg-elevated, #191c23) 0%, var(--tf-bg-overlay, #1f222a) 100%);
+    --pc-rail-chip-border: var(--tf-glass-border, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 44%, transparent));
+    --pc-rail-chip-shadow: var(--pe-panel-inset-highlight), 0 14px 28px rgba(0,0,0,0.24);
     display: flex;
     flex-direction: column;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    background:
-      radial-gradient(circle at top left, rgba(0,245,255,0.12), transparent 28%),
-      radial-gradient(circle at top right, rgba(168,56,255,0.14), transparent 32%),
-      linear-gradient(180deg, #090b12 0%, var(--tf-bg-base, #0b0d12) 38%, #080a10 100%);
+    background: var(--pe-shell-bg);
     font-family: 'Inter', system-ui, sans-serif;
     color: var(--tf-text-primary, #e2e6f0);
   }
@@ -198,13 +260,13 @@ const ENGINE_CSS = `
     padding: 0 24px;
     height: 36px;
     min-height: 36px;
-    background: linear-gradient(180deg, rgba(15,18,28,0.82), rgba(11,13,18,0.62));
-    border-bottom: 1px solid rgba(202,211,230,0.10);
+    background: var(--pe-shell-panel-bg);
+    border-bottom: 1px solid var(--pe-shell-panel-border);
     gap: 14px;
     flex-shrink: 0;
     z-index: 20;
     backdrop-filter: blur(18px) saturate(150%);
-    box-shadow: 0 10px 28px rgba(0,0,0,0.32);
+    box-shadow: var(--pe-shell-panel-shadow);
   }
   .pe-header-left {
     display: flex;
@@ -226,7 +288,7 @@ const ENGINE_CSS = `
     inset: 0;
     display: grid;
     place-items: center;
-    background: rgba(6, 8, 14, 0.64);
+    background: var(--pe-prompt-overlay-bg);
     backdrop-filter: blur(8px);
     z-index: 60;
   }
@@ -238,13 +300,9 @@ const ENGINE_CSS = `
     gap: 14px;
     padding: 22px 24px;
     border-radius: 18px;
-    border: 1px solid rgba(0,245,255,0.28);
-    background:
-      linear-gradient(180deg, rgba(23,28,42,0.94), rgba(12,15,24,0.92)),
-      linear-gradient(135deg, rgba(0,245,255,0.08), rgba(168,56,255,0.12));
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.05),
-      0 24px 60px rgba(0,0,0,0.36);
+    border: 1px solid var(--pe-prompt-card-border);
+    background: var(--tf-glass-highlight, none), var(--pe-prompt-card-bg), var(--pe-prompt-card-accent);
+    box-shadow: var(--pe-prompt-card-shadow);
     text-align: center;
   }
   .pe-fullscreen-prompt-title {
@@ -255,7 +313,7 @@ const ENGINE_CSS = `
   .pe-fullscreen-prompt-copy {
     font-size: 14px;
     line-height: 1.5;
-    color: var(--tf-text-secondary, #bfc5d4);
+    color: var(--tf-text-primary, #e2e6f0);
   }
   .pe-fullscreen-prompt-btn {
     display: inline-flex;
@@ -266,9 +324,9 @@ const ENGINE_CSS = `
     height: 42px;
     padding: 0 18px;
     border-radius: 999px;
-    border: 1px solid rgba(0,245,255,0.38);
-    background: linear-gradient(135deg, rgba(0,245,255,0.22), rgba(168,56,255,0.22));
-    color: #fff;
+    border: 1px solid var(--pe-prompt-btn-border);
+    background: var(--pe-prompt-btn-bg);
+    color: var(--pe-prompt-btn-text);
     cursor: pointer;
     font-size: 13px;
     font-weight: 800;
@@ -350,11 +408,11 @@ const ENGINE_CSS = `
     gap: 8px;
     min-width: 0;
     padding: 5px 6px;
-    border: 1px solid rgba(202,211,230,0.10);
+    border: 1px solid var(--pe-shell-panel-border);
     border-radius: 14px;
-    background: linear-gradient(180deg, rgba(20,24,36,0.78), rgba(12,15,24,0.64));
+    background: var(--pe-shell-panel-bg);
     backdrop-filter: blur(18px) saturate(145%);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    box-shadow: var(--pe-panel-inset-highlight);
   }
   .pe-header-nav-prev,
   .pe-header-nav-next {
@@ -396,42 +454,34 @@ const ENGINE_CSS = `
     width: 100%;
     max-width: none;
     padding: 6px 14px;
-    background:
-      linear-gradient(180deg, rgba(24,28,42,0.92), rgba(14,18,28,0.84)),
-      linear-gradient(135deg, rgba(0,245,255,0.10), rgba(168,56,255,0.12));
-        targetSurface: state.surface,
+    background: var(--tf-glass-highlight, none), linear-gradient(180deg, var(--tf-surface-control-bg, #1b1f2c), var(--tf-surface-panel-bg, #0e1019)), linear-gradient(135deg, var(--tf-state-info-bg, rgba(0,245,255,0.10)), var(--tf-state-emphasis-bg, rgba(168,56,255,0.12)));
     border-radius: 11px;
-    border: 1px solid rgba(202,211,230,0.14);
+    border: 1px solid var(--tf-surface-panel-border, rgba(202,211,230,0.14));
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.05),
-      0 8px 18px rgba(0,0,0,0.22);
+    box-shadow: var(--pe-header-nav-current-shadow);
   }
   .pe-title-capsule {
-    aria-label="Toggle fullscreen on slide window"
     display: inline-flex;
     align-items: center;
     padding: 1px 8px;
     border-radius: 9999px;
-    background: linear-gradient(135deg, var(--tf-color-secondary, #14b8a6), #2dd4bf);
+    background: linear-gradient(135deg, var(--tf-state-info-accent, var(--tf-color-secondary, #14b8a6)), var(--tf-color-secondary-light, #2dd4bf));
     font-size: 10px;
     font-weight: 700;
     color: var(--tf-text-inverse, #0b0d12);
     letter-spacing: 0.06em;
     text-transform: uppercase;
     flex-shrink: 0;
-        targetSurface: state.surface,
     line-height: 1.6;
   }
   .pe-header-nav-prev .pe-title-capsule,
   .pe-header-nav-next .pe-title-capsule {
     font-size: 9px;
     padding: 0px 6px;
-    aria-label="Toggle L-corner guides"
   }
   .pe-drawer-item-title .pe-title-capsule {
     font-size: 9px;
@@ -443,7 +493,6 @@ const ENGINE_CSS = `
   .pe-body {
     flex: 1;
     display: flex;
-        targetSurface: state.surface,
     min-height: 0;
     overflow: hidden;
   }
@@ -452,7 +501,6 @@ const ENGINE_CSS = `
   .pe-left {
     flex: 1;
     display: flex;
-    aria-label="Toggle center crossbar alignment marks"
     flex-direction: column;
     min-width: 0;
     overflow: hidden;
@@ -518,9 +566,9 @@ const ENGINE_CSS = `
     width: 38px;
     height: 34px;
     border-radius: 10px;
-    background: linear-gradient(180deg, rgba(27,31,45,0.88), rgba(18,21,32,0.82));
-    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
-    color: var(--tf-text-secondary, #bfc5d4);
+    background: var(--tf-glass-highlight, none), linear-gradient(180deg, var(--tf-surface-control-bg, #1f222a), var(--tf-surface-panel-bg, #111318));
+    border: 1px solid var(--tf-surface-panel-border, rgba(202,211,230,0.14));
+    color: var(--pe-shell-muted);
     cursor: pointer;
     transition: all 150ms;
     padding: 0;
@@ -579,7 +627,7 @@ const ENGINE_CSS = `
   .pe-drawer-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0.45);
+    background: var(--pe-drawer-scrim);
     backdrop-filter: blur(2px);
   }
 
@@ -587,8 +635,8 @@ const ENGINE_CSS = `
     position: relative;
     width: 280px;
     min-width: 280px;
-    background: var(--tf-bg-surface, #111318);
-    border-right: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
+    background: var(--tf-glass-highlight, none), linear-gradient(180deg, var(--tf-surface-panel-bg, #111318) 0%, var(--tf-surface-control-bg, #1f222a) 100%);
+    border-right: 1px solid var(--tf-surface-panel-border, rgba(202,211,230,0.14));
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -755,10 +803,8 @@ const ENGINE_CSS = `
     justify-content: center;
     padding: 32px 36px 28px;
     min-height: 160px;
-    background:
-      radial-gradient(ellipse 70% 100% at 50% 100%, rgba(99,102,241,0.14), transparent 70%),
-      linear-gradient(180deg, rgba(15,18,28,0.96), rgba(9,11,18,0.98));
-    border-top: 1px solid rgba(129,140,248,0.22);
+    background: var(--pe-footer-accent), var(--pe-footer-bg);
+    border-top: 1px solid var(--pe-footer-border);
     flex-shrink: 0;
     z-index: 20;
     gap: 10px;
@@ -809,7 +855,7 @@ const ENGINE_CSS = `
     font-family: 'JetBrains Mono', monospace;
     font-size: clamp(15px, 1.6vw, 20px);
     font-weight: 700;
-    color: var(--tf-color-primary-light, #818cf8);
+    color: var(--tf-text-secondary, #bfc5d4);
   }
   .pe-footer-x-capsule {
     display: inline-flex;
@@ -817,12 +863,13 @@ const ENGINE_CSS = `
     gap: 6px;
     padding: 5px 16px;
     border-radius: 999px;
-    border: 1px solid rgba(129,140,248,0.32);
-    background: rgba(20,24,36,0.72);
+    border: 1px solid var(--tf-state-neutral-border, rgba(167,180,200,0.30));
+    background: var(--tf-state-neutral-bg, rgba(167,180,200,0.14));
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 6%, transparent);
     font-family: 'JetBrains Mono', monospace;
     font-size: clamp(15px, 1.6vw, 22px);
     font-weight: 700;
-    color: var(--tf-color-primary-light, #818cf8);
+    color: var(--tf-text-secondary, #bfc5d4);
   }
   .pe-footer-x-capsule-icon {
     display: none;
@@ -844,7 +891,7 @@ const ENGINE_CSS = `
     width: clamp(88px, 10vw, 130px);
     height: clamp(88px, 10vw, 130px);
     border-radius: 8px;
-    border: 1px solid rgba(129,140,248,0.18);
+    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
   }
   .pe-footer-qr-label {
     font-family: 'JetBrains Mono', monospace;
@@ -934,8 +981,14 @@ const ENGINE_CSS = `
 
   /* ── Footer logo glow animation ────── */
   @keyframes pe-logo-glow {
-    0%, 100% { filter: drop-shadow(0 0 2px rgba(99,102,241,0.0)); }
-    50% { filter: drop-shadow(0 0 8px rgba(99,102,241,0.45)) drop-shadow(0 0 20px rgba(129,140,248,0.2)); }
+    0%, 100% {
+      filter: drop-shadow(0 0 2px color-mix(in srgb, var(--tf-state-recommendation-accent, #6366f1) 0%, transparent));
+    }
+    50% {
+      filter:
+        drop-shadow(0 0 8px color-mix(in srgb, var(--tf-state-recommendation-accent, #6366f1) 45%, transparent))
+        drop-shadow(0 0 20px color-mix(in srgb, var(--tf-state-recommendation-icon, #818cf8) 20%, transparent));
+    }
   }
   .pe-footer-left :is(.brand-lockup, img) {
     animation: pe-logo-glow 4s ease-in-out infinite;
@@ -1029,13 +1082,9 @@ const ENGINE_CSS = `
     gap: 14px;
     padding: 22px 24px;
     border-radius: 18px;
-    border: 1px solid rgba(0,245,255,0.28);
-    background:
-      linear-gradient(180deg, rgba(23,28,42,0.94), rgba(12,15,24,0.92)),
-      linear-gradient(135deg, rgba(0,245,255,0.08), rgba(168,56,255,0.12));
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.05),
-      0 24px 60px rgba(0,0,0,0.36);
+    border: 1px solid var(--pe-prompt-card-border);
+    background: var(--tf-glass-highlight, none), var(--pe-prompt-card-bg), var(--pe-prompt-card-accent);
+    box-shadow: var(--pe-prompt-card-shadow);
     text-align: center;
   }
   .pe-fullscreen-prompt-title {
@@ -1057,9 +1106,9 @@ const ENGINE_CSS = `
     height: 42px;
     padding: 0 18px;
     border-radius: 999px;
-    border: 1px solid rgba(0,245,255,0.38);
-    background: linear-gradient(135deg, rgba(0,245,255,0.22), rgba(168,56,255,0.22));
-    color: #fff;
+    border: 1px solid var(--pe-prompt-btn-border);
+    background: var(--pe-prompt-btn-bg);
+    color: var(--pe-prompt-btn-text);
     cursor: pointer;
     font-size: 13px;
     font-weight: 800;
@@ -1118,10 +1167,7 @@ const ENGINE_CSS = `
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background:
-      radial-gradient(circle at top left, rgba(0,245,255,0.12), transparent 24%),
-      radial-gradient(circle at top right, rgba(168,56,255,0.16), transparent 30%),
-      linear-gradient(180deg, #090b12 0%, var(--tf-bg-base, #0b0d12) 40%, #080a10 100%);
+    background: radial-gradient(ellipse at top left, color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 10%, transparent) 0%, transparent 38%), radial-gradient(ellipse at bottom right, color-mix(in srgb, var(--tf-color-accent, #f59e0b) 8%, transparent) 0%, transparent 42%), var(--pe-shell-bg);
     color: var(--tf-text-primary, #e2e6f0);
     font-family: 'Inter', system-ui, sans-serif;
   }
@@ -1133,16 +1179,23 @@ const ENGINE_CSS = `
     grid-template-columns: 368px 1fr;
   }
   .pc-sidebar {
-    border-right: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
-    background: linear-gradient(180deg, rgba(16,19,29,0.84), rgba(11,13,20,0.72));
+    border-right: 1px solid var(--pc-sidebar-border);
+    background: var(--pc-sidebar-bg);
+    box-shadow: var(--pc-panel-shadow);
     backdrop-filter: blur(18px) saturate(145%);
     display: flex;
     flex-direction: column;
     min-height: 0;
+    padding: 16px 14px 14px;
+    gap: 14px;
   }
   .pc-camera-preview {
-    padding: 10px;
-    border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    padding: 12px;
+    border: 1px solid var(--pc-sidebar-section-border);
+    border-radius: 20px;
+    background: var(--pc-sidebar-section-bg);
+    box-shadow: var(--pc-sidebar-section-shadow);
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -1152,15 +1205,15 @@ const ENGINE_CSS = `
     width: 100%;
     aspect-ratio: 16/9;
     border-radius: 10px;
-    background: #000;
+    background: var(--tf-bg-base, #0b0d12);
     object-fit: contain;
   }
   .pc-camera-placeholder {
     width: 100%;
     aspect-ratio: 16/9;
     border-radius: 10px;
-    background: linear-gradient(135deg, rgba(16,19,29,0.95), rgba(11,13,20,0.90));
-    border: 1px dashed rgba(202,211,230,0.14);
+    background: var(--pc-placeholder-bg);
+    border: 1px dashed var(--pc-placeholder-border);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1180,21 +1233,19 @@ const ENGINE_CSS = `
     width: 100%;
     height: 34px;
     border-radius: 10px;
-    border: 1px solid rgba(202,211,230,0.16);
-    background:
-      linear-gradient(180deg, rgba(26,31,46,0.88), rgba(18,21,32,0.84)),
-      linear-gradient(135deg, rgba(0,245,255,0.08), rgba(168,56,255,0.10));
+    border: 1px solid var(--pc-sidebar-control-border);
+    background: var(--pc-sidebar-control-bg);
     color: var(--tf-text-primary, #e2e6f0);
     font-size: 12px;
     padding: 0 10px;
     outline: none;
     cursor: pointer;
     transition: all 150ms;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    box-shadow: var(--pc-sidebar-control-shadow);
   }
   .pc-camera-select:hover,
   .pc-camera-select:focus-visible {
-    border-color: var(--tf-color-primary-light, #818cf8);
+    border-color: var(--pc-action-surface-hover-border);
   }
   .pc-camera-select option {
     background: var(--tf-bg-surface, #111318);
@@ -1202,14 +1253,22 @@ const ENGINE_CSS = `
   }
   .pc-controls {
     padding: 14px;
-    border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    border: 1px solid var(--pc-sidebar-section-border);
+    border-radius: 20px;
+    background: var(--pc-sidebar-section-bg);
+    box-shadow: var(--pc-sidebar-section-shadow);
+    overflow: hidden;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
   .pc-lessons {
     padding: 14px;
-    border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    border: 1px solid var(--pc-sidebar-section-border);
+    border-radius: 20px;
+    background: var(--pc-sidebar-section-bg);
+    box-shadow: var(--pc-sidebar-section-shadow);
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -1219,8 +1278,21 @@ const ENGINE_CSS = `
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--tf-text-muted, #8892a8);
+    color: var(--tf-text-secondary, #bfc5d4);
     padding: 0 2px;
+  }
+  .pc-sidebar-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--pc-sidebar-control-border);
+    background: var(--pc-sidebar-control-bg);
+    box-shadow: var(--pc-sidebar-control-shadow);
+  }
+  .pc-sidebar-control-group .pc-section-label {
+    padding: 0;
   }
   .pc-btn {
     display: inline-flex;
@@ -1228,32 +1300,28 @@ const ENGINE_CSS = `
     justify-content: center;
     height: 40px;
     border-radius: 12px;
-    border: 1px solid rgba(202,211,230,0.16);
-    background:
-      linear-gradient(180deg, rgba(28,33,48,0.90), rgba(17,20,31,0.84)),
-      linear-gradient(135deg, rgba(0,245,255,0.08), rgba(168,56,255,0.10));
+    border: 1px solid var(--pc-action-surface-border);
+    background: var(--pc-action-surface-bg);
     color: var(--tf-text-primary, #e2e6f0);
     cursor: pointer;
     font-size: 14px;
     font-weight: 700;
     transition: all 150ms;
     padding: 0 14px;
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.05),
-      0 12px 28px rgba(0,0,0,0.18);
-    backdrop-filter: blur(16px) saturate(135%);
+    box-shadow: var(--pc-action-surface-shadow);
+    backdrop-filter: blur(16px) saturate(140%);
   }
   .pc-btn:hover:not(:disabled) {
-    color: #ffffff;
-    border-color: rgba(0,245,255,0.34);
-    background:
-      linear-gradient(135deg, rgba(0,245,255,0.18), rgba(168,56,255,0.16)),
-      linear-gradient(180deg, rgba(30,35,52,0.96), rgba(17,20,31,0.90));
+    color: var(--pc-action-surface-hover-text);
+    border-color: var(--pc-action-surface-hover-border);
+    background: var(--pc-action-surface-hover-bg);
     transform: translateY(-1px);
   }
   .pc-btn-header {
     height: 34px;
-    background: linear-gradient(135deg, rgba(41,50,255,0.16), rgba(168,56,255,0.14));
+    background: var(--pc-sidebar-control-bg);
+    border-color: var(--pc-sidebar-control-border);
+    box-shadow: var(--pc-sidebar-control-shadow);
     color: var(--tf-text-secondary, #bfc5d4);
     font-size: 12px;
     font-weight: 700;
@@ -1273,31 +1341,29 @@ const ENGINE_CSS = `
     line-height: 1;
   }
   .pc-btn-header.active {
-    background: linear-gradient(135deg, rgba(0,245,255,0.28), rgba(168,56,255,0.24));
-    color: #ffffff;
-    border-color: rgba(0,245,255,0.44);
-    box-shadow: 0 0 8px rgba(0,245,255,0.18);
+    background: var(--pc-action-surface-hover-bg);
+    color: var(--tf-text-primary);
+    border-color: var(--pc-action-surface-hover-border);
+    box-shadow: var(--pc-action-surface-shadow);
   }
   .pc-lesson-select {
     width: 100%;
     height: 40px;
     border-radius: 12px;
-    border: 1px solid rgba(202,211,230,0.16);
-    background:
-      linear-gradient(180deg, rgba(26,31,46,0.88), rgba(18,21,32,0.84)),
-      linear-gradient(135deg, rgba(0,245,255,0.08), rgba(168,56,255,0.10));
+    border: 1px solid var(--pc-sidebar-control-border);
+    background: var(--pc-sidebar-control-bg);
     color: var(--tf-text-primary, #e2e6f0);
     font-size: 14px;
     padding: 0 12px;
     outline: none;
     cursor: pointer;
     transition: all 150ms;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
-    backdrop-filter: blur(16px) saturate(135%);
+    box-shadow: var(--pc-sidebar-control-shadow);
+    backdrop-filter: blur(16px) saturate(140%);
   }
   .pc-lesson-select:hover,
   .pc-lesson-select:focus-visible {
-    border-color: var(--tf-color-primary-light, #818cf8);
+    border-color: var(--pc-action-surface-hover-border);
   }
   .pc-lesson-select option {
     background: var(--tf-bg-surface, #111318);
@@ -1344,39 +1410,41 @@ const ENGINE_CSS = `
     min-height: 0;
     overflow-y: auto;
     padding: 12px;
+    border: 1px solid var(--pc-sidebar-section-border);
+    border-radius: 20px;
+    background: var(--pc-sidebar-section-bg);
+    box-shadow: var(--pc-sidebar-section-shadow);
+    overflow-y: auto;
   }
   .pc-jump::-webkit-scrollbar { width: 4px; }
-  .pc-jump::-webkit-scrollbar-thumb { background: rgba(202,211,230,0.18); }
+  .pc-jump::-webkit-scrollbar-thumb {
+    background: var(--tf-border-default, rgba(202,211,230,0.14));
+    border-radius: 999px;
+  }
   .pc-jump-item {
     width: 100%;
     text-align: left;
     margin-bottom: 6px;
     border-radius: 12px;
-    border: 1px solid rgba(202,211,230,0.02);
-    background: linear-gradient(180deg, rgba(18,21,31,0.52), rgba(18,21,31,0.36));
+    border: 1px solid var(--pc-action-surface-border);
+    background: var(--pc-sidebar-control-bg);
     color: var(--tf-text-secondary, #bfc5d4);
     padding: 10px 12px;
     cursor: pointer;
     display: flex;
     align-items: baseline;
     gap: 12px;
-    backdrop-filter: blur(10px) saturate(130%);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+    box-shadow: var(--pc-sidebar-control-shadow);
+    backdrop-filter: blur(16px) saturate(140%);
   }
   .pc-jump-item:hover {
-    background:
-      linear-gradient(180deg, rgba(27,31,45,0.88), rgba(18,21,31,0.74)),
-      linear-gradient(135deg, rgba(0,245,255,0.08), rgba(168,56,255,0.08));
+    background: var(--pc-action-surface-hover-bg);
   }
   .pc-jump-item.active {
-    background:
-      linear-gradient(180deg, rgba(24,29,43,0.96), rgba(16,19,29,0.88)),
-      linear-gradient(135deg, rgba(0,245,255,0.18), rgba(168,56,255,0.16));
-    border-color: rgba(0,245,255,0.32);
+    background: var(--pc-action-surface-hover-bg);
+    border-color: var(--pc-action-surface-hover-border);
     color: var(--tf-text-primary, #e2e6f0);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.05),
-      0 0 0 1px rgba(168,56,255,0.14);
+    box-shadow: var(--pc-action-surface-shadow);
   }
   .pc-jump-index {
     font-family: 'JetBrains Mono', monospace;
@@ -1398,7 +1466,10 @@ const ENGINE_CSS = `
     display: grid;
     grid-template-columns: minmax(0, 1fr) 52px;
     overflow: hidden;
-    background: var(--tf-bg-base, #0b0d12);
+    background: var(--pc-transcript-shell-bg);
+    border-left: 1px solid var(--pc-transcript-shell-border);
+    box-shadow: inset 1px 0 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 4%, transparent);
+    backdrop-filter: blur(18px) saturate(145%);
   }
   .pc-transcript-main {
     position: relative;
@@ -1416,9 +1487,10 @@ const ENGINE_CSS = `
     flex-direction: column;
     align-items: center;
     padding: 6px 0;
-    gap: 2px;
-    border-left: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
-    background: linear-gradient(180deg, rgba(16,19,29,0.92), rgba(11,13,20,0.80));
+    gap: 10px;
+    border-left: 1px solid var(--pc-transcript-shell-border);
+    background: var(--pc-rail-bg);
+    box-shadow: inset 1px 0 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 6%, transparent);
     backdrop-filter: blur(18px) saturate(145%);
   }
   .pc-transcript-rail::-webkit-scrollbar { width: 0; }
@@ -1429,12 +1501,13 @@ const ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    border: 1px solid transparent;
-    background: transparent;
-    color: var(--tf-text-muted, #8892a8);
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    border: 1px solid var(--pc-rail-chip-border);
+    background: var(--pc-rail-chip-bg);
+    box-shadow: var(--pc-rail-chip-shadow);
+    color: var(--tf-text-secondary, #bfc5d4);
     cursor: pointer;
     transition: all 120ms ease;
     flex-shrink: 0;
@@ -1446,15 +1519,15 @@ const ENGINE_CSS = `
     flex-shrink: 0;
   }
   .pc-dock-btn:hover:not(:disabled) {
-    color: #fff;
-    background: rgba(99,102,241,0.14);
-    border-color: rgba(99,102,241,0.22);
+    color: var(--tf-text-primary, #e2e6f0);
+    background: var(--pc-action-surface-hover-bg);
+    border-color: var(--pc-action-surface-hover-border);
   }
   .pc-dock-btn.active {
-    color: #fff;
-    background: linear-gradient(135deg, rgba(0,245,255,0.20), rgba(168,56,255,0.18));
-    border-color: rgba(0,245,255,0.36);
-    box-shadow: 0 0 8px rgba(0,245,255,0.12);
+    color: var(--tf-text-primary, #e2e6f0);
+    background: var(--pc-action-surface-hover-bg);
+    border-color: var(--pc-action-surface-hover-border);
+    box-shadow: var(--pc-action-surface-shadow);
   }
   .pc-dock-btn:disabled {
     opacity: 0.28;
@@ -1474,10 +1547,10 @@ const ENGINE_CSS = `
     font-weight: 600;
     letter-spacing: 0.02em;
     white-space: nowrap;
-    color: #e2e6f0;
-    background: rgba(23,28,42,0.95);
-    border: 1px solid rgba(129,140,248,0.22);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    color: var(--tf-text-primary, #e2e6f0);
+    background: var(--pc-panel-bg);
+    border: 1px solid var(--pc-panel-border);
+    box-shadow: var(--pc-action-surface-shadow);
     pointer-events: none;
     opacity: 0;
     transition: opacity 100ms ease;
@@ -1494,7 +1567,7 @@ const ENGINE_CSS = `
   .pc-dock-divider {
     width: 24px;
     height: 1px;
-    background: var(--tf-border-subtle, rgba(202,211,230,0.10));
+    background: var(--pc-rail-chip-border);
     flex-shrink: 0;
     margin: 3px 0;
   }
@@ -1546,7 +1619,8 @@ const ENGINE_CSS = `
     position: fixed;
     inset: 0;
     z-index: 200;
-    background: rgba(0,0,0,0.55);
+    background: var(--tf-gradient-overlay, rgba(6, 8, 14, 0.64));
+    backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1559,15 +1633,16 @@ const ENGINE_CSS = `
     overflow-y: auto;
     padding: 20px;
     border-radius: 16px;
-    border: 1px solid rgba(129,140,248,0.22);
-    background: linear-gradient(180deg, rgba(23,28,42,0.99), rgba(12,15,24,0.99));
-    box-shadow: 0 24px 64px rgba(0,0,0,0.55);
+    border: 1px solid var(--pc-dialog-border);
+    background: var(--pc-dialog-bg);
+    box-shadow: var(--pc-dialog-shadow);
     color: var(--tf-text-primary, #e2e6f0);
     animation: pc-scale-in 150ms ease;
+    backdrop-filter: blur(22px) saturate(150%);
   }
   .pc-settings-dialog::-webkit-scrollbar { width: 4px; }
   .pc-settings-dialog::-webkit-scrollbar-thumb {
-    background: rgba(202,211,230,0.18);
+    background: var(--tf-border-default, rgba(202,211,230,0.14));
     border-radius: 999px;
   }
   .pc-settings-close {
@@ -1577,8 +1652,8 @@ const ENGINE_CSS = `
     width: 28px;
     height: 28px;
     border-radius: 8px;
-    border: 1px solid rgba(202,211,230,0.12);
-    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--pc-action-surface-border);
+    background: var(--pc-action-surface-bg);
     color: var(--tf-text-muted, #8892a8);
     cursor: pointer;
     display: flex;
@@ -1589,9 +1664,9 @@ const ENGINE_CSS = `
     transition: all 120ms;
   }
   .pc-settings-close:hover {
-    color: #fff;
-    border-color: rgba(239,68,68,0.4);
-    background: rgba(239,68,68,0.12);
+    color: var(--tf-text-primary, #e2e6f0);
+    border-color: var(--tf-state-danger-border, rgba(239,68,68,0.35));
+    background: var(--tf-state-danger-bg, rgba(239,68,68,0.14));
   }
   @keyframes pc-fade-in { from { opacity: 0; } to { opacity: 1; } }
   @keyframes pc-scale-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -1608,8 +1683,9 @@ const ENGINE_CSS = `
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--tf-text-muted, #8892a8);
-    border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
-    background: var(--tf-bg-surface, #111318);
+    border-bottom: 1px solid var(--pc-transcript-shell-border);
+    background: var(--pc-transcript-header-bg);
+    box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 4%, transparent);
   }
   .pc-transcript-header-title {
     min-width: 0;
@@ -1639,15 +1715,11 @@ const ENGINE_CSS = `
     margin-bottom: 16px;
     padding: 16px 18px;
     border-radius: 14px;
-    border: 1px solid rgba(99,102,241,0.45);
-    background:
-      linear-gradient(180deg, rgba(19,23,36,0.96), rgba(12,15,24,0.92)),
-      linear-gradient(135deg, rgba(99,102,241,0.12), rgba(0,245,255,0.08));
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.05),
-      0 0 0 1px rgba(99,102,241,0.12),
-      0 16px 30px rgba(0,0,0,0.18);
+    border: 1px solid var(--pc-action-surface-hover-border);
+    background: var(--pc-action-surface-bg);
+    box-shadow: var(--pc-action-surface-shadow);
     animation: pc-active-transcript-enter 220ms ease;
+    backdrop-filter: blur(16px) saturate(140%);
   }
   .pc-transcript-current-title {
     display: flex;
@@ -1661,7 +1733,7 @@ const ENGINE_CSS = `
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--tf-color-primary-light, #818cf8);
+    color: var(--tf-text-secondary, #bfc5d4);
   }
   .pc-transcript-current-step {
     font-size: 11px;
@@ -1712,10 +1784,11 @@ const ENGINE_CSS = `
     padding: 12px 14px;
     border-radius: 12px;
     border: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
-    background: var(--tf-bg-surface, #111318);
+    background: var(--pc-action-surface-bg);
     opacity: 0.68;
     transition: all 180ms ease;
     cursor: pointer;
+    backdrop-filter: blur(16px) saturate(140%);
   }
   .pc-transcript-step:hover {
     opacity: 0.92;
@@ -1723,11 +1796,9 @@ const ENGINE_CSS = `
   }
   .pc-transcript-step.active {
     opacity: 1;
-    border-color: var(--tf-color-primary, #6366f1);
-    box-shadow: 0 0 0 1px rgba(99,102,241,0.22);
-    background:
-      linear-gradient(180deg, rgba(24,28,42,0.92), rgba(14,18,28,0.86)),
-      linear-gradient(135deg, rgba(99,102,241,0.10), rgba(0,245,255,0.06));
+    border-color: var(--pc-action-surface-hover-border);
+    box-shadow: var(--pc-action-surface-shadow);
+    background: var(--pc-action-surface-hover-bg);
   }
   .pc-transcript-step.complete {
     opacity: 0.82;
@@ -1768,9 +1839,10 @@ const ENGINE_CSS = `
   .pc-transcript-edit-btn {
     height: 28px;
     padding: 0 10px;
-    border-radius: 6px;
-    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
-    background: var(--tf-bg-elevated, #191c23);
+    border-radius: 10px;
+    border: 1px solid var(--pc-rail-chip-border);
+    background: var(--pc-rail-chip-bg);
+    box-shadow: var(--pc-rail-chip-shadow);
     color: var(--tf-text-secondary, #bfc5d4);
     cursor: pointer;
     font-size: 11px;
@@ -1828,7 +1900,7 @@ const ENGINE_CSS = `
   .pc-transcript-original {
     padding: 10px 16px;
     border-top: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
-    background: rgba(11,13,18,0.6);
+    background: var(--pc-action-surface-bg);
   }
   .pc-transcript-original-label {
     font-size: 9px;
@@ -1870,7 +1942,7 @@ const ENGINE_CSS = `
   }
   .pc-transcript-split-section + .pc-transcript-split-section {
     border-top: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
-    background: rgba(11,13,18,0.4);
+    background: var(--tf-surface-card-bg, #191c23);
   }
   .pc-transcript-split-label {
     font-size: 9px;
@@ -1953,8 +2025,8 @@ const ENGINE_CSS = `
     height: 100%;
     display: flex;
     flex-direction: column;
-    border-left: 1px solid rgba(202,211,230,0.10);
-    background: var(--tf-bg-surface, #111318);
+    border-left: 1px solid var(--pe-pip-panel-border);
+    background: var(--pe-pip-panel-bg);
     overflow: hidden;
   }
 
@@ -1970,7 +2042,7 @@ const ENGINE_CSS = `
     height: 22px;
     gap: 6px;
     border-bottom: 1px solid rgba(202,211,230,0.08);
-    background: linear-gradient(180deg, rgba(15,18,28,0.82), rgba(11,13,18,0.62));
+    background: var(--pe-pip-header-bg);
     backdrop-filter: blur(18px) saturate(150%);
     flex-shrink: 0;
   }
@@ -1982,7 +2054,7 @@ const ENGINE_CSS = `
     padding: 14px 16px 10px;
     gap: 6px;
     border-bottom: 1px solid rgba(202,211,230,0.06);
-    background: linear-gradient(180deg, rgba(12,15,24,0.96), rgba(10,12,19,0.88));
+    background: var(--pe-pip-panel-bg);
     overflow: hidden;
     flex: 0 0 auto;
     min-height: clamp(70px, 9vh, 130px);
@@ -2037,9 +2109,9 @@ const ENGINE_CSS = `
     justify-content: center;
     padding: 6px 10px;
     border-radius: 999px;
-    border: 1px solid rgba(129,140,248,0.18);
-    background: rgba(20,24,36,0.84);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    border: 1px solid var(--pe-pip-chip-border);
+    background: var(--pe-pip-chip-bg);
+    box-shadow: var(--pe-pip-chip-shadow);
     font-size: 12px;
     color: var(--tf-text-secondary, #bfc5d4);
     font-family: 'JetBrains Mono', monospace;
@@ -2054,13 +2126,9 @@ const ENGINE_CSS = `
     gap: 8px;
     padding: 12px 14px;
     border-radius: 16px;
-    border: 1px solid rgba(20,184,166,0.16);
-    background:
-      linear-gradient(180deg, rgba(19,24,35,0.96), rgba(12,16,24,0.88)),
-      linear-gradient(135deg, rgba(20,184,166,0.08), rgba(99,102,241,0.08));
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.03),
-      0 8px 24px rgba(0,0,0,0.18);
+    border: 1px solid var(--pe-pip-objective-border);
+    background: var(--pe-pip-objective-bg);
+    box-shadow: var(--pe-pip-chip-shadow);
   }
 
   .pe-pip-meta-objective-label {
@@ -2069,7 +2137,7 @@ const ENGINE_CSS = `
     align-self: flex-start;
     padding: 4px 8px;
     border-radius: 999px;
-    background: rgba(20,184,166,0.12);
+    background: var(--pe-pip-objective-pill-bg);
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -2091,17 +2159,14 @@ const ENGINE_CSS = `
   }
 
   .pe-pip-inset {
-    color: rgba(226,230,240,0.88);
+    color: var(--tf-text-primary, #e2e6f0);
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 0 0 auto;
     overflow: hidden;
-    background:
-      radial-gradient(ellipse at 30% 20%, rgba(99,102,241,0.10) 0%, transparent 60%),
-      radial-gradient(ellipse at 70% 80%, rgba(168,56,255,0.08) 0%, transparent 60%),
-      linear-gradient(135deg, #262a3d 0%, #2e3350 50%, #232740 100%);
+    background: var(--pe-pip-inset-bg);
   }
   .pe-pip-frame {
     position: relative;
@@ -2128,10 +2193,8 @@ const ENGINE_CSS = `
     flex: 1 1 0;
     min-height: 180px;
     overflow: hidden;
-    background:
-      radial-gradient(ellipse 80% 100% at 50% 100%, rgba(99,102,241,0.14), transparent 70%),
-      linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
-    border-top: 1px solid rgba(129,140,248,0.22);
+    background: var(--pe-pip-footer-bg);
+    border-top: 1px solid var(--pe-footer-border);
   }
   .pe-pip-footer-row {
     display: flex;
@@ -2187,7 +2250,7 @@ const ENGINE_CSS = `
     font-family: 'JetBrains Mono', monospace;
     font-size: clamp(1rem, 2.2vh, 1.4rem);
     font-weight: 700;
-    color: var(--tf-color-primary-light, #818cf8);
+    color: var(--tf-text-secondary, #bfc5d4);
   }
   .pe-pip-footer-x-text {
     font-size: clamp(0.65rem, 1.3vh, 0.85rem);
@@ -2207,12 +2270,13 @@ const ENGINE_CSS = `
     gap: 4px;
     padding: 4px 14px;
     border-radius: 999px;
-    border: 1px solid rgba(129,140,248,0.32);
-    background: rgba(20,24,36,0.72);
+    border: 1px solid var(--tf-state-neutral-border, rgba(167,180,200,0.30));
+    background: var(--tf-state-neutral-bg, rgba(167,180,200,0.14));
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 6%, transparent);
     font-family: 'JetBrains Mono', monospace;
     font-size: clamp(0.88rem, 2vh, 1.2rem);
     font-weight: 700;
-    color: var(--tf-color-primary-light, #818cf8);
+    color: var(--tf-text-secondary, #bfc5d4);
   }
   .pe-pip-footer-x-capsule-icon {
     display: none;
@@ -2235,7 +2299,7 @@ const ENGINE_CSS = `
     width: clamp(80px, 12vh, 130px);
     height: clamp(80px, 12vh, 130px);
     border-radius: 6px;
-    border: 1px solid rgba(129,140,248,0.18);
+    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
   }
   .pe-pip-footer-qr-label {
     font-family: 'JetBrains Mono', monospace;
@@ -2358,7 +2422,7 @@ const ENGINE_CSS = `
     --pe-slide-stage-ratio: 1.4;
     width: 100vw;
     height: 100vh;
-    background: #000;
+    background: var(--tf-surface-stage-bg, #0b0d12);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2377,9 +2441,9 @@ const ENGINE_CSS = `
     display: grid;
     grid-template-rows: var(--pe-shorts-stage-height) minmax(0, 1fr) auto;
     background:
-      radial-gradient(circle at top, rgba(0,245,255,0.10), transparent 32%),
-      radial-gradient(circle at bottom, rgba(168,56,255,0.08), transparent 34%),
-      linear-gradient(180deg, #090b12, var(--tf-bg-surface, #111318) 20%, var(--tf-bg-surface, #111318) 80%, #0b0b0f);
+      radial-gradient(circle at top, color-mix(in srgb, var(--tf-state-info-accent, #14b8a6) 10%, transparent), transparent 34%),
+      radial-gradient(circle at bottom, color-mix(in srgb, var(--tf-state-recommendation-accent, #6366f1) 10%, transparent), transparent 36%),
+      var(--pe-shell-bg);
     overflow: hidden;
     position: relative;
   }
@@ -2394,11 +2458,11 @@ const ENGINE_CSS = `
     flex-direction: column;
     justify-content: flex-start;
     padding: 0;
-    border-bottom: 1px solid rgba(202,211,230,0.06);
+    border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
     background:
-      radial-gradient(circle at 30% 40%, rgba(0,245,255,0.08), transparent 50%),
-      radial-gradient(circle at 70% 60%, rgba(168,56,255,0.06), transparent 50%),
-      linear-gradient(180deg, rgba(11,13,18,0.80), var(--tf-bg-surface, #111318));
+      radial-gradient(circle at 30% 40%, color-mix(in srgb, var(--tf-state-info-accent, #14b8a6) 8%, transparent), transparent 52%),
+      radial-gradient(circle at 70% 60%, color-mix(in srgb, var(--tf-state-emphasis-accent, #a855f7) 7%, transparent), transparent 52%),
+      linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-stage-bg, #0b0d12) 80%, transparent), var(--tf-surface-panel-bg, #111318));
     overflow: hidden;
     box-sizing: border-box;
     position: relative;
@@ -2483,11 +2547,11 @@ const ENGINE_CSS = `
     justify-content: center;
     overflow: hidden;
     background:
-      radial-gradient(ellipse 80% 60% at 30% 30%, rgba(129,140,248,0.22), transparent),
-      radial-gradient(ellipse 70% 50% at 70% 70%, rgba(192,132,252,0.18), transparent),
-      radial-gradient(ellipse 60% 40% at 50% 50%, rgba(56,189,248,0.10), transparent),
-      linear-gradient(160deg, #262a3d 0%, #2e3350 40%, #232740 100%);
-    border-top: 1px solid rgba(148,163,184,0.12);
+      radial-gradient(ellipse 80% 60% at 30% 30%, color-mix(in srgb, var(--tf-state-recommendation-accent, #6366f1) 22%, transparent), transparent),
+      radial-gradient(ellipse 70% 50% at 70% 70%, color-mix(in srgb, var(--tf-state-emphasis-accent, #a855f7) 18%, transparent), transparent),
+      radial-gradient(ellipse 60% 40% at 50% 50%, color-mix(in srgb, var(--tf-state-info-accent, #14b8a6) 10%, transparent), transparent),
+      linear-gradient(160deg, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 88%, var(--tf-surface-stage-bg, #0b0d12) 12%) 0%, color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 86%, var(--tf-surface-stage-bg, #0b0d12) 14%) 40%, color-mix(in srgb, var(--tf-surface-stage-bg, #0b0d12) 92%, var(--tf-surface-panel-bg, #111318) 8%) 100%);
+    border-top: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
   }
 
   .pe-shorts-guide-svg {
@@ -2509,8 +2573,8 @@ const ENGINE_CSS = `
     min-height: fit-content;
     flex-shrink: 0;
     white-space: nowrap;
-    border-top: 1px solid rgba(202,211,230,0.08);
-    background: linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
+    border-top: 1px solid var(--pe-footer-border);
+    background: var(--pe-pip-footer-bg);
   }
   .pe-shorts-subscribe-icon {
     display: flex;
@@ -2556,13 +2620,13 @@ const ENGINE_CSS = `
     justify-content: center;
     padding: 0.18rem 0.42rem;
     border-radius: 999px;
-    border: 1px solid rgba(129,140,248,0.2);
-    background: rgba(20,24,36,0.84);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    border: 1px solid var(--tf-state-neutral-border, rgba(167,180,200,0.30));
+    background: var(--tf-state-neutral-bg, rgba(167,180,200,0.14));
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 6%, transparent);
     font-family: 'JetBrains Mono', monospace;
     font-size: clamp(0.62rem, 1.2vh, 0.8rem);
     font-weight: 700;
-    color: var(--tf-color-primary-light, #818cf8);
+    color: var(--tf-text-secondary, #bfc5d4);
     white-space: nowrap;
   }
 
@@ -2588,13 +2652,13 @@ const ENGINE_CSS = `
     transition: all 150ms ease;
   }
   .pc-deck-type-btn:hover {
-    border-color: var(--tf-color-primary, #6366f1);
+    border-color: var(--pc-action-surface-hover-border);
     color: var(--tf-text-primary, #e2e6f0);
   }
   .pc-deck-type-btn.active {
-    background: var(--tf-color-primary, #6366f1);
-    border-color: var(--tf-color-primary, #6366f1);
-    color: #fff;
+    background: var(--pc-action-surface-bg);
+    border-color: var(--pc-action-surface-border);
+    color: var(--tf-text-primary, #e2e6f0);
   }
 
   /* Shorts toggle button */
@@ -2626,12 +2690,12 @@ const ENGINE_CSS = `
   }
   .pe-shorts-btn:hover {
     color: var(--tf-text-primary, #e2e6f0);
-    border-color: var(--tf-color-primary, #6366f1);
+    border-color: var(--pc-action-surface-hover-border);
   }
   .pe-shorts-btn.active {
-    color: var(--tf-color-primary-light, #818cf8);
-    border-color: var(--tf-color-primary, #6366f1);
-    background: var(--tf-bg-elevated, #191c23);
+    color: var(--tf-text-primary, #e2e6f0);
+    border-color: var(--pc-action-surface-hover-border);
+    background: var(--pc-action-surface-hover-bg);
   }
 
   /* ── Feed Mode (4:5) — full-page aspect with PIP inset ── */
@@ -2639,7 +2703,7 @@ const ENGINE_CSS = `
     --pe-slide-stage-ratio: 1.4;
     width: 100vw;
     height: 100vh;
-    background: #000;
+    background: var(--tf-surface-stage-bg, #0b0d12);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2658,9 +2722,9 @@ const ENGINE_CSS = `
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     background:
-      radial-gradient(circle at top, rgba(0,245,255,0.10), transparent 32%),
-      radial-gradient(circle at bottom, rgba(168,56,255,0.08), transparent 34%),
-      linear-gradient(180deg, #090b12, var(--tf-bg-surface, #111318) 20%, var(--tf-bg-surface, #111318) 80%, #0b0b0f);
+      radial-gradient(circle at top, color-mix(in srgb, var(--tf-state-info-accent, #14b8a6) 10%, transparent), transparent 34%),
+      radial-gradient(circle at bottom, color-mix(in srgb, var(--tf-state-recommendation-accent, #6366f1) 10%, transparent), transparent 36%),
+      var(--pe-shell-bg);
     overflow: hidden;
     position: relative;
   }
@@ -2674,11 +2738,11 @@ const ENGINE_CSS = `
     padding: clamp(3vh, 5vh, 7vh) clamp(1.5vw, 3vw, 5vw) clamp(2vh, 3.5vh, 5vh);
     min-height: clamp(80px, 14vh, 180px);
     overflow: hidden;
-    border-bottom: 1px solid rgba(202,211,230,0.06);
+    border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
     background:
-      radial-gradient(circle at 30% 40%, rgba(0,245,255,0.08), transparent 50%),
-      radial-gradient(circle at 70% 60%, rgba(168,56,255,0.06), transparent 50%),
-      linear-gradient(180deg, rgba(11,13,18,0.80), var(--tf-bg-surface, #111318));
+      radial-gradient(circle at 30% 40%, color-mix(in srgb, var(--tf-state-info-accent, #14b8a6) 8%, transparent), transparent 52%),
+      radial-gradient(circle at 70% 60%, color-mix(in srgb, var(--tf-state-emphasis-accent, #a855f7) 7%, transparent), transparent 52%),
+      linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-stage-bg, #0b0d12) 80%, transparent), var(--tf-surface-panel-bg, #111318));
   }
   .pe-feed-title-inner {
     display: flex;
@@ -2719,11 +2783,11 @@ const ENGINE_CSS = `
     justify-content: center;
     overflow: hidden;
     background:
-      radial-gradient(ellipse 80% 60% at 30% 30%, rgba(129,140,248,0.22), transparent),
-      radial-gradient(ellipse 70% 50% at 70% 70%, rgba(192,132,252,0.18), transparent),
-      radial-gradient(ellipse 60% 40% at 50% 50%, rgba(56,189,248,0.10), transparent),
-      linear-gradient(160deg, #262a3d 0%, #2e3350 40%, #232740 100%);
-    border-top: 1px solid rgba(148,163,184,0.12);
+      radial-gradient(ellipse 80% 60% at 30% 30%, color-mix(in srgb, var(--tf-state-recommendation-accent, #6366f1) 22%, transparent), transparent),
+      radial-gradient(ellipse 70% 50% at 70% 70%, color-mix(in srgb, var(--tf-state-emphasis-accent, #a855f7) 18%, transparent), transparent),
+      radial-gradient(ellipse 60% 40% at 50% 50%, color-mix(in srgb, var(--tf-state-info-accent, #14b8a6) 10%, transparent), transparent),
+      linear-gradient(160deg, color-mix(in srgb, var(--tf-surface-control-bg, #1f222a) 88%, var(--tf-surface-stage-bg, #0b0d12) 12%) 0%, color-mix(in srgb, var(--tf-surface-panel-bg, #111318) 86%, var(--tf-surface-stage-bg, #0b0d12) 14%) 40%, color-mix(in srgb, var(--tf-surface-stage-bg, #0b0d12) 92%, var(--tf-surface-panel-bg, #111318) 8%) 100%);
+    border-top: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
   }
 
   /* SVG guide overlay — inside PIP area only */
@@ -2747,10 +2811,8 @@ const ENGINE_CSS = `
     min-height: fit-content;
     flex-shrink: 0;
     white-space: nowrap;
-    border-top: 1px solid rgba(129,140,248,0.22);
-    background:
-      radial-gradient(ellipse 80% 100% at 50% 100%, rgba(99,102,241,0.12), transparent 70%),
-      linear-gradient(180deg, var(--tf-bg-surface, #111318), var(--tf-bg-base, #0b0b0f));
+    border-top: 1px solid var(--pe-footer-border);
+    background: var(--pe-pip-footer-bg);
   }
   .pe-feed-subscribe-icon {
     display: flex;
@@ -2789,13 +2851,13 @@ const ENGINE_CSS = `
     justify-content: center;
     padding: 0.22rem 0.48rem;
     border-radius: 999px;
-    border: 1px solid rgba(129,140,248,0.2);
-    background: rgba(20,24,36,0.84);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    border: 1px solid var(--tf-state-neutral-border, rgba(167,180,200,0.30));
+    background: var(--tf-state-neutral-bg, rgba(167,180,200,0.14));
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 6%, transparent);
     font-family: 'JetBrains Mono', monospace;
     font-size: clamp(0.72rem, 1.45vh, 0.96rem);
     font-weight: 700;
-    color: var(--tf-color-primary-light, #818cf8);
+    color: var(--tf-text-secondary, #bfc5d4);
     white-space: nowrap;
   }
 `;
@@ -4103,23 +4165,24 @@ export function LayoutEditorDialog({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.75)",
-    backdropFilter: "blur(4px)",
+    background: "var(--tf-gradient-overlay, rgba(6, 8, 14, 0.64))",
+    backdropFilter: "blur(12px)",
     padding: 24,
   };
   const panelStyle: React.CSSProperties = {
-    background: "#13151a",
-    border: "1px solid #2a2d36",
+    background: "var(--pc-dialog-bg)",
+    border: "1px solid var(--pc-dialog-border)",
     borderRadius: 16,
     padding: 32,
     width: 620,
     maxWidth: "100%",
     maxHeight: "calc(100vh - 48px)",
     overflow: "auto",
-    color: "#e2e6f0",
+    color: "var(--tf-text-primary, #e2e6f0)",
     fontFamily: "Segoe UI, Roboto, Arial, sans-serif",
     fontSize: 14,
-    boxShadow: "0 24px 64px rgba(0, 0, 0, 0.6)",
+    boxShadow: "var(--pc-dialog-shadow)",
+    backdropFilter: "blur(22px) saturate(150%)",
   };
   const headerStyle: React.CSSProperties = {
     display: "flex",
@@ -4127,13 +4190,13 @@ export function LayoutEditorDialog({
     alignItems: "flex-start",
     marginBottom: 24,
     paddingBottom: 16,
-    borderBottom: "1px solid #2a2d36",
+    borderBottom: "1px solid var(--tf-border-subtle, rgba(202,211,230,0.08))",
   };
   const btnBase: React.CSSProperties = {
-    background: "#1e2028",
-    border: "1px solid #3a3d46",
+    background: "var(--pc-action-surface-bg)",
+    border: "1px solid var(--pc-action-surface-border)",
     borderRadius: 8,
-    color: "#e2e6f0",
+    color: "var(--tf-text-primary, #e2e6f0)",
     padding: "8px 16px",
     cursor: "pointer",
     fontSize: 13,
@@ -4145,31 +4208,39 @@ export function LayoutEditorDialog({
     flex: 1,
     padding: "16px 20px",
     borderRadius: 12,
-    border: active ? "2px solid #6366f1" : "1px solid #2a2d36",
-    background: active ? "#1a1c2e" : "#16181e",
+    border: active
+      ? "2px solid var(--pc-action-surface-hover-border)"
+      : "1px solid var(--pc-dialog-section-border)",
+    background: active
+      ? "var(--pc-action-surface-hover-bg)"
+      : "var(--pc-dialog-section-bg)",
     cursor: "pointer",
     transition: "all 0.15s",
     textAlign: "center" as const,
+    boxShadow: active
+      ? "var(--pc-action-surface-shadow)"
+      : "var(--pc-dialog-section-shadow)",
   });
   const sectionLabelStyle: React.CSSProperties = {
     fontSize: 11,
     fontWeight: 600,
     textTransform: "uppercase" as const,
     letterSpacing: "0.08em",
-    color: "#6b7280",
+    color: "var(--tf-text-muted, #8892a8)",
     marginBottom: 12,
   };
   const rowCardStyle: React.CSSProperties = {
-    background: "#16181e",
-    border: "1px solid #2a2d36",
+    background: "var(--pc-dialog-section-bg)",
+    border: "1px solid var(--pc-dialog-section-border)",
     borderRadius: 12,
     padding: "16px 20px",
     marginBottom: 12,
+    boxShadow: "var(--pc-dialog-section-shadow)",
   };
   const rowHeaderStyle: React.CSSProperties = {
     fontSize: 12,
     fontWeight: 600,
-    color: "#9ca3af",
+    color: "var(--tf-text-secondary, #bfc5d4)",
     marginBottom: 12,
     textTransform: "uppercase" as const,
     letterSpacing: "0.04em",
@@ -4186,14 +4257,22 @@ export function LayoutEditorDialog({
     fontSize: 12,
     lineHeight: "1.4",
     border: selected
-      ? "1px solid #6366f1"
+      ? "1px solid var(--pc-action-surface-hover-border)"
       : disabled
-        ? "1px solid #1e2028"
-        : "1px solid #3a3d46",
-    background: selected ? "#1e1f3a" : disabled ? "#111318" : "#1e2028",
-    color: selected ? "#a5b4fc" : disabled ? "#4b5563" : "#d1d5db",
+        ? "1px solid var(--tf-border-subtle, rgba(202,211,230,0.08))"
+        : "1px solid var(--pc-action-surface-border)",
+    background: selected
+      ? "var(--pc-action-surface-hover-bg)"
+      : disabled
+        ? "var(--pc-panel-bg)"
+        : "var(--pc-action-surface-bg)",
+    color: selected
+      ? "var(--tf-text-primary, #e2e6f0)"
+      : disabled
+        ? "var(--tf-text-muted, #8892a8)"
+        : "var(--tf-text-secondary, #bfc5d4)",
     cursor: disabled ? "not-allowed" : "pointer",
-    opacity: disabled ? 0.5 : 1,
+    opacity: disabled ? 0.55 : 1,
     transition: "all 0.12s",
     whiteSpace: "nowrap" as const,
   });
@@ -4203,7 +4282,7 @@ export function LayoutEditorDialog({
     alignItems: "center",
     marginTop: 24,
     paddingTop: 16,
-    borderTop: "1px solid #2a2d36",
+    borderTop: "1px solid var(--tf-border-subtle, rgba(202,211,230,0.08))",
     gap: 12,
   };
 
@@ -4219,7 +4298,7 @@ export function LayoutEditorDialog({
           <div
             style={{
               fontSize: 11,
-              color: "#4b5563",
+              color: "var(--tf-text-muted, #8892a8)",
               marginBottom: 8,
               fontWeight: 500,
             }}
@@ -4263,7 +4342,14 @@ export function LayoutEditorDialog({
                 }
               >
                 {isInThisCell && (
-                  <span style={{ color: "#6366f1", fontSize: 14 }}>✓</span>
+                  <span
+                    style={{
+                      color: "var(--tf-state-success-icon, #10b981)",
+                      fontSize: 14,
+                    }}
+                  >
+                    ✓
+                  </span>
                 )}
                 {blockLabels[idx] ?? `Block ${idx + 1}`}
               </div>
@@ -4275,7 +4361,7 @@ export function LayoutEditorDialog({
             style={{
               marginTop: 8,
               fontSize: 11,
-              color: "#6b7280",
+              color: "var(--tf-text-muted, #8892a8)",
             }}
           >
             {cell.length} block{cell.length !== 1 ? "s" : ""} — stacked
@@ -4302,7 +4388,7 @@ export function LayoutEditorDialog({
                 margin: 0,
                 fontSize: 18,
                 fontWeight: 600,
-                color: "#f3f4f6",
+                color: "var(--tf-text-primary, #e2e6f0)",
                 lineHeight: "1.3",
               }}
             >
@@ -4312,7 +4398,7 @@ export function LayoutEditorDialog({
               style={{
                 margin: "4px 0 0",
                 fontSize: 13,
-                color: "#6b7280",
+                color: "var(--tf-text-muted, #8892a8)",
               }}
             >
               {slideId}
@@ -4353,7 +4439,13 @@ export function LayoutEditorDialog({
               ▬
             </div>
             <div style={{ fontWeight: 600, fontSize: 14 }}>Simple</div>
-            <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--tf-text-muted, #8892a8)",
+                marginTop: 2,
+              }}
+            >
               Single column, stacked
             </div>
           </div>
@@ -4375,7 +4467,13 @@ export function LayoutEditorDialog({
               ▦
             </div>
             <div style={{ fontWeight: 600, fontSize: 14 }}>Advanced</div>
-            <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--tf-text-muted, #8892a8)",
+                marginTop: 2,
+              }}
+            >
               Top · Middle (2-col) · Bottom
             </div>
           </div>
@@ -4393,7 +4491,12 @@ export function LayoutEditorDialog({
               <div style={rowHeaderStyle}>
                 {rowLabel}
                 {row.columns > 1 && (
-                  <span style={{ fontWeight: 400, color: "#4b5563" }}>
+                  <span
+                    style={{
+                      fontWeight: 400,
+                      color: "var(--tf-text-muted, #8892a8)",
+                    }}
+                  >
                     {" "}
                     — {row.columns} columns
                   </span>
@@ -4421,7 +4524,13 @@ export function LayoutEditorDialog({
         {/* Footer */}
         <div style={footerStyle}>
           <button
-            style={{ ...btnBase, color: "#f87171", borderColor: "#7f1d1d44" }}
+            style={{
+              ...btnBase,
+              color: "var(--tf-state-danger-icon, #ef4444)",
+              borderColor:
+                "var(--tf-state-danger-border, rgba(239,68,68,0.35))",
+              background: "var(--tf-state-danger-bg, rgba(239,68,68,0.14))",
+            }}
             onClick={() => {
               onSave(null);
               onClose();
@@ -4435,10 +4544,14 @@ export function LayoutEditorDialog({
                 style={{
                   ...btnBase,
                   background: adjustMode
-                    ? "rgba(234, 179, 8, 0.2)"
+                    ? "var(--tf-state-warning-bg, rgba(245,158,11,0.16))"
                     : "transparent",
-                  borderColor: adjustMode ? "#eab308" : "#ffffff22",
-                  color: adjustMode ? "#eab308" : "#94a3b8",
+                  borderColor: adjustMode
+                    ? "var(--tf-state-warning-border, rgba(245,158,11,0.35))"
+                    : "var(--pc-action-surface-border)",
+                  color: adjustMode
+                    ? "var(--tf-state-warning-icon, #f59e0b)"
+                    : "var(--tf-text-secondary, #bfc5d4)",
                   fontWeight: adjustMode ? 600 : 400,
                 }}
                 onClick={onToggleAdjust}
@@ -4453,9 +4566,9 @@ export function LayoutEditorDialog({
             <button
               style={{
                 ...btnBase,
-                background: "#6366f1",
-                borderColor: "#818cf8",
-                color: "#fff",
+                background: "var(--pc-action-surface-hover-bg)",
+                borderColor: "var(--pc-action-surface-hover-border)",
+                color: "var(--pc-action-surface-hover-text)",
                 fontWeight: 600,
               }}
               onClick={() => {
@@ -5020,7 +5133,7 @@ export function PresentationLayout({
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: PRESENTATION_ENGINE_CSS }} />
       <div
         className={`pe-root${headless ? " pe-headless" : ""}${pipMode ? " pe-pip-mode" : ""}`}
         ref={rootRef}
@@ -5855,7 +5968,7 @@ export function ShortsLayout({
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: PRESENTATION_ENGINE_CSS }} />
       <div
         className="pe-shorts-root"
         ref={rootRef}
@@ -6320,7 +6433,7 @@ export function ShortsFeedLayout({
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: PRESENTATION_ENGINE_CSS }} />
       <div
         className="pe-feed-root"
         ref={rootRef}
@@ -6921,7 +7034,7 @@ export function PresentationControlPanel({
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: ENGINE_CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: PRESENTATION_ENGINE_CSS }} />
       <div className="pc-root">
         <div className="pc-body">
           <aside className="pc-sidebar">
@@ -6969,7 +7082,7 @@ export function PresentationControlPanel({
             <div className="pc-lessons">
               {headerSlot}
               {showFilter && (
-                <>
+                <div className="pc-sidebar-control-group">
                   <span className="pc-section-label">Deck Type</span>
                   <div className="pc-deck-type-row">
                     <button
@@ -6992,149 +7105,152 @@ export function PresentationControlPanel({
                       </button>
                     ))}
                   </div>
-                </>
+                </div>
               )}
-              <span className="pc-section-label">Jump Lesson</span>
-              <select
-                className="pc-lesson-select"
-                value={currentDeckInFilter ? deck.id : ""}
-                onChange={(e) => handleSelectDeck(e.target.value)}
-                aria-label="Jump to lesson"
-              >
-                {!currentDeckInFilter && (
-                  <option value="" disabled>
-                    Select a {filteredDeckTypeLabel}
-                  </option>
-                )}
-                {filteredDecks.map((lessonDeck) => {
-                  const typeMarker = isShortDeck(lessonDeck.deckType)
-                    ? "📱 "
-                    : lessonDeck.deckType === "mono"
-                      ? "▶ "
-                      : "";
-                  return (
-                    <option key={lessonDeck.id} value={lessonDeck.id}>
-                      {lessonDeck.number}. {typeMarker}
-                      {sanitizePresentationTitle(lessonDeck.title)}
-                    </option>
-                  );
-                })}
-              </select>
-
-              <span className="pc-section-label" style={{ marginTop: 8 }}>
-                Slide Zoom
-              </span>
-              <select
-                className="pc-lesson-select"
-                value={activeState.zoom.toFixed(2)}
-                onChange={(e) => {
-                  const nextZoom = parseFloat(e.target.value);
-                  setSurfaceStates((current) => ({
-                    ...current,
-                    [activeSurface]: {
-                      ...current[activeSurface],
-                      zoom: nextZoom,
-                    },
-                  }));
-                  try {
-                    localStorage.setItem(zoomStorageKey, String(nextZoom));
-                  } catch {
-                    // Ignore localStorage access issues.
-                  }
-                  send({
-                    type: "command",
-                    deckId: deck.id,
-                    action: "set-zoom",
-                    zoom: nextZoom,
-                  });
-                }}
-                aria-label="Slide zoom"
-              >
-                <option value="1.00">1.00x</option>
-                <option value="1.05">1.05x</option>
-                <option value="1.08">1.08x</option>
-                <option value="1.10">1.10x</option>
-                <option value="1.12">1.12x</option>
-                <option value="1.15">1.15x</option>
-                <option value="1.20">1.20x</option>
-                <option value="1.25">1.25x</option>
-                <option value="1.30">1.30x</option>
-              </select>
-
-              <span className="pc-section-label" style={{ marginTop: 8 }}>
-                Slide Enlarge
-              </span>
-              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                <input
-                  type="number"
+              <div className="pc-sidebar-control-group">
+                <span className="pc-section-label">Jump Lesson</span>
+                <select
                   className="pc-lesson-select"
-                  style={{ flex: 1 }}
-                  value={activeState.enlarge}
-                  min={ENLARGE_MIN}
-                  max={ENLARGE_MAX}
-                  step={ENLARGE_STEP}
+                  value={currentDeckInFilter ? deck.id : ""}
+                  onChange={(e) => handleSelectDeck(e.target.value)}
+                  aria-label="Jump to lesson"
+                >
+                  {!currentDeckInFilter && (
+                    <option value="" disabled>
+                      Select a {filteredDeckTypeLabel}
+                    </option>
+                  )}
+                  {filteredDecks.map((lessonDeck) => {
+                    const typeMarker = isShortDeck(lessonDeck.deckType)
+                      ? "📱 "
+                      : lessonDeck.deckType === "mono"
+                        ? "▶ "
+                        : "";
+                    return (
+                      <option key={lessonDeck.id} value={lessonDeck.id}>
+                        {lessonDeck.number}. {typeMarker}
+                        {sanitizePresentationTitle(lessonDeck.title)}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              <div className="pc-sidebar-control-group">
+                <span className="pc-section-label">Slide Zoom</span>
+                <select
+                  className="pc-lesson-select"
+                  value={activeState.zoom.toFixed(2)}
                   onChange={(e) => {
-                    const raw = parseFloat(e.target.value);
-                    if (Number.isNaN(raw)) return;
-                    const nextEnlarge =
-                      Math.round(
-                        Math.max(ENLARGE_MIN, Math.min(ENLARGE_MAX, raw)) * 100,
-                      ) / 100;
-                    const slideId =
-                      deck.slides[activeState.slideIndex]?.id ?? "";
+                    const nextZoom = parseFloat(e.target.value);
                     setSurfaceStates((current) => ({
                       ...current,
                       [activeSurface]: {
                         ...current[activeSurface],
-                        enlarge: nextEnlarge,
+                        zoom: nextZoom,
                       },
                     }));
-                    writeSlideEnlarge(
-                      controlChannelId,
-                      deck.id,
-                      slideId,
-                      nextEnlarge,
-                    );
+                    try {
+                      localStorage.setItem(zoomStorageKey, String(nextZoom));
+                    } catch {
+                      // Ignore localStorage access issues.
+                    }
                     send({
                       type: "command",
                       deckId: deck.id,
-                      action: "set-enlarge",
-                      slideId,
-                      enlarge: nextEnlarge,
+                      action: "set-zoom",
+                      zoom: nextZoom,
                     });
                   }}
-                  aria-label="Slide enlarge"
-                />
-                <button
-                  className="pc-btn"
-                  style={{
-                    fontSize: 11,
-                    padding: "4px 8px",
-                    minWidth: 0,
-                    whiteSpace: "nowrap",
-                    ...(enlargeSaved
-                      ? {
-                          background: "rgba(34, 197, 94, 0.2)",
-                          borderColor: "#22c55e",
-                          color: "#22c55e",
-                        }
-                      : {}),
-                    transition: "all 0.2s",
-                  }}
-                  onClick={() => {
-                    persistAllEnlargeValues(
-                      controlChannelId,
-                      deck.id,
-                      deck.slides,
-                    );
-                    setEnlargeSaved(true);
-                    setTimeout(() => setEnlargeSaved(false), 1500);
-                  }}
-                  title="Persist all slide enlarge values to local storage"
-                  aria-label="Persist enlarge"
+                  aria-label="Slide zoom"
                 >
-                  {enlargeSaved ? "Saved ✓" : "Save"}
-                </button>
+                  <option value="1.00">1.00x</option>
+                  <option value="1.05">1.05x</option>
+                  <option value="1.08">1.08x</option>
+                  <option value="1.10">1.10x</option>
+                  <option value="1.12">1.12x</option>
+                  <option value="1.15">1.15x</option>
+                  <option value="1.20">1.20x</option>
+                  <option value="1.25">1.25x</option>
+                  <option value="1.30">1.30x</option>
+                </select>
+              </div>
+
+              <div className="pc-sidebar-control-group">
+                <span className="pc-section-label">Slide Enlarge</span>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <input
+                    type="number"
+                    className="pc-lesson-select"
+                    style={{ flex: 1 }}
+                    value={activeState.enlarge}
+                    min={ENLARGE_MIN}
+                    max={ENLARGE_MAX}
+                    step={ENLARGE_STEP}
+                    onChange={(e) => {
+                      const raw = parseFloat(e.target.value);
+                      if (Number.isNaN(raw)) return;
+                      const nextEnlarge =
+                        Math.round(
+                          Math.max(ENLARGE_MIN, Math.min(ENLARGE_MAX, raw)) *
+                            100,
+                        ) / 100;
+                      const slideId =
+                        deck.slides[activeState.slideIndex]?.id ?? "";
+                      setSurfaceStates((current) => ({
+                        ...current,
+                        [activeSurface]: {
+                          ...current[activeSurface],
+                          enlarge: nextEnlarge,
+                        },
+                      }));
+                      writeSlideEnlarge(
+                        controlChannelId,
+                        deck.id,
+                        slideId,
+                        nextEnlarge,
+                      );
+                      send({
+                        type: "command",
+                        deckId: deck.id,
+                        action: "set-enlarge",
+                        slideId,
+                        enlarge: nextEnlarge,
+                      });
+                    }}
+                    aria-label="Slide enlarge"
+                  />
+                  <button
+                    className="pc-btn"
+                    style={{
+                      fontSize: 11,
+                      padding: "4px 8px",
+                      minWidth: 0,
+                      whiteSpace: "nowrap",
+                      ...(enlargeSaved
+                        ? {
+                            background: "var(--tf-state-success-bg)",
+                            borderColor: "var(--tf-color-success)",
+                            color: "var(--tf-color-success)",
+                          }
+                        : {}),
+                      transition: "all 0.2s",
+                    }}
+                    onClick={() => {
+                      persistAllEnlargeValues(
+                        controlChannelId,
+                        deck.id,
+                        deck.slides,
+                      );
+                      setEnlargeSaved(true);
+                      setTimeout(() => setEnlargeSaved(false), 1500);
+                    }}
+                    title="Persist all slide enlarge values to local storage"
+                    aria-label="Persist enlarge"
+                  >
+                    {enlargeSaved ? "Saved ✓" : "Save"}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -7389,8 +7505,12 @@ export function PresentationControlPanel({
               <div
                 className="pc-dock-dot"
                 style={{
-                  background: connected ? "#22c55e" : "#6b7280",
-                  boxShadow: connected ? "0 0 8px #22c55e88" : "none",
+                  background: connected
+                    ? "var(--tf-color-success)"
+                    : "var(--tf-text-muted)",
+                  boxShadow: connected
+                    ? "0 0 8px var(--tf-color-success)"
+                    : "none",
                 }}
                 title={
                   connected

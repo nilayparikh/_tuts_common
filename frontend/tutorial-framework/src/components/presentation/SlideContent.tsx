@@ -9,15 +9,19 @@
 
 import React from "react";
 import { Appear, Text, FlexBox, Box } from "spectacle";
-import { initMermaid } from "../../theme/mermaidTheme";
+import {
+  applyMermaidSemanticColors,
+  initMermaid,
+} from "../../theme/mermaidTheme";
 
 /* ── CSS var shorthands ───────────────────────────────────────────────── */
 
 const v = {
-  bgBase: "var(--tf-bg-base, #0b0d12)",
-  bgSurface: "var(--tf-bg-surface, #111318)",
-  bgElevated: "var(--tf-bg-elevated, #191c23)",
-  bgOverlay: "var(--tf-bg-overlay, #1f222a)",
+  bgBase:
+    "var(--tf-gradient-stage, var(--tf-surface-stage-bg, var(--tf-bg-base, #0b0d12)))",
+  bgSurface: "var(--tf-surface-panel-bg, var(--tf-bg-surface, #111318))",
+  bgElevated: "var(--tf-surface-card-bg, var(--tf-bg-elevated, #191c23))",
+  bgOverlay: "var(--tf-surface-overlay-bg, var(--tf-bg-overlay, #1f222a))",
   textPrimary: "var(--tf-text-primary, #e2e6f0)",
   textSecondary: "var(--tf-text-secondary, #bfc5d4)",
   textMuted: "var(--tf-text-muted, #8892a8)",
@@ -25,8 +29,11 @@ const v = {
   primaryLight: "var(--tf-color-primary-light, #818cf8)",
   accent: "var(--tf-color-accent, #f59e0b)",
   accentLight: "var(--tf-color-accent-light, #fcd34d)",
-  borderDefault: "var(--tf-border-default, rgba(202,211,230,0.14))",
+  borderDefault:
+    "var(--tf-surface-card-border, var(--tf-border-default, rgba(202,211,230,0.14)))",
   borderSubtle: "var(--tf-border-subtle, rgba(202,211,230,0.08))",
+  stateNeutralBg: "var(--tf-state-neutral-bg, rgba(148,163,184,0.08))",
+  stateNeutralBorder: "var(--tf-state-neutral-border, rgba(148,163,184,0.22))",
   codeBg: "var(--tf-code-bg, #1f222a)",
   codeText: "var(--tf-code-text, #e2e8f0)",
   fontDisplay: "var(--tf-font-display, 'Inter', system-ui, sans-serif)",
@@ -60,8 +67,9 @@ export function BulletList({ items, appear = true }: BulletListProps) {
         marginBottom: "6px",
         padding: "12px 16px",
         borderRadius: "8px",
-        background: i % 2 === 0 ? "transparent" : v.bgElevated,
-        transition: "background 200ms ease",
+        background: i % 2 === 0 ? v.bgElevated : v.stateNeutralBg,
+        border: `1px solid ${i % 2 === 0 ? v.borderDefault : v.stateNeutralBorder}`,
+        transition: "background 200ms ease, border-color 200ms ease",
       }}
     >
       <Box
@@ -73,7 +81,8 @@ export function BulletList({ items, appear = true }: BulletListProps) {
           borderRadius: "50%",
           background: `linear-gradient(135deg, ${v.colorPrimary}, ${v.colorAccent})`,
           flexShrink: 0,
-          boxShadow: `0 0 8px rgba(99,102,241,0.3)`,
+          boxShadow:
+            "0 0 0 1px var(--tf-state-recommendation-border, rgba(41,50,255,0.35))",
         }}
       />
       <Box>
@@ -123,7 +132,7 @@ interface InfoCardProps {
 }
 
 export function InfoCard({ icon, label, value, color }: InfoCardProps) {
-  const c = color ?? v.primaryLight;
+  const c = color ?? v.textPrimary;
   return (
     <Box
       style={{
@@ -162,6 +171,97 @@ export function InfoCard({ icon, label, value, color }: InfoCardProps) {
       >
         {value}
       </Text>
+    </Box>
+  );
+}
+
+/* ── Practical Note Callout ─────────────────────────────────────────── */
+
+interface PracticalNoteCalloutProps {
+  title: string;
+  note: string;
+  icon?: string;
+}
+
+export function PracticalNoteCallout({
+  title,
+  note,
+  icon = "tips_and_updates",
+}: PracticalNoteCalloutProps) {
+  return (
+    <Box
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "16px",
+        width: "100%",
+        maxWidth: "760px",
+        padding: "16px 18px",
+        borderRadius: v.radiusLg,
+        background:
+          "linear-gradient(135deg, var(--tf-state-neutral-bg, rgba(148,163,184,0.08)) 0%, var(--tf-surface-card-bg, var(--tf-bg-elevated, #191c23)) 72%)",
+        border: `1px solid ${v.borderDefault}`,
+        boxShadow:
+          "inset 0 1px 0 var(--tf-glass-highlight, rgba(255,255,255,0.04)), 0 14px 34px rgba(0,0,0,0.26)",
+      }}
+    >
+      <Box
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "48px",
+          height: "48px",
+          borderRadius: "14px",
+          background:
+            "linear-gradient(180deg, var(--tf-state-recommendation-bg, rgba(99,102,241,0.16)) 0%, var(--tf-state-neutral-bg, rgba(148,163,184,0.08)) 100%)",
+          border:
+            "1px solid var(--tf-state-recommendation-border, rgba(99,102,241,0.32))",
+          flexShrink: 0,
+        }}
+      >
+        <span
+          aria-hidden="true"
+          style={{
+            fontFamily: "Material Symbols Outlined",
+            fontSize: "24px",
+            lineHeight: 1,
+            color: v.primaryLight,
+            fontVariationSettings: '"FILL" 1, "wght" 600, "GRAD" 0, "opsz" 24',
+          }}
+        >
+          {icon}
+        </span>
+      </Box>
+
+      <Box style={{ flex: 1, minWidth: 0 }}>
+        <Text
+          fontSize="12px"
+          fontWeight={700}
+          color={v.primaryLight}
+          fontFamily={v.fontDisplay}
+          style={{
+            margin: 0,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+          }}
+        >
+          {title}
+        </Text>
+        <Text
+          fontSize="16px"
+          color={v.textSecondary}
+          fontFamily={v.fontBody}
+          style={{
+            margin: 0,
+            marginTop: "8px",
+            lineHeight: 1.6,
+            maxWidth: "640px",
+          }}
+        >
+          {note}
+        </Text>
+      </Box>
     </Box>
   );
 }
@@ -491,6 +591,10 @@ export function MermaidDiagram({
   const enhancedChart = chart.trimStart().startsWith("%%{")
     ? chart
     : MERMAID_SPACING_CONFIG + chart;
+  const themedChart = React.useMemo(
+    () => applyMermaidSemanticColors(enhancedChart),
+    [enhancedChart],
+  );
 
   React.useEffect(() => {
     if (!ref.current) return;
@@ -506,7 +610,7 @@ export function MermaidDiagram({
           clearInterval(interval);
           initMermaid();
           try {
-            const { svg } = await m.render(id, enhancedChart);
+            const { svg } = await m.render(id, themedChart);
             ref.current.innerHTML = svg;
           } catch (e) {
             ref.current.textContent = chart;
@@ -522,14 +626,14 @@ export function MermaidDiagram({
     initMermaid();
     (async () => {
       try {
-        const { svg } = await mermaid.render(id, enhancedChart);
+        const { svg } = await mermaid.render(id, themedChart);
         if (ref.current) ref.current.innerHTML = svg;
       } catch {
         if (ref.current) ref.current.textContent = chart;
       }
     })();
     return;
-  }, [enhancedChart, id]);
+  }, [themedChart, id]);
 
   return (
     <Box style={{ width: "100%", maxWidth, margin: "0 auto" }}>

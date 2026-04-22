@@ -41,13 +41,13 @@ export interface PresentationConfig {
 
 /* ── Styles ───────────────────────────────────────────────────────────── */
 
-const CSS = `
+export const PRESENTATION_SHELL_CSS = `
   .pres-shell {
     display: flex;
     height: 100vh;
     width: 100vw;
     overflow: hidden;
-    background: #000;
+    background: var(--tf-bg-backdrop, var(--tf-gradient-stage, #000));
     font-family: var(--tf-font-body, "Inter", system-ui, sans-serif);
     color: var(--tf-text-primary, #e2e6f0);
   }
@@ -60,10 +60,10 @@ const CSS = `
     width: 36px;
     height: 36px;
     border-radius: var(--tf-radius-sm, 8px);
-    background: rgba(25,28,35,0.85);
-    backdrop-filter: blur(8px);
-    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
-    color: var(--tf-text-secondary, #bfc5d4);
+    background: var(--tf-glass-highlight, none), var(--tf-glass-bg, var(--tf-surface-panel-bg, rgba(25,28,35,0.85)));
+    backdrop-filter: blur(var(--tf-glass-blur, 20px)) saturate(140%);
+    border: 1px solid var(--tf-glass-border, var(--tf-surface-overlay-border, rgba(202,211,230,0.14)));
+    color: var(--tf-surface-overlay-text, var(--tf-text-secondary, #bfc5d4));
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -72,11 +72,12 @@ const CSS = `
     font-size: 18px;
     line-height: 1;
     padding: 0;
+    box-shadow: var(--tf-shadow-level3), var(--tf-glow-primary, none);
   }
   .pres-drawer-toggle:hover {
-    background: rgba(31,34,42,0.95);
+    background: var(--tf-state-recommendation-bg, rgba(31,34,42,0.95));
     color: var(--tf-text-primary, #e2e6f0);
-    border-color: var(--tf-color-primary, #6366f1);
+    border-color: var(--tf-state-recommendation-border, var(--tf-color-primary, #6366f1));
   }
 
   .pres-main {
@@ -85,7 +86,7 @@ const CSS = `
     flex-direction: column;
     min-width: 0;
     position: relative;
-    background: #000;
+    background: var(--tf-gradient-stage, var(--tf-surface-stage-bg, #000));
   }
 
   .pres-deck-area {
@@ -95,7 +96,7 @@ const CSS = `
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    background: #000;
+    background: var(--tf-gradient-stage, var(--tf-surface-stage-bg, #000));
   }
 
   /* 16:9 aspect ratio container */
@@ -121,11 +122,12 @@ const CSS = `
     justify-content: space-between;
     padding: 6px 20px;
     height: 44px;
-    background: var(--tf-bg-surface, #111318);
-    border-top: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    background: var(--tf-glass-highlight, none), var(--tf-glass-bg, var(--tf-surface-panel-bg, #111318));
+    border-top: 1px solid var(--tf-glass-border, var(--tf-surface-panel-border, rgba(202,211,230,0.08)));
     font-size: 12px;
     gap: 16px;
     z-index: 10;
+    box-shadow: 0 -1px 0 var(--tf-border-subtle, rgba(202,211,230,0.08));
   }
 
   .pres-footer-brand {
@@ -161,18 +163,18 @@ const CSS = `
     width: 32px;
     height: 28px;
     border-radius: var(--tf-radius-sm, 8px);
-    background: var(--tf-bg-elevated, #191c23);
-    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
-    color: var(--tf-text-secondary, #bfc5d4);
+    background: var(--tf-surface-control-bg, var(--tf-bg-elevated, #191c23));
+    border: 1px solid var(--tf-surface-control-border, var(--tf-border-default, rgba(202,211,230,0.14)));
+    color: var(--tf-surface-control-text, var(--tf-text-secondary, #bfc5d4));
     cursor: pointer;
     transition: all 150ms ease;
     font-size: 14px;
     padding: 0;
   }
   .pres-nav-btn:hover:not(:disabled) {
-    background: var(--tf-bg-overlay, #1f222a);
-    color: var(--tf-color-primary-light, #818cf8);
-    border-color: var(--tf-color-primary-light, #818cf8);
+    background: var(--tf-state-recommendation-bg, var(--tf-bg-overlay, #1f222a));
+    color: var(--tf-state-recommendation-accent, var(--tf-color-primary-light, #818cf8));
+    border-color: var(--tf-state-recommendation-border, var(--tf-color-primary-light, #818cf8));
   }
   .pres-nav-btn:disabled {
     opacity: 0.3;
@@ -193,7 +195,7 @@ const CSS = `
   .pres-drawer-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
+    background: var(--tf-gradient-overlay, rgba(0,0,0,0.6));
     z-index: 900;
     opacity: 0;
     transition: opacity 200ms ease;
@@ -210,14 +212,15 @@ const CSS = `
     left: 0;
     bottom: 0;
     width: 320px;
-    background: var(--tf-bg-surface, #111318);
-    border-right: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
+    background: linear-gradient(180deg, var(--tf-surface-panel-bg, #111318) 0%, var(--tf-surface-control-bg, #1f222a) 100%);
+    border-right: 1px solid var(--tf-surface-panel-border, var(--tf-border-default, rgba(202,211,230,0.14)));
     z-index: 950;
     transform: translateX(-100%);
     transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    box-shadow: var(--tf-shadow-level4);
   }
   .pres-drawer.open {
     transform: translateX(0);
@@ -225,7 +228,7 @@ const CSS = `
 
   .pres-drawer-header {
     padding: 16px 20px;
-    border-bottom: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
+    border-bottom: 1px solid var(--tf-surface-panel-border, var(--tf-border-subtle, rgba(202,211,230,0.08)));
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -256,9 +259,9 @@ const CSS = `
     transition: all 150ms ease;
   }
   .pres-drawer-close:hover {
-    background: var(--tf-bg-elevated, #191c23);
+    background: var(--tf-state-neutral-bg, var(--tf-bg-elevated, #191c23));
     color: var(--tf-text-primary, #e2e6f0);
-    border-color: var(--tf-border-default, rgba(202,211,230,0.14));
+    border-color: var(--tf-state-neutral-border, var(--tf-border-default, rgba(202,211,230,0.14)));
   }
 
   .pres-drawer-list {
@@ -273,7 +276,7 @@ const CSS = `
     background: transparent;
   }
   .pres-drawer-list::-webkit-scrollbar-thumb {
-    background: rgba(202,211,230,0.12);
+    background: var(--tf-border-default, rgba(202,211,230,0.12));
     border-radius: 2px;
   }
 
@@ -288,11 +291,11 @@ const CSS = `
     border-left: 3px solid transparent;
   }
   .pres-drawer-item:hover {
-    background: var(--tf-bg-elevated, #191c23);
+    background: var(--tf-state-neutral-bg, var(--tf-bg-elevated, #191c23));
   }
   .pres-drawer-item.active {
-    background: rgba(99,102,241,0.08);
-    border-left-color: var(--tf-color-primary, #6366f1);
+    background: linear-gradient(135deg, var(--tf-state-recommendation-bg, rgba(99,102,241,0.08)) 0%, var(--tf-state-emphasis-bg, rgba(168,56,255,0.1)) 100%);
+    border-left-color: var(--tf-state-recommendation-accent, var(--tf-color-primary, #6366f1));
   }
 
   .pres-drawer-number {
@@ -337,7 +340,7 @@ const CSS = `
   }
   .pres-drawer-subitem:hover {
     color: var(--tf-text-secondary, #bfc5d4);
-    background: var(--tf-bg-elevated, #191c23);
+    background: var(--tf-state-neutral-bg, var(--tf-bg-elevated, #191c23));
   }
   .pres-drawer-subitem .pres-sub-dot {
     width: 4px;
@@ -360,7 +363,7 @@ const CSS = `
     height: 28px;
     border-radius: var(--tf-radius-sm, 8px);
     background: transparent;
-    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
+    border: 1px solid var(--tf-surface-control-border, var(--tf-border-default, rgba(202,211,230,0.14)));
     color: var(--tf-text-muted, #8892a8);
     cursor: pointer;
     transition: all 150ms ease;
@@ -368,9 +371,9 @@ const CSS = `
     margin-left: 4px;
   }
   .pres-fullscreen-btn:hover {
-    color: var(--tf-text-primary, #e2e6f0);
-    border-color: var(--tf-color-primary, #6366f1);
-    background: var(--tf-bg-elevated, #191c23);
+    color: var(--tf-state-recommendation-accent, var(--tf-text-primary, #e2e6f0));
+    border-color: var(--tf-state-recommendation-border, var(--tf-color-primary, #6366f1));
+    background: var(--tf-state-recommendation-bg, var(--tf-bg-elevated, #191c23));
   }
 `;
 
@@ -568,7 +571,7 @@ export function PresentationShell({
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: PRESENTATION_SHELL_CSS }} />
 
       <div className="pres-shell" ref={shellRef}>
         {/* Drawer toggle */}

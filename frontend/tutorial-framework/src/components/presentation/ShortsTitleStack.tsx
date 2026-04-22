@@ -21,9 +21,10 @@ export function ShortsTitleStack({
         flexDirection: "column",
         gap: "4px",
         padding: "14px 28px 12px",
-        borderBottom: "1px solid rgba(202,211,230,0.08)",
+        borderBottom:
+          "1px solid var(--tf-border-subtle, rgba(202,211,230,0.08))",
         background:
-          "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)), radial-gradient(circle at top left, rgba(96,165,250,0.16), transparent 52%)",
+          "linear-gradient(180deg, var(--tf-surface-card-bg, var(--tf-bg-elevated, #191c23)), var(--tf-surface-panel-bg, var(--tf-bg-surface, #111318)))",
         overflow: "hidden",
         flexShrink: 0,
       }}
@@ -34,7 +35,7 @@ export function ShortsTitleStack({
           alignItems: "center",
           gap: "8px",
           minWidth: 0,
-          color: "rgba(226,230,240,0.72)",
+          color: "var(--tf-text-secondary, #bfc5d4)",
         }}
       >
         <span
@@ -43,7 +44,7 @@ export function ShortsTitleStack({
             width: "26px",
             height: "1px",
             background:
-              "linear-gradient(90deg, rgba(96,165,250,0.95), rgba(96,165,250,0.2))",
+              "linear-gradient(90deg, var(--tf-state-warning-accent, var(--tf-color-warning, #f59e0b)), transparent)",
             flexShrink: 0,
           }}
         />

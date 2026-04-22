@@ -23,15 +23,24 @@ const v = {
   bgSurface: "var(--tf-bg-surface, #111318)",
   bgElevated: "var(--tf-bg-elevated, #191c23)",
   bgOverlay: "var(--tf-bg-overlay, #1f222a)",
+  panelBg: "var(--tf-surface-panel-bg, var(--tf-bg-surface, #111318))",
+  cardBg: "var(--tf-surface-card-bg, var(--tf-bg-elevated, #191c23))",
+  glassHighlight:
+    "var(--tf-glass-highlight, linear-gradient(180deg, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 4%, transparent) 0%, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 2%, transparent) 100%))",
+  neutralBg:
+    "var(--tf-state-neutral-bg, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 4%, transparent))",
   textPrimary: "var(--tf-text-primary, #e2e6f0)",
   textSecondary: "var(--tf-text-secondary, #bfc5d4)",
   textMuted: "var(--tf-text-muted, #8892a8)",
+  textOnSuccess: "var(--tf-text-on-success, var(--tf-text-inverse, #0b0d12))",
   primaryLight: "var(--tf-color-primary-light, #818cf8)",
   secondary: "var(--tf-color-secondary, #14b8a6)",
   accent: "var(--tf-color-accent, #f59e0b)",
   success: "var(--tf-color-success, #10b981)",
   borderDefault: "var(--tf-border-default, rgba(202,211,230,0.14))",
   borderSubtle: "var(--tf-border-subtle, rgba(202,211,230,0.08))",
+  shadowLevel2: "var(--tf-shadow-level2, 0 8px 20px rgba(0,0,0,0.18))",
+  shadowLevel3: "var(--tf-shadow-level3, 0 16px 34px rgba(0,0,0,0.28))",
   fontMono: "var(--tf-font-mono, 'JetBrains Mono', monospace)",
   radiusMd: "var(--tf-radius-md, 12px)",
   radiusLg: "var(--tf-radius-lg, 16px)",
@@ -95,7 +104,7 @@ export function ProcessStagesWidget({
         padding: isCompact ? "14px" : "18px",
         borderRadius: v.radiusLg,
         border: `1px solid ${v.borderDefault}`,
-        background: `linear-gradient(180deg, ${v.bgSurface}, ${v.bgBase})`,
+        background: `${v.glassHighlight}, linear-gradient(180deg, ${v.panelBg}, ${v.bgBase})`,
         minHeight: 0,
         flex: 1,
         overflow: "hidden",
@@ -137,11 +146,11 @@ export function ProcessStagesWidget({
                   borderRadius: v.radiusMd,
                   border: `1.5px solid ${isActive ? color : isRevealed ? mixAlpha(color, 50) : v.borderSubtle}`,
                   background: isActive
-                    ? `linear-gradient(180deg, ${mixAlpha(color, 14)}, ${v.bgElevated})`
-                    : v.bgElevated,
+                    ? `linear-gradient(180deg, ${mixAlpha(color, 14)}, ${v.cardBg})`
+                    : v.cardBg,
                   boxShadow: isActive
-                    ? `0 0 24px ${mixAlpha(color, 25)}, 0 4px 16px rgba(0,0,0,0.3)`
-                    : "0 2px 8px rgba(0,0,0,0.15)",
+                    ? `${v.shadowLevel3}, 0 0 24px ${mixAlpha(color, 25)}`
+                    : v.shadowLevel2,
                   opacity: isRevealed ? 1 : 0,
                   transform: isRevealed ? "scale(1)" : "scale(0.92)",
                   transition: "all 400ms cubic-bezier(0.4, 0, 0.2, 1)",
@@ -175,7 +184,7 @@ export function ProcessStagesWidget({
                   >
                     <span
                       className="material-symbols-outlined"
-                      style={{ fontSize: "12px", color: "#0b0d12" }}
+                      style={{ fontSize: "12px", color: v.textOnSuccess }}
                     >
                       check
                     </span>
@@ -190,7 +199,7 @@ export function ProcessStagesWidget({
                     borderRadius: "50%",
                     background: isActive
                       ? mixAlpha(color, 20)
-                      : "rgba(255,255,255,0.04)",
+                      : v.neutralBg,
                     border: `1.5px solid ${isActive ? color : mixAlpha(color, 30)}`,
                     display: "flex",
                     alignItems: "center",
@@ -383,7 +392,7 @@ export function ProcessStagesWidget({
           padding: isCompact ? "10px 12px" : "12px 16px",
           borderRadius: v.radiusSm,
           border: `1px solid ${v.borderDefault}`,
-          background: `linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))`,
+          background: `${v.glassHighlight}, linear-gradient(180deg, ${v.cardBg}, ${v.panelBg})`,
           display: "flex",
           alignItems: "center",
           gap: isCompact ? "10px" : "14px",

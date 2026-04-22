@@ -32,8 +32,6 @@ const PAD_TOP = 14;
 const PARAGRAPH_GAP_MULTIPLIER = 0.6;
 /** Opacity for lines outside the focus band. */
 const DIM_OPACITY = 0.3;
-/** Background colour (translucent dark). */
-const BG = "rgba(6, 8, 14, 0.92)";
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 
@@ -59,6 +57,148 @@ export interface TeleprompterOverlayProps {
   baseFontSize?: number;
 }
 
+interface TeleprompterTheme {
+  overlayBg: string;
+  focusBandBg: string;
+  focusBandAccent: string;
+  button: {
+    border: string;
+    background: string;
+    color: string;
+  };
+  buttonHover: {
+    border: string;
+    background: string;
+    color: string;
+  };
+  canvasBg: string;
+  canvasFocusBandBg: string;
+  canvasFocusBandAccent: string;
+  canvasText: string;
+  canvasHint: string;
+}
+
+function resolveStyleSource(
+  root?: HTMLElement | CSSStyleDeclaration | null,
+): CSSStyleDeclaration | null {
+  if (!root) {
+    if (typeof window === "undefined" || typeof document === "undefined") {
+      return null;
+    }
+    return getComputedStyle(document.documentElement);
+  }
+
+  if ("getPropertyValue" in root) {
+    return root as CSSStyleDeclaration;
+  }
+
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return getComputedStyle(root);
+}
+
+function readRuntimeThemeVar(
+  source: CSSStyleDeclaration | null,
+  variableName: string,
+  fallback: string,
+): string {
+  const value = source?.getPropertyValue(variableName)?.trim();
+  return value || fallback;
+}
+
+function parseColorChannels(
+  value: string,
+): { r: number; g: number; b: number } | null {
+  const color = value.trim();
+
+  if (color.startsWith("#")) {
+    const normalized = color.slice(1);
+    const expanded =
+      normalized.length === 3
+        ? normalized
+            .split("")
+            .map((segment) => `${segment}${segment}`)
+            .join("")
+        : normalized;
+
+    if (expanded.length !== 6) {
+      return null;
+    }
+
+    return {
+      r: parseInt(expanded.slice(0, 2), 16),
+      g: parseInt(expanded.slice(2, 4), 16),
+      b: parseInt(expanded.slice(4, 6), 16),
+    };
+  }
+
+  const match = color.match(/rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (!match) {
+    return null;
+  }
+
+  return {
+    r: Number(match[1]),
+    g: Number(match[2]),
+    b: Number(match[3]),
+  };
+}
+
+function withAlpha(color: string, alpha: number): string {
+  const channels = parseColorChannels(color);
+  if (!channels) {
+    return color;
+  }
+
+  return `rgba(${channels.r}, ${channels.g}, ${channels.b}, ${alpha})`;
+}
+
+export function buildTeleprompterTheme(
+  root?: HTMLElement | CSSStyleDeclaration | null,
+): TeleprompterTheme {
+  const styles = resolveStyleSource(root);
+
+  return {
+    overlayBg: "var(--tf-gradient-overlay, rgba(6, 8, 14, 0.92))",
+    focusBandBg:
+      "var(--tf-state-recommendation-bg, rgba(99, 102, 241, 0.10))",
+    focusBandAccent:
+      "var(--tf-state-recommendation-accent, var(--tf-color-primary-light, #818cf8))",
+    button: {
+      border:
+        "1px solid var(--tf-surface-overlay-border, rgba(202,211,230,0.16))",
+      background: "var(--tf-glass-bg, rgba(23,28,42,0.85))",
+      color:
+        "var(--tf-surface-overlay-text, var(--tf-text-secondary, rgba(226,230,240,0.7)))",
+    },
+    buttonHover: {
+      border:
+        "1px solid var(--tf-state-danger-border, rgba(239,68,68,0.5))",
+      background: "var(--tf-state-danger-bg, rgba(239,68,68,0.18))",
+      color: "var(--tf-text-primary, #fff)",
+    },
+    canvasBg: readRuntimeThemeVar(
+      styles,
+      "--tf-surface-overlay-bg",
+      "#1f222a",
+    ),
+    canvasFocusBandBg: readRuntimeThemeVar(
+      styles,
+      "--tf-state-recommendation-bg",
+      "rgba(99, 102, 241, 0.10)",
+    ),
+    canvasFocusBandAccent: readRuntimeThemeVar(
+      styles,
+      "--tf-state-recommendation-accent",
+      "#818cf8",
+    ),
+    canvasText: readRuntimeThemeVar(styles, "--tf-text-primary", "#e2e6f0"),
+    canvasHint: readRuntimeThemeVar(styles, "--tf-text-secondary", "#bfc5d4"),
+  };
+}
+
 /* ── Component ─────────────────────────────────────────────────────── */
 
 export function TeleprompterOverlay({
@@ -67,6 +207,7 @@ export function TeleprompterOverlay({
   onClose,
   baseFontSize,
 }: TeleprompterOverlayProps) {
+  const theme = buildTeleprompterTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
@@ -201,15 +342,15 @@ export function TeleprompterOverlay({
     ctx.clearRect(0, 0, canvasSize.w, canvasSize.h);
 
     /* Background */
-    ctx.fillStyle = BG;
+    ctx.fillStyle = theme.canvasBg;
     ctx.fillRect(0, 0, canvasSize.w, canvasSize.h);
 
     /* Focus band highlight — covers 3 lines */
     const bandTop = focusCentreCanvas - lineHeight * 1.5;
     const bandBot = focusCentreCanvas + lineHeight * 1.5;
-    ctx.fillStyle = "rgba(99, 102, 241, 0.10)";
+    ctx.fillStyle = theme.canvasFocusBandBg;
     ctx.fillRect(0, bandTop, canvasSize.w, bandBot - bandTop);
-    ctx.fillStyle = "rgba(99, 102, 241, 0.55)";
+    ctx.fillStyle = withAlpha(theme.canvasFocusBandAccent, 0.55);
     ctx.fillRect(6, bandTop, 3, bandBot - bandTop);
 
     ctx.font = font;
@@ -224,15 +365,15 @@ export function TeleprompterOverlay({
       const alpha =
         dist < 0.25 ? 1 : Math.max(DIM_OPACITY, 1 - (dist - 0.25) * 1.8);
 
-      ctx.fillStyle = `rgba(226, 230, 240, ${alpha.toFixed(2)})`;
+      ctx.fillStyle = withAlpha(theme.canvasText, Number(alpha.toFixed(2)));
       ctx.fillText(line.text, PAD_X, drawY);
     }
 
     /* Top/bottom fade gradients. */
     const fadeH = canvasSize.h * 0.15;
     const topGrad = ctx.createLinearGradient(0, 0, 0, fadeH);
-    topGrad.addColorStop(0, BG);
-    topGrad.addColorStop(1, "rgba(6, 8, 14, 0)");
+    topGrad.addColorStop(0, theme.canvasBg);
+    topGrad.addColorStop(1, withAlpha(theme.canvasBg, 0));
     ctx.fillStyle = topGrad;
     ctx.fillRect(0, 0, canvasSize.w, fadeH);
 
@@ -242,14 +383,14 @@ export function TeleprompterOverlay({
       0,
       canvasSize.h,
     );
-    botGrad.addColorStop(0, "rgba(6, 8, 14, 0)");
-    botGrad.addColorStop(1, BG);
+    botGrad.addColorStop(0, withAlpha(theme.canvasBg, 0));
+    botGrad.addColorStop(1, theme.canvasBg);
     ctx.fillStyle = botGrad;
     ctx.fillRect(0, canvasSize.h - fadeH, canvasSize.w, fadeH);
 
     /* Hint */
     ctx.font = `10px 'Inter', system-ui, sans-serif`;
-    ctx.fillStyle = "rgba(226, 230, 240, 0.30)";
+    ctx.fillStyle = withAlpha(theme.canvasHint, 0.34);
     ctx.textBaseline = "bottom";
     const hint = "Scroll ↕  ·  ↑↓ 3 lines  ·  ←→ prev/next  ·  Esc close";
     ctx.fillText(
@@ -263,7 +404,14 @@ export function TeleprompterOverlay({
     if (Math.abs(targetY - scroll.currentY) > 0.3) {
       rafRef.current = requestAnimationFrame(paint);
     }
-  }, [canvasSize]);
+  }, [
+    canvasSize,
+    theme.canvasBg,
+    theme.canvasFocusBandAccent,
+    theme.canvasFocusBandBg,
+    theme.canvasHint,
+    theme.canvasText,
+  ]);
 
   /* Build layout + kick paint whenever text, size, or visibility changes. */
   useEffect(() => {
@@ -364,9 +512,9 @@ export function TeleprompterOverlay({
           width: 32,
           height: 32,
           borderRadius: 8,
-          border: "1px solid rgba(202,211,230,0.16)",
-          background: "rgba(23,28,42,0.85)",
-          color: "rgba(226,230,240,0.7)",
+          border: theme.button.border,
+          background: theme.button.background,
+          color: theme.button.color,
           cursor: "pointer",
           display: "flex",
           alignItems: "center",
@@ -377,19 +525,20 @@ export function TeleprompterOverlay({
           transition: "all 120ms",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.color = "#fff";
-          (e.currentTarget as HTMLButtonElement).style.borderColor =
-            "rgba(239,68,68,0.5)";
-          (e.currentTarget as HTMLButtonElement).style.background =
-            "rgba(239,68,68,0.18)";
+            (e.currentTarget as HTMLButtonElement).style.color =
+              theme.buttonHover.color;
+            (e.currentTarget as HTMLButtonElement).style.border =
+              theme.buttonHover.border;
+            (e.currentTarget as HTMLButtonElement).style.background =
+              theme.buttonHover.background;
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.color =
-            "rgba(226,230,240,0.7)";
-          (e.currentTarget as HTMLButtonElement).style.borderColor =
-            "rgba(202,211,230,0.16)";
-          (e.currentTarget as HTMLButtonElement).style.background =
-            "rgba(23,28,42,0.85)";
+            (e.currentTarget as HTMLButtonElement).style.color =
+              theme.button.color;
+            (e.currentTarget as HTMLButtonElement).style.border =
+              theme.button.border;
+            (e.currentTarget as HTMLButtonElement).style.background =
+              theme.button.background;
         }}
       >
         ×

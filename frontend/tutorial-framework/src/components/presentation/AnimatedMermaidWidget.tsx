@@ -17,7 +17,10 @@
 
 import { useRef, useEffect, useState, useMemo } from "react";
 import { usePresentationStep } from "./PresentationControlEngine";
-import { initMermaid } from "../../theme/mermaidTheme";
+import {
+  applyMermaidSemanticColors,
+  initMermaid,
+} from "../../theme/mermaidTheme";
 
 /* ── CSS var shorthands ───────────────────────────────────────────────── */
 
@@ -25,11 +28,18 @@ const v = {
   bgBase: "var(--tf-bg-base, #0b0d12)",
   bgSurface: "var(--tf-bg-surface, #111318)",
   bgElevated: "var(--tf-bg-elevated, #191c23)",
+  panelBg: "var(--tf-surface-panel-bg, var(--tf-bg-surface, #111318))",
+  cardBg: "var(--tf-surface-card-bg, var(--tf-bg-elevated, #191c23))",
+  controlBg: "var(--tf-surface-control-bg, var(--tf-bg-overlay, #1f222a))",
   textPrimary: "var(--tf-text-primary, #e2e6f0)",
   textSecondary: "var(--tf-text-secondary, #bfc5d4)",
   textMuted: "var(--tf-text-muted, #8892a8)",
   primaryLight: "var(--tf-color-primary-light, #818cf8)",
+  recommendationAccent:
+    "var(--tf-state-recommendation-accent, var(--tf-color-primary-light, #818cf8))",
   borderDefault: "var(--tf-border-default, rgba(202,211,230,0.14))",
+  cardBorder: "var(--tf-surface-card-border, var(--tf-border-default, rgba(202,211,230,0.14)))",
+  glassHighlight: "var(--tf-glass-highlight, none)",
   fontMono: "var(--tf-font-mono, 'JetBrains Mono', monospace)",
   radiusMd: "var(--tf-radius-md, 12px)",
   radiusLg: "var(--tf-radius-lg, 16px)",
@@ -166,7 +176,8 @@ export function AnimatedMermaidWidget({
       if (!mermaid?.render || !containerRef.current) return false;
       initMermaid();
       try {
-        const { svg } = await mermaid.render(renderId, chart);
+        const themedChart = applyMermaidSemanticColors(chart);
+        const { svg } = await mermaid.render(renderId, themedChart);
         if (cancelled || !containerRef.current) return true;
         containerRef.current.innerHTML = svg;
 
@@ -240,7 +251,7 @@ export function AnimatedMermaidWidget({
       const active = nodeId === activeNodeId;
       el.style.opacity = revealed ? "1" : "0";
       el.style.filter = active
-        ? `drop-shadow(0 0 6px ${steps[activeIdx]?.color ?? "#818cf8"})`
+        ? `drop-shadow(0 0 6px ${steps[activeIdx]?.color ?? v.recommendationAccent})`
         : "none";
     }
 
@@ -274,8 +285,8 @@ export function AnimatedMermaidWidget({
         gap: isCompact ? "8px" : "12px",
         padding: isCompact ? "10px" : "14px",
         borderRadius: v.radiusLg,
-        border: `1px solid ${v.borderDefault}`,
-        background: `linear-gradient(180deg, ${v.bgSurface}, ${v.bgBase})`,
+        border: `1px solid ${v.cardBorder}`,
+        background: `linear-gradient(180deg, ${v.panelBg}, ${v.bgBase})`,
         minHeight: 0,
         flex: 1,
         overflow: "hidden",
@@ -290,7 +301,7 @@ export function AnimatedMermaidWidget({
           justifyContent: "center",
           alignItems: "center",
           overflow: "hidden",
-          background: v.bgElevated,
+          background: v.cardBg,
           borderRadius: v.radiusMd,
           padding: isCompact ? "12px" : "18px",
         }}
@@ -319,9 +330,8 @@ export function AnimatedMermaidWidget({
           gap: isCompact ? "8px" : "12px",
           padding: isCompact ? "8px 10px" : "10px 14px",
           borderRadius: v.radiusSm,
-          border: `1px solid ${v.borderDefault}`,
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
+          border: `1px solid ${v.cardBorder}`,
+          background: `${v.glassHighlight}, linear-gradient(180deg, ${v.cardBg}, ${v.controlBg})`,
           flexShrink: 0,
           overflow: "hidden",
         }}

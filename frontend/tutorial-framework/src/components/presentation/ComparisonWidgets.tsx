@@ -16,10 +16,11 @@ import { MermaidDiagram } from "./SlideContent";
 /* ── CSS var shorthands ───────────────────────────────────────────────── */
 
 const v = {
-  bgBase: "var(--tf-bg-base, #0b0d12)",
-  bgSurface: "var(--tf-bg-surface, #111318)",
-  bgElevated: "var(--tf-bg-elevated, #191c23)",
-  bgOverlay: "var(--tf-bg-overlay, #1f222a)",
+  bgBase:
+    "var(--tf-gradient-stage, var(--tf-surface-stage-bg, var(--tf-bg-base, #0b0d12)))",
+  bgSurface: "var(--tf-surface-panel-bg, var(--tf-bg-surface, #111318))",
+  bgElevated: "var(--tf-surface-card-bg, var(--tf-bg-elevated, #191c23))",
+  bgOverlay: "var(--tf-surface-overlay-bg, var(--tf-bg-overlay, #1f222a))",
   textPrimary: "var(--tf-text-primary, #e2e6f0)",
   textSecondary: "var(--tf-text-secondary, #bfc5d4)",
   textMuted: "var(--tf-text-muted, #8892a8)",
@@ -479,8 +480,7 @@ export function ComparisonPipeline({
           padding: "4px 10px",
           borderRadius: v.radiusSm,
           border: `1px solid ${v.borderDefault}`,
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
+          background: v.bgElevated,
           flexShrink: 0,
         }}
       >

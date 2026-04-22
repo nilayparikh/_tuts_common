@@ -15,15 +15,17 @@ import { Slide, Heading, Text, FlexBox, Box, Notes } from "spectacle";
 /* ── Shared tokens as CSS var references ──────────────────────────────── */
 
 const v = {
-  bgBase: "var(--tf-bg-base, #0b0d12)",
-  bgSurface: "var(--tf-bg-surface, #111318)",
-  bgElevated: "var(--tf-bg-elevated, #191c23)",
+  bgBase:
+    "var(--tf-gradient-stage, var(--tf-surface-stage-bg, var(--tf-bg-base, #0b0d12)))",
+  bgSurface: "var(--tf-surface-panel-bg, var(--tf-bg-surface, #111318))",
+  bgElevated: "var(--tf-surface-card-bg, var(--tf-bg-elevated, #191c23))",
   textPrimary: "var(--tf-text-primary, #e2e6f0)",
   textSecondary: "var(--tf-text-secondary, #bfc5d4)",
   textMuted: "var(--tf-text-muted, #8892a8)",
   primary: "var(--tf-color-primary, #6366f1)",
   primaryLight: "var(--tf-color-primary-light, #818cf8)",
   accent: "var(--tf-color-accent, #f59e0b)",
+  textOnPrimary: "var(--tf-text-on-primary, var(--tf-text-inverse, #0b0d12))",
   fontDisplay: "var(--tf-font-display, 'Inter', system-ui, sans-serif)",
   fontBody: "var(--tf-font-body, 'Inter', system-ui, sans-serif)",
 };
@@ -109,7 +111,7 @@ export function TitleSlide({
           <Text
             fontSize="14px"
             fontWeight={700}
-            color={v.bgBase}
+              color={v.textOnPrimary}
             fontFamily={v.fontDisplay}
             style={{
               margin: 0,

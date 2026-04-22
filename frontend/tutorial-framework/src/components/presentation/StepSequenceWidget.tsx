@@ -9,6 +9,17 @@ const v = {
   bgSurface: "var(--tf-bg-surface, #111318)",
   bgElevated: "var(--tf-bg-elevated, #191c23)",
   bgOverlay: "var(--tf-bg-overlay, #1f222a)",
+  panelBg: "var(--tf-surface-panel-bg, var(--tf-bg-surface, #111318))",
+  cardBg: "var(--tf-surface-card-bg, var(--tf-bg-elevated, #191c23))",
+  controlBg: "var(--tf-surface-control-bg, var(--tf-bg-overlay, #1f222a))",
+  glassHighlight:
+    "var(--tf-glass-highlight, linear-gradient(180deg, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 4%, transparent) 0%, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 2%, transparent) 100%))",
+  glassHighlightSoft:
+    "linear-gradient(180deg, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 1.5%, transparent) 0%, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 0.5%, transparent) 100%)",
+  stageGlow:
+    "var(--tf-state-recommendation-bg, color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 14%, transparent))",
+  neutralBg:
+    "var(--tf-state-neutral-bg, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 8%, transparent))",
   textPrimary: "var(--tf-text-primary, #e2e6f0)",
   textSecondary: "var(--tf-text-secondary, #bfc5d4)",
   primaryLight: "var(--tf-color-primary-light, #818cf8)",
@@ -17,6 +28,12 @@ const v = {
   success: "var(--tf-color-success, #10b981)",
   borderDefault: "var(--tf-border-default, rgba(202,211,230,0.14))",
   borderSubtle: "var(--tf-border-subtle, rgba(202,211,230,0.08))",
+  shadowLevel2: "var(--tf-shadow-level2, 0 8px 20px rgba(0,0,0,0.18))",
+  shadowLevel3: "var(--tf-shadow-level3, 0 16px 34px rgba(0,0,0,0.28))",
+  insetHighlight:
+    "inset 0 1px 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 3%, transparent)",
+  guideLine:
+    "color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 3%, transparent)",
   fontMono: "var(--tf-font-mono, 'JetBrains Mono', monospace)",
   radiusMd: "var(--tf-radius-md, 12px)",
   radiusLg: "var(--tf-radius-lg, 16px)",
@@ -84,8 +101,8 @@ export function StepSequenceWidget({
         padding: shellPadding,
         borderRadius: v.radiusLg,
         border: `1px solid ${v.borderDefault}`,
-        background: `radial-gradient(circle at top, rgba(99,102,241,0.14), transparent 34%), linear-gradient(180deg, ${v.bgSurface}, ${v.bgBase})`,
-        backgroundImage: `radial-gradient(circle at top, rgba(99,102,241,0.14), transparent 34%), linear-gradient(180deg, ${v.bgSurface}, ${v.bgBase}), repeating-linear-gradient(180deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 34px)`,
+        background: `radial-gradient(circle at top, ${v.stageGlow}, transparent 34%), linear-gradient(180deg, ${v.panelBg}, ${v.bgBase})`,
+        backgroundImage: `radial-gradient(circle at top, ${v.stageGlow}, transparent 34%), linear-gradient(180deg, ${v.panelBg}, ${v.bgBase}), repeating-linear-gradient(180deg, ${v.guideLine} 0 1px, transparent 1px 34px)`,
         minHeight: 0,
         flex: 1,
         position: "relative",
@@ -105,8 +122,8 @@ export function StepSequenceWidget({
             padding: headerPadding,
             borderRadius: v.radiusMd,
             border: `1px solid ${v.borderDefault}`,
-            background: `linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))`,
-            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+            background: `${v.glassHighlight}, linear-gradient(180deg, ${v.cardBg}, ${v.panelBg})`,
+            boxShadow: v.insetHighlight,
           }}
         >
           <div
@@ -153,10 +170,10 @@ export function StepSequenceWidget({
                 style={{
                   padding: isCompact ? "8px 10px" : "10px 12px",
                   borderRadius: v.radiusSm,
-                  background: `linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))`,
+                  background: `${v.glassHighlight}, linear-gradient(180deg, ${v.cardBg}, ${v.panelBg})`,
                   border: `1px solid ${v.borderDefault}`,
                   textAlign: "center",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)",
+                  boxShadow: v.insetHighlight,
                 }}
               >
                 <div
@@ -210,12 +227,12 @@ export function StepSequenceWidget({
                   padding: stepCardPadding,
                   borderRadius: v.radiusMd,
                   background: isActive
-                    ? `linear-gradient(180deg, rgba(17,19,24,0.96), rgba(11,13,18,0.96))`
-                    : `linear-gradient(180deg, rgba(17,19,24,0.84), rgba(11,13,18,0.84))`,
+                    ? `${v.glassHighlight}, linear-gradient(180deg, ${v.controlBg}, ${v.bgBase})`
+                    : `${v.glassHighlightSoft}, linear-gradient(180deg, ${v.cardBg}, ${v.bgBase})`,
                   border: `1px solid ${isActive ? accentColor : v.borderSubtle}`,
                   boxShadow: isActive
-                    ? `0 0 0 1px ${mixWithTransparent(accentColor, 20)}, 0 16px 34px rgba(0,0,0,0.28)`
-                    : "0 8px 20px rgba(0,0,0,0.18)",
+                    ? `0 0 0 1px ${mixWithTransparent(accentColor, 20)}, ${v.shadowLevel3}`
+                    : v.shadowLevel2,
                 }}
               >
                 <div
@@ -266,7 +283,7 @@ export function StepSequenceWidget({
                       ? mixWithTransparent(accentColor, 26)
                       : v.borderSubtle
                   }`,
-                  background: `linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.005))`,
+                  background: `${v.glassHighlightSoft}, linear-gradient(180deg, ${v.panelBg}, ${v.controlBg})`,
                   overflow: "hidden",
                 }}
               >
@@ -287,12 +304,12 @@ export function StepSequenceWidget({
                   const laneBackground = isActive
                     ? isHighlightedLane
                       ? mixWithTransparent(laneColor, 64)
-                      : "rgba(202,211,230,0.08)"
+                      : v.neutralBg
                     : isComplete && isHighlightedLane
                       ? mixWithTransparent(laneColor, 42)
                       : isHighlightedLane
                         ? mixWithTransparent(laneColor, 24)
-                        : "rgba(202,211,230,0.08)";
+                        : v.neutralBg;
 
                   return (
                     <React.Fragment key={`${step.id}-lane-${laneIndex}`}>

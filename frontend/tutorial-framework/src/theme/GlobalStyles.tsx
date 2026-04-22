@@ -1,5 +1,5 @@
 import React from "react";
-import { tokens } from "./tokens";
+import { tokens, tokensToCSS } from "./tokens";
 
 /**
  * Inject CSS variables and Material Design 3 base resets.
@@ -12,186 +12,11 @@ export function TutorialGlobalStyles(): React.ReactElement {
 }
 
 function buildCSS(): string {
-  const c = tokens.color;
-  const ty = tokens.typography;
-  const r = tokens.radius;
-  const sh = tokens.shadow;
-  const la = tokens.layout;
-  const tr = tokens.transition;
+  const tokenCss = tokensToCSS(tokens);
 
   return `
 /* ─── LocalM Tutorial Framework: CSS Variables (Material Design 3) ──── */
-:root {
-  /* Surfaces */
-  --tf-bg-base:       ${c.bgBase};
-  --tf-bg-surface:    ${c.bgSurface};
-  --tf-bg-elevated:   ${c.bgElevated};
-  --tf-bg-overlay:    ${c.bgOverlay};
-  --tf-bg-highest:    ${c.bgHighest};
-
-  /* Outline */
-  --tf-border-subtle:  ${c.borderSubtle};
-  --tf-border-default: ${c.borderDefault};
-  --tf-border-strong:  ${c.borderStrong};
-
-  /* On-Surface Text */
-  --tf-text-primary:   ${c.textPrimary};
-  --tf-text-secondary: ${c.textSecondary};
-  --tf-text-muted:     ${c.textMuted};
-  --tf-text-inverse:   ${c.textInverse};
-
-  /* Primary */
-  --tf-color-primary:             ${c.primary};
-  --tf-color-primary-light:       ${c.primaryLight};
-  --tf-color-primary-dark:        ${c.primaryDark};
-  --tf-color-primary-bg:          ${c.primaryBg};
-  --tf-color-primary-container:   ${c.primaryContainer};
-
-  /* Secondary */
-  --tf-color-secondary:           ${c.secondary};
-  --tf-color-secondary-light:     ${c.secondaryLight};
-  --tf-color-secondary-container: ${c.secondaryContainer};
-
-  /* Accent / Tertiary */
-  --tf-color-accent:        ${c.accent};
-  --tf-color-accent-light:  ${c.accentLight};
-  --tf-color-accent-dark:   ${c.accentDark};
-  --tf-color-accent-container: ${c.accentContainer};
-
-  /* Semantic */
-  --tf-color-success:           ${c.success};
-  --tf-color-success-bg:        ${c.successBg};
-  --tf-color-success-container: ${c.successContainer};
-  --tf-color-warning:           ${c.warning};
-  --tf-color-warning-bg:        ${c.warningBg};
-  --tf-color-warning-container: ${c.warningContainer};
-  --tf-color-danger:            ${c.danger};
-  --tf-color-danger-bg:         ${c.dangerBg};
-  --tf-color-danger-container:  ${c.dangerContainer};
-
-  /* Semantic borders */
-  --tf-color-primary-border:   ${c.primaryBorder};
-  --tf-color-secondary-border: ${c.secondaryBorder};
-  --tf-color-accent-border:    ${c.accentBorder};
-  --tf-color-success-border:   ${c.successBorder};
-  --tf-color-warning-border:   ${c.warningBorder};
-  --tf-color-danger-border:    ${c.dangerBorder};
-
-  /* Container High (stronger tint) */
-  --tf-color-primary-container-high:   ${c.primaryContainerHigh};
-  --tf-color-secondary-container-high: ${c.secondaryContainerHigh};
-  --tf-color-accent-container-high:    ${c.accentContainerHigh};
-  --tf-color-success-container-high:   ${c.successContainerHigh};
-  --tf-color-warning-container-high:   ${c.warningContainerHigh};
-  --tf-color-danger-container-high:    ${c.dangerContainerHigh};
-
-  /* Brand — LocalM (canonical identity) */
-  --tf-brand-localm-cyan:   ${c.brandLocalmCyan};
-  --tf-brand-localm-blue:   ${c.brandLocalmBlue};
-  --tf-brand-localm-purple: ${c.brandLocalmPurple};
-  --tf-brand-localm-green:  ${c.brandLocalmGreen};
-  --tf-brand-localm-gold:   ${c.brandLocalmGold};
-
-  /* Brand — third-party services */
-  --tf-brand-youtube:  ${c.brandYouTube};
-  --tf-brand-spotify:  ${c.brandSpotify};
-  --tf-brand-apple:    ${c.brandApple};
-  --tf-brand-linkedin: ${c.brandLinkedIn};
-
-  /* Decorative */
-  --tf-decor-red:    ${c.decorRed};
-  --tf-decor-yellow: ${c.decorYellow};
-  --tf-decor-green:  ${c.decorGreen};
-
-  /* Code */
-  --tf-code-bg:       ${c.codeBg};
-  --tf-code-text:     ${c.codeText};
-  --tf-code-keyword:  ${c.codeKeyword};
-  --tf-code-string:   ${c.codeString};
-  --tf-code-comment:  ${c.codeComment};
-  --tf-code-number:   ${c.codeNumber};
-
-  /* Typography (Fluid) */
-  --tf-font-display: ${ty.fontDisplay};
-  --tf-font-body:    ${ty.fontBody};
-  --tf-font-mono:    ${ty.fontMono};
-
-  --tf-text-xs:   ${ty.sizeXs};
-  --tf-text-sm:   ${ty.sizeSm};
-  --tf-text-md:   ${ty.sizeMd};
-  --tf-text-lg:   ${ty.sizeLg};
-  --tf-text-xl:   ${ty.sizeXl};
-  --tf-text-2xl:  ${ty.size2xl};
-  --tf-text-3xl:  ${ty.size3xl};
-  --tf-text-4xl:  ${ty.size4xl};
-  --tf-text-5xl:  ${ty.size5xl};
-  --tf-text-6xl:  ${ty.size6xl};
-
-  --tf-font-normal:    ${ty.weightNormal};
-  --tf-font-medium:    ${ty.weightMedium};
-  --tf-font-semibold:  ${ty.weightSemibold};
-  --tf-font-bold:      ${ty.weightBold};
-  --tf-font-extrabold: ${ty.weightExtrabold};
-
-  --tf-leading-snug:    ${ty.lineSnug};
-  --tf-leading-normal:  ${ty.lineNormal};
-  --tf-leading-relaxed: ${ty.lineRelaxed};
-  --tf-leading-loose:   ${ty.lineLoose};
-
-  --tf-tracking-normal:  ${ty.trackingNormal};
-  --tf-tracking-wide:    ${ty.trackingWide};
-  --tf-tracking-tight:   ${ty.trackingTight};
-  --tf-tracking-tighter: ${ty.trackingTighter};  --tf-tracking-widest:   ${ty.trackingWidest};
-  /* Spacing */
-  --tf-space-0:  0;
-  --tf-space-1:  0.25rem;
-  --tf-space-2:  0.5rem;
-  --tf-space-3:  0.75rem;
-  --tf-space-4:  1rem;
-  --tf-space-5:  1.25rem;
-  --tf-space-6:  1.5rem;
-  --tf-space-8:  2rem;
-  --tf-space-10: 2.5rem;
-  --tf-space-12: 3rem;
-  --tf-space-16: 4rem;
-  --tf-space-20: 5rem;
-  --tf-space-24: 6rem;
-
-  /* Radius (MD3) */
-  --tf-radius-xs:   ${r.xs};
-  --tf-radius-sm:   ${r.sm};
-  --tf-radius-md:   ${r.md};
-  --tf-radius-lg:   ${r.lg};
-  --tf-radius-xl:   ${r.xl};
-  --tf-radius-full: ${r.full};
-
-  /* Shadows (MD3 Elevation) */
-  --tf-shadow-level0: ${sh.level0};
-  --tf-shadow-level1: ${sh.level1};
-  --tf-shadow-level2: ${sh.level2};
-  --tf-shadow-level3: ${sh.level3};
-  --tf-shadow-level4: ${sh.level4};
-  --tf-shadow-level5: ${sh.level5};
-  --tf-shadow-sm: ${sh.sm};
-  --tf-shadow-md: ${sh.md};
-  --tf-shadow-lg: ${sh.lg};
-  --tf-shadow-xl: ${sh.xl};
-  --tf-shadow-glow: ${sh.glow};
-  --tf-shadow-glow-accent: ${sh.glowAccent};
-
-  /* Layout */
-  --tf-content-width:    ${la.contentWidth};
-  --tf-narrow-width:     ${la.narrowWidth};
-  --tf-sidebar-width:    ${la.sidebarWidth};
-  --tf-header-height:    ${la.headerHeight};
-  --tf-course-max-width: ${la.courseMaxWidth};
-
-  /* Transitions (MD3 Motion) */
-  --tf-transition-fast:       ${tr.fast};
-  --tf-transition-normal:     ${tr.normal};
-  --tf-transition-slow:       ${tr.slow};
-  --tf-transition-emphasized: ${tr.emphasized};
-}
+${tokenCss}
 
 /* ─── Base Reset (MD3 Dark) ──────────────────────────────────────────────── */
 *, *::before, *::after {
@@ -292,9 +117,10 @@ code:not(pre code) {
 
 /* ─── Focus ring (MD3) ───────────────────────────────────────────────────── */
 :focus-visible {
-  outline: 0.125rem solid var(--tf-color-primary);
-  outline-offset: 0.125rem;
+  outline: 0.125rem solid var(--tf-focus-ring, var(--tf-color-primary));
+  outline-offset: var(--tf-focus-ring-offset, 0.125rem);
   border-radius: var(--tf-radius-sm);
+  box-shadow: var(--tf-focus-ring-shadow, none);
 }
 
 /* ─── Smooth heading anchors ─────────────────────────────────────────────── */
@@ -311,16 +137,6 @@ strong { font-weight: var(--tf-font-semibold); color: var(--tf-text-primary); }
 /* On wide screens the centered body leaves gutters; subtly tint them. */
 .tf-course-player-wrap {
   background: var(--tf-bg-base);
-}
-
-/* ─── Glass surface defaults ────────────────────────────────────────────── */
-/* ThemeProvider overrides these per-theme via :root inline styles */
-:root {
-  --tf-glass-bg: var(--tf-bg-surface);
-  --tf-glass-blur: 0px;
-  --tf-glass-border: rgba(255,255,255,0.04);
-  --tf-glass-highlight: none;
-  --tf-glow-primary: none;
 }
 
 /* ─── Responsive: framework-level breakpoints ────────────────────────────── */

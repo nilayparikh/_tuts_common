@@ -56,6 +56,7 @@ export {
 export {
   BulletList,
   InfoCard,
+  PracticalNoteCallout,
   ComparisonTable,
   SlideCodeBlock,
   GradientDivider,
