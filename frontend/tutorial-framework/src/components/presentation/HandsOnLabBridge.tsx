@@ -78,8 +78,8 @@ export function HandsOnLabBridge({
         minHeight: 0,
         display: "grid",
         gridTemplateRows: "auto minmax(0, 1fr) auto",
-        gap: "16px",
-        padding: "20px",
+        gap: "14px",
+        padding: "18px",
         borderRadius: v.radiusLg,
         border: `1px solid ${v.borderDefault}`,
         background: `linear-gradient(180deg, ${v.panelBg}, ${v.bgBase})`,
@@ -112,8 +112,8 @@ export function HandsOnLabBridge({
         </div>
         <div
           style={{
-            fontSize: "16px",
-            lineHeight: 1.55,
+            fontSize: "15px",
+            lineHeight: 1.45,
             color: v.textSecondary,
             fontFamily: v.fontBody,
           }}
@@ -127,7 +127,7 @@ export function HandsOnLabBridge({
           minHeight: 0,
           display: "grid",
           placeItems: "center",
-          padding: "10px",
+          padding: "8px",
           borderRadius: v.radiusXl,
           border: `1px solid ${v.borderSubtle}`,
           background:
@@ -148,14 +148,14 @@ export function HandsOnLabBridge({
         />
         <div
           style={{
-            width: "min(860px, 100%)",
-            minHeight: "260px",
+            width: "min(840px, 100%)",
+            minHeight: "228px",
             display: "grid",
             gridTemplateRows: "auto auto auto",
             alignContent: "center",
             justifyItems: "center",
-            gap: "16px",
-            padding: "32px 36px",
+            gap: "12px",
+            padding: "24px 28px",
             borderRadius: v.radiusXl,
             border: `1px solid color-mix(in srgb, ${v.primaryLight} 28%, transparent)`,
             background:
@@ -180,7 +180,7 @@ export function HandsOnLabBridge({
           </div>
           <div
             style={{
-              fontSize: "46px",
+              fontSize: "42px",
               lineHeight: 1,
               fontWeight: 800,
               color: v.textPrimary,
@@ -193,8 +193,8 @@ export function HandsOnLabBridge({
           <div
             style={{
               maxWidth: "720px",
-              fontSize: "20px",
-              lineHeight: 1.45,
+              fontSize: "18px",
+              lineHeight: 1.35,
               color: v.textSecondary,
               fontFamily: v.fontBody,
               textAlign: "center",
@@ -207,8 +207,8 @@ export function HandsOnLabBridge({
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "10px",
-                padding: "10px 14px",
+                gap: "8px",
+                padding: "9px 12px",
                 borderRadius: "999px",
                 background: v.controlBg,
                 border: `1px solid color-mix(in srgb, ${v.primaryLight} 32%, transparent)`,
@@ -220,7 +220,7 @@ export function HandsOnLabBridge({
             >
               <span
                 style={{
-                  fontSize: "11px",
+                  fontSize: "10px",
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   color: v.primaryLight,
@@ -229,7 +229,7 @@ export function HandsOnLabBridge({
               >
                 {commandLabel}
               </span>
-              <span style={{ fontSize: "15px" }}>{command}</span>
+              <span style={{ fontSize: "14px" }}>{command}</span>
             </div>
           ) : null}
         </div>
@@ -239,7 +239,7 @@ export function HandsOnLabBridge({
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${Math.min(Math.max(focusAreas.length, 1), 4)}, minmax(0, 1fr))`,
-          gap: "12px",
+          gap: "10px",
         }}
       >
         {focusAreas.map((area) => {
@@ -251,8 +251,8 @@ export function HandsOnLabBridge({
                 minHeight: 0,
                 display: "grid",
                 gridTemplateRows: "auto auto 1fr",
-                gap: "10px",
-                padding: "14px 16px",
+                gap: "8px",
+                padding: "12px 14px",
                 borderRadius: v.radiusMd,
                 border: `1px solid ${tone.border}`,
                 background: `linear-gradient(180deg, color-mix(in srgb, ${tone.border} 9%, ${v.cardBg}) 0%, ${v.bgSurface} 100%)`,
@@ -260,9 +260,9 @@ export function HandsOnLabBridge({
             >
               <div
                 style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "12px",
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "10px",
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -273,14 +273,14 @@ export function HandsOnLabBridge({
               >
                 <span
                   className="material-symbols-outlined"
-                  style={{ fontSize: "20px", lineHeight: 1 }}
+                  style={{ fontSize: "18px", lineHeight: 1 }}
                 >
                   {area.icon}
                 </span>
               </div>
               <div
                 style={{
-                  fontSize: "11px",
+                  fontSize: "10px",
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   fontFamily: v.fontMono,
@@ -292,10 +292,11 @@ export function HandsOnLabBridge({
               </div>
               <div
                 style={{
-                  fontSize: "15px",
-                  lineHeight: 1.5,
+                  fontSize: "14px",
+                  lineHeight: 1.4,
                   color: v.textSecondary,
                   fontFamily: v.fontBody,
+                  overflowWrap: "anywhere",
                 }}
               >
                 {area.value}
@@ -308,8 +309,8 @@ export function HandsOnLabBridge({
       {note ? (
         <div
           style={{
-            fontSize: "13px",
-            lineHeight: 1.55,
+            fontSize: "12px",
+            lineHeight: 1.45,
             color: v.textMuted,
             fontFamily: v.fontBody,
             textAlign: "center",
