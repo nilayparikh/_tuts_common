@@ -203,6 +203,46 @@ all sites.
 
 ## Component Reference
 
+### `AnimatedSvgFocusWidget`
+
+Use this when a slide already has a raw SVG asset and you want raw SVG with selector-driven step focus instead of rebuilding the diagram in Mermaid.
+
+```tsx
+import {
+  AnimatedSvgFocusWidget,
+  type AnimatedSvgFocusStep,
+} from "@localm/tutorial-framework";
+
+const steps: AnimatedSvgFocusStep[] = [
+  {
+    id: "context",
+    title: "Orient to the full system",
+    transcript: "Start with the full svg dimmed.",
+    revealMode: "context",
+  },
+  {
+    id: "focus-surface",
+    title: "Focus one area",
+    transcript: "Highlight one meaningful block at a time.",
+    selectors: ["#editable-surface", "#route-editable-surface"],
+  },
+  {
+    id: "full-reveal",
+    title: "Restore the full diagram",
+    transcript: "Finish with the entire svg restored.",
+    revealMode: "full",
+  },
+];
+```
+
+Guidelines:
+
+- Add stable `id` attributes to SVG groups before wiring the slide.
+- Prefer `selectors` that target semantic groups like `#bounded-kernel`, not positional transforms.
+- First step should usually be a dimmed context view.
+- Final step should usually be a full reveal.
+- Share the same step array between the slide `steps` field and the widget so presenter narration stays aligned.
+
 ### Layout Components
 
 #### `TutorialLayout`

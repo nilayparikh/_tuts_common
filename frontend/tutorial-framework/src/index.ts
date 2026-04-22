@@ -171,6 +171,8 @@ export {
   ColorLegend,
   ComparisonPipeline,
   PillarGrid,
+  AnimatedSvgFocusWidget,
+  HandsOnLabBridge,
 } from "./components/presentation";
 export type {
   PresentationConfig,
@@ -185,6 +187,8 @@ export type {
   ComparisonPipelineProps,
   PillarData,
   PillarGridProps,
+  AnimatedSvgFocusStep,
+  HandsOnLabFocusArea,
 } from "./components/presentation";
 
 // Course

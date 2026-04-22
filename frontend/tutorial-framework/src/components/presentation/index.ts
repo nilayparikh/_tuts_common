@@ -81,6 +81,11 @@ export {
   type AnimatedMermaidStep,
   type AnimatedMermaidEdge,
 } from "./AnimatedMermaidWidget";
+export {
+  AnimatedSvgFocusWidget,
+  type AnimatedSvgFocusStep,
+} from "./AnimatedSvgFocusWidget";
+export { HandsOnLabBridge, type HandsOnLabFocusArea } from "./HandsOnLabBridge";
 export { ProcessStagesWidget, type ProcessStage } from "./ProcessStagesWidget";
 export {
   ColorLegend,

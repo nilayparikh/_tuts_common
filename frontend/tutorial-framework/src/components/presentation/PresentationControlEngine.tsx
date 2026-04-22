@@ -16,6 +16,7 @@
 import React, {
   useState,
   useEffect,
+  useLayoutEffect,
   useCallback,
   useRef,
   useMemo,
@@ -1177,9 +1178,12 @@ export const PRESENTATION_ENGINE_CSS = `
     min-height: 0;
     display: grid;
     grid-template-columns: 368px 1fr;
+    gap: 18px;
+    padding: 18px;
   }
   .pc-sidebar {
-    border-right: 1px solid var(--pc-sidebar-border);
+    border: 1px solid var(--pc-sidebar-border);
+    border-radius: 28px;
     background: var(--pc-sidebar-bg);
     box-shadow: var(--pc-panel-shadow);
     backdrop-filter: blur(18px) saturate(145%);
@@ -1188,6 +1192,7 @@ export const PRESENTATION_ENGINE_CSS = `
     min-height: 0;
     padding: 16px 14px 14px;
     gap: 14px;
+    overflow: hidden;
   }
   .pc-camera-preview {
     padding: 12px;
@@ -1467,8 +1472,9 @@ export const PRESENTATION_ENGINE_CSS = `
     grid-template-columns: minmax(0, 1fr) 52px;
     overflow: hidden;
     background: var(--pc-transcript-shell-bg);
-    border-left: 1px solid var(--pc-transcript-shell-border);
-    box-shadow: inset 1px 0 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 4%, transparent);
+    border: 1px solid var(--pc-transcript-shell-border);
+    border-radius: 32px;
+    box-shadow: var(--pc-panel-shadow), inset 1px 0 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 4%, transparent);
     backdrop-filter: blur(18px) saturate(145%);
   }
   .pc-transcript-main {
@@ -1477,6 +1483,13 @@ export const PRESENTATION_ENGINE_CSS = `
     min-height: 0;
     display: flex;
     flex-direction: column;
+    margin: 12px 0 12px 12px;
+    padding: 18px;
+    border-radius: 26px;
+    border: 1px solid color-mix(in srgb, var(--pc-transcript-shell-border) 82%, transparent);
+    background: var(--pc-transcript-bg);
+    box-shadow: var(--pc-action-surface-shadow);
+    overflow: hidden;
   }
   .pc-transcript-rail {
     width: 52px;
@@ -1486,9 +1499,11 @@ export const PRESENTATION_ENGINE_CSS = `
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 6px 0;
+    padding: 12px 0;
+    margin: 12px 12px 12px 0;
     gap: 10px;
-    border-left: 1px solid var(--pc-transcript-shell-border);
+    border: 1px solid var(--pc-transcript-shell-border);
+    border-radius: 24px;
     background: var(--pc-rail-bg);
     box-shadow: inset 1px 0 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 6%, transparent);
     backdrop-filter: blur(18px) saturate(145%);
@@ -3508,6 +3523,21 @@ function persistAllEnlargeValues(
   }
 }
 
+function hydrateControlStateEnlarge(
+  channelId: string,
+  deckId: string,
+  slides: { id: string }[],
+  state: ControlState,
+): ControlState {
+  const slideId = slides[state.slideIndex]?.id ?? "";
+  const persistedEnlarge = readSlideEnlarge(channelId, deckId, slideId);
+
+  return {
+    ...state,
+    enlarge: persistedEnlarge,
+  };
+}
+
 /* ── Layout Override Types & Helpers ───────────────────────────────────── */
 
 /**
@@ -4724,6 +4754,24 @@ export function PresentationLayout({
   const currentSlideEnlarge =
     enlargeMap[currentSlide?.id ?? ""] ?? DEFAULT_ENLARGE;
   const currentSlideLayout = layoutMap[currentSlide?.id ?? ""] ?? null;
+
+  useLayoutEffect(() => {
+    setSlideZoom(readStoredSlideZoom(zoomStorageKey));
+    setEnlargeMap(() => {
+      const map: Record<string, number> = {};
+      for (const s of deck.slides) {
+        map[s.id] = readSlideEnlarge(controlChannelId, deck.id, s.id);
+      }
+      return map;
+    });
+    setLayoutMap(() => {
+      const map: Record<string, SlideLayoutOverride | null> = {};
+      for (const s of deck.slides) {
+        map[s.id] = readSlideLayout(controlChannelId, deck.id, s.id);
+      }
+      return map;
+    });
+  }, [controlChannelId, deck.id, deck.slides, zoomStorageKey]);
 
   /** Commit drag-resized row heights to the current slide's layout. */
   const handleRowResize = useCallback(
@@ -6890,7 +6938,15 @@ export function PresentationControlPanel({
       const msg = ev.data;
       if (!msg || msg.type !== "state" || msg.deckId !== deck.id) return;
       setConnectedSurfaces((prev) => ({ ...prev, [msg.surface]: true }));
-      setSurfaceStates((prev) => ({ ...prev, [msg.surface]: msg }));
+      setSurfaceStates((prev) => ({
+        ...prev,
+        [msg.surface]: hydrateControlStateEnlarge(
+          controlChannelId,
+          deck.id,
+          deck.slides,
+          msg,
+        ),
+      }));
     };
 
     const onStorage = (ev: StorageEvent) => {
@@ -6899,7 +6955,15 @@ export function PresentationControlPanel({
         const msg = JSON.parse(ev.newValue) as ControlState;
         if (!msg || msg.type !== "state" || msg.deckId !== deck.id) return;
         setConnectedSurfaces((prev) => ({ ...prev, [msg.surface]: true }));
-        setSurfaceStates((prev) => ({ ...prev, [msg.surface]: msg }));
+        setSurfaceStates((prev) => ({
+          ...prev,
+          [msg.surface]: hydrateControlStateEnlarge(
+            controlChannelId,
+            deck.id,
+            deck.slides,
+            msg,
+          ),
+        }));
       } catch {
         // Ignore malformed sync payloads.
       }
@@ -6922,7 +6986,15 @@ export function PresentationControlPanel({
         const msg = JSON.parse(cachedState) as ControlState;
         if (msg?.type === "state" && msg.deckId === deck.id) {
           setConnectedSurfaces((prev) => ({ ...prev, [msg.surface]: true }));
-          setSurfaceStates((prev) => ({ ...prev, [msg.surface]: msg }));
+          setSurfaceStates((prev) => ({
+            ...prev,
+            [msg.surface]: hydrateControlStateEnlarge(
+              controlChannelId,
+              deck.id,
+              deck.slides,
+              msg,
+            ),
+          }));
         }
       } catch {
         // Ignore malformed sync payloads.
@@ -6936,7 +7008,7 @@ export function PresentationControlPanel({
       channel.close();
       channelRef.current = null;
     };
-  }, [controlChannelId, deck.id, stateStorageKey]);
+  }, [controlChannelId, deck.id, deck.slides, stateStorageKey]);
 
   const send = useCallback(
     (cmd: ControlCommand) => {
@@ -7009,7 +7081,12 @@ export function PresentationControlPanel({
     return () => window.clearTimeout(timeoutId);
   }, [activeSurface, requestState]);
 
-  const activeState = surfaceStates[activeSurface];
+  const activeState = hydrateControlStateEnlarge(
+    controlChannelId,
+    deck.id,
+    deck.slides,
+    surfaceStates[activeSurface],
+  );
   const connected = Object.values(connectedSurfaces).some(Boolean);
   const activeConnected = connectedSurfaces[activeSurface];
   const atStart =
