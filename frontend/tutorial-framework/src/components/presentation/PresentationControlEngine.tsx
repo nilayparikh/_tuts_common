@@ -5010,7 +5010,7 @@ export function PresentationLayout({
           Math.max(0, Math.min(msg.index, currentStepCountRef.current - 1)),
         );
       } else if (msg.action === "set-zoom") {
-        const nextZoom = Math.max(0.85, Math.min(msg.zoom, 1.4));
+        const nextZoom = Math.max(0.85, Math.min(msg.zoom, 2.5));
         setSlideZoom(nextZoom);
       } else if (msg.action === "set-enlarge") {
         const slideId = msg.slideId;
@@ -7250,6 +7250,13 @@ export function PresentationControlPanel({
                   <option value="1.20">1.20x</option>
                   <option value="1.25">1.25x</option>
                   <option value="1.30">1.30x</option>
+                  <option value="1.40">1.40x</option>
+                  <option value="1.50">1.50x</option>
+                  <option value="1.60">1.60x</option>
+                  <option value="1.75">1.75x</option>
+                  <option value="2.00">2.00x</option>
+                  <option value="2.25">2.25x</option>
+                  <option value="2.50">2.50x</option>
                 </select>
               </div>
 
