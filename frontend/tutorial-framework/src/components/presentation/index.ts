@@ -86,6 +86,10 @@ export {
   type AnimatedSvgFocusStep,
 } from "./AnimatedSvgFocusWidget";
 export { HandsOnLabBridge, type HandsOnLabFocusArea } from "./HandsOnLabBridge";
+export {
+  MechanismSnapshotCard,
+  type MechanismSnapshotCardProps,
+} from "./MechanismSnapshotCard";
 export { ProcessStagesWidget, type ProcessStage } from "./ProcessStagesWidget";
 export {
   ColorLegend,

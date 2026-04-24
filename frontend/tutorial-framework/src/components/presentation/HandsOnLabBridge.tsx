@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-
 const v = {
   bgBase: "var(--tf-bg-base, #0b0d12)",
   bgSurface: "var(--tf-bg-surface, #111318)",
@@ -43,6 +41,10 @@ const TONES: Record<HandsOnLabTone, { border: string; label: string }> = {
   warning: { border: v.warning, label: v.warning },
 };
 
+function scalePx(value: string): string {
+  return `calc(${value} * var(--pe-slide-enlarge, 1))`;
+}
+
 export interface HandsOnLabFocusArea {
   label: string;
   value: string;
@@ -53,23 +55,25 @@ export interface HandsOnLabFocusArea {
 interface HandsOnLabBridgeProps {
   eyebrow?: string;
   title?: string;
-  summary: string;
+  summary?: string;
   prompt?: string;
   commandLabel?: string;
   command?: string;
   focusAreas: HandsOnLabFocusArea[];
   note?: string;
+  disclaimer?: string;
 }
 
 export function HandsOnLabBridge({
   eyebrow = "Live Demo Transition",
   title = "Hands-On Lab",
   summary,
-  prompt = "Switch to VS Code and walk the repo before the next build step.",
+  prompt,
   commandLabel = "Open Here",
   command,
   focusAreas,
   note,
+  disclaimer = "Review the code before you run it. These examples are provided as-is, without warranties or liability.",
 }: HandsOnLabBridgeProps) {
   return (
     <div
@@ -77,7 +81,9 @@ export function HandsOnLabBridge({
         flex: 1,
         minHeight: 0,
         display: "grid",
-        gridTemplateRows: "auto minmax(0, 1fr) auto",
+        gridTemplateRows: summary
+          ? "auto minmax(0, 1fr) auto"
+          : "minmax(0, 1fr) auto",
         gap: "14px",
         padding: "18px",
         borderRadius: v.radiusLg,
@@ -86,41 +92,45 @@ export function HandsOnLabBridge({
         overflow: "hidden",
       }}
     >
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "auto 1fr",
-          gap: "12px",
-          alignItems: "start",
-        }}
-      >
+      {summary ? (
         <div
           style={{
-            padding: "6px 12px",
-            borderRadius: "999px",
-            background: v.bgOverlay,
-            border: `1px solid ${v.borderSubtle}`,
-            color: v.primaryLight,
-            fontSize: "11px",
-            fontWeight: 700,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            fontFamily: v.fontMono,
+            display: "grid",
+            gridTemplateColumns: eyebrow ? "auto 1fr" : "1fr",
+            gap: "12px",
+            alignItems: "start",
           }}
         >
-          {eyebrow}
+          {eyebrow ? (
+            <div
+              style={{
+                padding: "6px 12px",
+                borderRadius: "999px",
+                background: v.bgOverlay,
+                border: `1px solid ${v.borderSubtle}`,
+                color: v.primaryLight,
+                fontSize: "11px",
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                fontFamily: v.fontMono,
+              }}
+            >
+              {eyebrow}
+            </div>
+          ) : null}
+          <div
+            style={{
+              fontSize: "15px",
+              lineHeight: 1.45,
+              color: v.textSecondary,
+              fontFamily: v.fontBody,
+            }}
+          >
+            {summary}
+          </div>
         </div>
-        <div
-          style={{
-            fontSize: "15px",
-            lineHeight: 1.45,
-            color: v.textSecondary,
-            fontFamily: v.fontBody,
-          }}
-        >
-          {summary}
-        </div>
-      </div>
+      ) : null}
 
       <div
         style={{
@@ -151,7 +161,6 @@ export function HandsOnLabBridge({
             width: "min(840px, 100%)",
             minHeight: "228px",
             display: "grid",
-            gridTemplateRows: "auto auto auto",
             alignContent: "center",
             justifyItems: "center",
             gap: "12px",
@@ -168,18 +177,6 @@ export function HandsOnLabBridge({
         >
           <div
             style={{
-              fontSize: "12px",
-              fontWeight: 700,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: v.primaryLight,
-              fontFamily: v.fontMono,
-            }}
-          >
-            Transition Out Of Slides
-          </div>
-          <div
-            style={{
               fontSize: "42px",
               lineHeight: 1,
               fontWeight: 800,
@@ -190,18 +187,20 @@ export function HandsOnLabBridge({
           >
             {title}
           </div>
-          <div
-            style={{
-              maxWidth: "720px",
-              fontSize: "18px",
-              lineHeight: 1.35,
-              color: v.textSecondary,
-              fontFamily: v.fontBody,
-              textAlign: "center",
-            }}
-          >
-            {prompt}
-          </div>
+          {prompt ? (
+            <div
+              style={{
+                maxWidth: "720px",
+                fontSize: "18px",
+                lineHeight: 1.35,
+                color: v.textSecondary,
+                fontFamily: v.fontBody,
+                textAlign: "center",
+              }}
+            >
+              {prompt}
+            </div>
+          ) : null}
           {command ? (
             <div
               style={{
@@ -239,7 +238,8 @@ export function HandsOnLabBridge({
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${Math.min(Math.max(focusAreas.length, 1), 4)}, minmax(0, 1fr))`,
-          gap: "10px",
+          gap: scalePx("10px"),
+          alignItems: "stretch",
         }}
       >
         {focusAreas.map((area) => {
@@ -248,11 +248,12 @@ export function HandsOnLabBridge({
             <div
               key={`${area.label}-${area.value}`}
               style={{
+                height: "100%",
                 minHeight: 0,
                 display: "grid",
                 gridTemplateRows: "auto auto 1fr",
-                gap: "8px",
-                padding: "12px 14px",
+                gap: scalePx("8px"),
+                padding: `${scalePx("12px")} ${scalePx("14px")}`,
                 borderRadius: v.radiusMd,
                 border: `1px solid ${tone.border}`,
                 background: `linear-gradient(180deg, color-mix(in srgb, ${tone.border} 9%, ${v.cardBg}) 0%, ${v.bgSurface} 100%)`,
@@ -260,9 +261,9 @@ export function HandsOnLabBridge({
             >
               <div
                 style={{
-                  width: "36px",
-                  height: "36px",
-                  borderRadius: "10px",
+                  width: scalePx("36px"),
+                  height: scalePx("36px"),
+                  borderRadius: scalePx("10px"),
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -273,14 +274,14 @@ export function HandsOnLabBridge({
               >
                 <span
                   className="material-symbols-outlined"
-                  style={{ fontSize: "18px", lineHeight: 1 }}
+                  style={{ fontSize: scalePx("18px"), lineHeight: 1 }}
                 >
                   {area.icon}
                 </span>
               </div>
               <div
                 style={{
-                  fontSize: "10px",
+                  fontSize: scalePx("10px"),
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   fontFamily: v.fontMono,
@@ -292,7 +293,7 @@ export function HandsOnLabBridge({
               </div>
               <div
                 style={{
-                  fontSize: "14px",
+                  fontSize: scalePx("14px"),
                   lineHeight: 1.4,
                   color: v.textSecondary,
                   fontFamily: v.fontBody,
@@ -306,17 +307,38 @@ export function HandsOnLabBridge({
         })}
       </div>
 
-      {note ? (
+      {note || disclaimer ? (
         <div
           style={{
-            fontSize: "12px",
-            lineHeight: 1.45,
-            color: v.textMuted,
+            display: "grid",
+            gap: note && disclaimer ? "4px" : "0",
             fontFamily: v.fontBody,
             textAlign: "center",
           }}
         >
-          {note}
+          {note ? (
+            <div
+              style={{
+                fontSize: "12px",
+                lineHeight: 1.45,
+                color: v.textMuted,
+              }}
+            >
+              {note}
+            </div>
+          ) : null}
+          {disclaimer ? (
+            <div
+              style={{
+                fontSize: "12px",
+                lineHeight: 1.45,
+                color: v.textSecondary,
+                fontWeight: 600,
+              }}
+            >
+              {disclaimer}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

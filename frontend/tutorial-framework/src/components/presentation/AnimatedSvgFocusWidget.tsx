@@ -216,9 +216,7 @@ export function AnimatedSvgFocusWidget({
       data-testid="animated-svg-focus-widget"
       style={{
         display: "flex",
-        flexDirection: "column",
-        gap: isCompact ? "8px" : "12px",
-        padding: isCompact ? "10px" : "14px",
+        padding: isCompact ? "6px" : "10px",
         borderRadius: v.radiusLg,
         border: `1px solid ${v.cardBorder}`,
         background: `linear-gradient(180deg, ${v.panelBg}, ${v.bgBase})`,
@@ -229,15 +227,11 @@ export function AnimatedSvgFocusWidget({
     >
       <div
         style={{
-          flex: 1,
+          width: "100%",
+          height: "100%",
           minHeight: 0,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          flex: 1,
           overflow: "hidden",
-          background: v.cardBg,
-          borderRadius: v.radiusMd,
-          padding: isCompact ? "12px" : "18px",
         }}
       >
         <div
@@ -246,72 +240,10 @@ export function AnimatedSvgFocusWidget({
             width: "100%",
             height: "100%",
             display: "flex",
-            justifyContent: "center",
             alignItems: "center",
+            justifyContent: "center",
           }}
         />
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: isCompact ? "8px" : "12px",
-          padding: isCompact ? "8px 10px" : "10px 14px",
-          borderRadius: v.radiusSm,
-          border: `1px solid ${v.cardBorder}`,
-          background: `${v.glassHighlight}, linear-gradient(180deg, ${v.cardBg}, ${v.controlBg})`,
-          flexShrink: 0,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            fontSize: isCompact ? "9px" : "10px",
-            fontWeight: 700,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            color: activeStep?.color ?? v.primaryLight,
-            fontFamily: v.fontMono,
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-          }}
-        >
-          [{String(activeIdx + 1).padStart(2, "0")}/
-          {String(steps.length).padStart(2, "0")}]
-        </div>
-        <div
-          style={{
-            fontSize: isCompact ? "12px" : "13px",
-            fontWeight: 600,
-            color: v.textPrimary,
-            lineHeight: 1.3,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            flex: 1,
-            minWidth: 0,
-          }}
-        >
-          {activeStep?.title ?? ""}
-        </div>
-        {activeStep?.detail && (
-          <div
-            style={{
-              fontSize: isCompact ? "10px" : "11px",
-              color: v.textSecondary,
-              fontFamily: v.fontMono,
-              lineHeight: 1.3,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              flexShrink: 1,
-              minWidth: 0,
-            }}
-          >
-            {activeStep.detail}
-          </div>
-        )}
       </div>
     </div>
   );

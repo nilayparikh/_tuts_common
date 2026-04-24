@@ -29,6 +29,7 @@ import { resolveTranscriptContent } from "./transcript-utils";
 export interface PresentationSlide {
   id: string;
   title: string;
+  presenterTitle?: string;
   duration?: number;
   narration?: string;
   steps?: PresentationStep[];
@@ -136,6 +137,12 @@ function sanitizePresentationTitle(title: string | undefined): string {
   if (!title) return "";
   const m = title.match(TITLE_PREFIX_RE);
   return m ? title.slice(m[0].length) : title;
+}
+
+function getPresenterSlideTitle(
+  slide: PresentationSlide | undefined,
+): string | undefined {
+  return slide?.presenterTitle ?? slide?.title;
 }
 
 function getCaptureFooterHandle(branding?: PresentationBranding): string {
@@ -4865,7 +4872,7 @@ export function PresentationLayout({
       duration: slide?.duration,
       zoom: slideZoom,
       enlarge: currentSlideEnlarge,
-      slideTitle: slide?.title,
+      slideTitle: getPresenterSlideTitle(slide),
       narration: slide?.narration,
       steps: slide?.steps,
       stepIndex: slide?.steps?.length ? activeStepIndex : 0,
@@ -5205,8 +5212,11 @@ export function PresentationLayout({
           </div>
 
           <div className="pe-header-center">
-            <span className="pe-header-slide-title" title={currentSlide?.title}>
-              {renderSlideTitle(currentSlide?.title)}
+            <span
+              className="pe-header-slide-title"
+              title={getPresenterSlideTitle(currentSlide)}
+            >
+              {renderSlideTitle(getPresenterSlideTitle(currentSlide))}
             </span>
           </div>
 
@@ -5482,7 +5492,7 @@ export function PresentationLayout({
                 <div className="pe-pip-meta">
                   {slideIndex > 0 && slideIndex < slideCount - 1 && (
                     <span className="pe-pip-meta-slide-title">
-                      {renderSlideTitle(currentSlide?.title)}
+                      {renderSlideTitle(getPresenterSlideTitle(currentSlide))}
                     </span>
                   )}
                 </div>
@@ -5801,7 +5811,7 @@ export function ShortsLayout({
       duration: slide?.duration,
       zoom: 1,
       enlarge: DEFAULT_ENLARGE,
-      slideTitle: slide?.title,
+      slideTitle: getPresenterSlideTitle(slide),
       narration: slide?.narration,
       steps: slide?.steps,
       stepIndex: slide?.steps?.length ? activeStepIndex : 0,
@@ -6669,7 +6679,7 @@ export function PresentationControlPanel({
       deck.id,
       deck.slides[0]?.id ?? "",
     ),
-    slideTitle: deck.slides[0]?.title,
+    slideTitle: getPresenterSlideTitle(deck.slides[0]),
     narration: deck.slides[0]?.narration,
     steps: deck.slides[0]?.steps,
     stepIndex: 0,
