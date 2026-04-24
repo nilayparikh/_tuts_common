@@ -3427,6 +3427,10 @@ const ENLARGE_STEP = 0.05;
 const DEFAULT_ENLARGE = 1;
 const TRANSCRIPT_FONT_SCALE_STOPS = [1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7];
 const DEFAULT_TRANSCRIPT_FONT_SCALE_INDEX = 1;
+const TELEPROMPTER_FOCUS_LINE_STOPS = [
+  0.16, 0.19, 0.22, 0.25, 0.28, 0.32, 0.35,
+];
+const DEFAULT_TELEPROMPTER_FOCUS_LINE_INDEX = 2;
 
 function getControlStorageKey(channelId: string, kind: "command" | "state") {
   return `${channelId}:${kind}`;
@@ -6663,6 +6667,7 @@ export function PresentationControlPanel({
   const commandStorageKey = getControlStorageKey(controlChannelId, "command");
   const zoomStorageKey = getZoomStorageKey(controlChannelId, deck.id);
   const transcriptScaleStorageKey = `${controlChannelId}:transcript-scale`;
+  const teleprompterFocusLineStorageKey = `${controlChannelId}:teleprompter-focus-line`;
   const buildDefaultControlState = (
     surface: PresentationSurface,
   ): ControlState => ({
@@ -6766,6 +6771,37 @@ export function PresentationControlPanel({
       // Ignore localStorage access issues.
     }
   }, [transcriptScaleIndex, transcriptScaleStorageKey]);
+  const [teleprompterFocusLineIndex, setTeleprompterFocusLineIndex] =
+    useState<number>(() => {
+      try {
+        const cachedItem = localStorage.getItem(
+          teleprompterFocusLineStorageKey,
+        );
+        if (cachedItem != null) {
+          const cachedValue = Number(cachedItem);
+          if (
+            Number.isInteger(cachedValue) &&
+            cachedValue >= 0 &&
+            cachedValue < TELEPROMPTER_FOCUS_LINE_STOPS.length
+          ) {
+            return cachedValue;
+          }
+        }
+      } catch {
+        // Ignore localStorage access issues.
+      }
+      return DEFAULT_TELEPROMPTER_FOCUS_LINE_INDEX;
+    });
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        teleprompterFocusLineStorageKey,
+        String(teleprompterFocusLineIndex),
+      );
+    } catch {
+      // Ignore localStorage access issues.
+    }
+  }, [teleprompterFocusLineIndex, teleprompterFocusLineStorageKey]);
 
   const [enlargeSaved, setEnlargeSaved] = useState(false);
 
@@ -7110,6 +7146,9 @@ export function PresentationControlPanel({
     TRANSCRIPT_FONT_SCALE_STOPS[transcriptScaleIndex] ??
     TRANSCRIPT_FONT_SCALE_STOPS[DEFAULT_TRANSCRIPT_FONT_SCALE_INDEX];
   const transcriptFontScaleLabel = `${Math.round(transcriptFontScale * 100)}%`;
+  const teleprompterFocusLinePosition =
+    TELEPROMPTER_FOCUS_LINE_STOPS[teleprompterFocusLineIndex] ??
+    TELEPROMPTER_FOCUS_LINE_STOPS[DEFAULT_TELEPROMPTER_FOCUS_LINE_INDEX];
   const timerOver =
     activeState.duration != null && activeState.elapsed > activeState.duration;
   const guidesOn = activeState.showGuides;
@@ -7590,6 +7629,7 @@ export function PresentationControlPanel({
                   visible={teleprompterOn}
                   onClose={() => setTeleprompterOn(false)}
                   baseFontSize={14 * transcriptFontScale}
+                  focusLinePosition={teleprompterFocusLinePosition}
                 />
               )}
             </div>
@@ -7737,6 +7777,56 @@ export function PresentationControlPanel({
                 aria-label="Toggle teleprompter"
               >
                 {Icons.teleprompter}
+              </button>
+              <button
+                className="pc-dock-btn"
+                onClick={() =>
+                  setTeleprompterFocusLineIndex(
+                    Math.max(0, teleprompterFocusLineIndex - 1),
+                  )
+                }
+                disabled={teleprompterFocusLineIndex <= 0}
+                data-tip="Raise prompt line"
+                aria-label="Raise teleprompter line"
+              >
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    lineHeight: 1,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  T↑
+                </span>
+              </button>
+              <button
+                className="pc-dock-btn"
+                onClick={() =>
+                  setTeleprompterFocusLineIndex(
+                    Math.min(
+                      TELEPROMPTER_FOCUS_LINE_STOPS.length - 1,
+                      teleprompterFocusLineIndex + 1,
+                    ),
+                  )
+                }
+                disabled={
+                  teleprompterFocusLineIndex >=
+                  TELEPROMPTER_FOCUS_LINE_STOPS.length - 1
+                }
+                data-tip="Lower prompt line"
+                aria-label="Lower teleprompter line"
+              >
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    lineHeight: 1,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  T↓
+                </span>
               </button>
 
               {/* ── Steps ── */}

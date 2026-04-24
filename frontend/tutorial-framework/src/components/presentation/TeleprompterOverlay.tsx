@@ -32,6 +32,12 @@ const PAD_TOP = 14;
 const PARAGRAPH_GAP_MULTIPLIER = 0.6;
 /** Opacity for lines outside the focus band. */
 const DIM_OPACITY = 0.3;
+/** Default guide-line position, measured as a ratio of canvas height. */
+const DEFAULT_FOCUS_LINE_POSITION = 0.22;
+/** Lower bound for manual guide-line placement. */
+const MIN_FOCUS_LINE_POSITION = 0.16;
+/** Upper bound for manual guide-line placement. */
+const MAX_FOCUS_LINE_POSITION = 0.42;
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 
@@ -55,6 +61,8 @@ export interface TeleprompterOverlayProps {
    * Defaults to ~15.4 (14 × 1.1) when omitted.
    */
   baseFontSize?: number;
+  /** Vertical guide-line position as a ratio of overlay height. */
+  focusLinePosition?: number;
 }
 
 interface TeleprompterTheme {
@@ -162,8 +170,7 @@ export function buildTeleprompterTheme(
 
   return {
     overlayBg: "var(--tf-gradient-overlay, rgba(6, 8, 14, 0.92))",
-    focusBandBg:
-      "var(--tf-state-recommendation-bg, rgba(99, 102, 241, 0.10))",
+    focusBandBg: "var(--tf-state-recommendation-bg, rgba(99, 102, 241, 0.10))",
     focusBandAccent:
       "var(--tf-state-recommendation-accent, var(--tf-color-primary-light, #818cf8))",
     button: {
@@ -174,16 +181,11 @@ export function buildTeleprompterTheme(
         "var(--tf-surface-overlay-text, var(--tf-text-secondary, rgba(226,230,240,0.7)))",
     },
     buttonHover: {
-      border:
-        "1px solid var(--tf-state-danger-border, rgba(239,68,68,0.5))",
+      border: "1px solid var(--tf-state-danger-border, rgba(239,68,68,0.5))",
       background: "var(--tf-state-danger-bg, rgba(239,68,68,0.18))",
       color: "var(--tf-text-primary, #fff)",
     },
-    canvasBg: readRuntimeThemeVar(
-      styles,
-      "--tf-surface-overlay-bg",
-      "#1f222a",
-    ),
+    canvasBg: readRuntimeThemeVar(styles, "--tf-surface-overlay-bg", "#1f222a"),
     canvasFocusBandBg: readRuntimeThemeVar(
       styles,
       "--tf-state-recommendation-bg",
@@ -206,6 +208,7 @@ export function TeleprompterOverlay({
   visible,
   onClose,
   baseFontSize,
+  focusLinePosition,
 }: TeleprompterOverlayProps) {
   const theme = buildTeleprompterTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -335,7 +338,17 @@ export function TeleprompterOverlay({
     const targetY = lines[Math.min(scroll.targetLine, maxLineIndex)]?.y ?? 0;
     scroll.currentY += (targetY - scroll.currentY) * SCROLL_LERP;
 
-    const focusCentreCanvas = Math.max(lineHeight * 2, canvasSize.h * 0.35);
+    const clampedFocusLinePosition = Math.min(
+      MAX_FOCUS_LINE_POSITION,
+      Math.max(
+        MIN_FOCUS_LINE_POSITION,
+        focusLinePosition ?? DEFAULT_FOCUS_LINE_POSITION,
+      ),
+    );
+    const focusCentreCanvas = Math.max(
+      lineHeight * 2,
+      canvasSize.h * clampedFocusLinePosition,
+    );
     const offsetY = focusCentreCanvas - scroll.currentY;
 
     ctx.save();
@@ -411,6 +424,7 @@ export function TeleprompterOverlay({
     theme.canvasFocusBandBg,
     theme.canvasHint,
     theme.canvasText,
+    focusLinePosition,
   ]);
 
   /* Build layout + kick paint whenever text, size, or visibility changes. */
@@ -525,20 +539,20 @@ export function TeleprompterOverlay({
           transition: "all 120ms",
         }}
         onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color =
-              theme.buttonHover.color;
-            (e.currentTarget as HTMLButtonElement).style.border =
-              theme.buttonHover.border;
-            (e.currentTarget as HTMLButtonElement).style.background =
-              theme.buttonHover.background;
+          (e.currentTarget as HTMLButtonElement).style.color =
+            theme.buttonHover.color;
+          (e.currentTarget as HTMLButtonElement).style.border =
+            theme.buttonHover.border;
+          (e.currentTarget as HTMLButtonElement).style.background =
+            theme.buttonHover.background;
         }}
         onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color =
-              theme.button.color;
-            (e.currentTarget as HTMLButtonElement).style.border =
-              theme.button.border;
-            (e.currentTarget as HTMLButtonElement).style.background =
-              theme.button.background;
+          (e.currentTarget as HTMLButtonElement).style.color =
+            theme.button.color;
+          (e.currentTarget as HTMLButtonElement).style.border =
+            theme.button.border;
+          (e.currentTarget as HTMLButtonElement).style.background =
+            theme.button.background;
         }}
       >
         ×
