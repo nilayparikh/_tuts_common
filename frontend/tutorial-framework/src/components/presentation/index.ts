@@ -104,6 +104,12 @@ export {
   type PillarData,
   type PillarGridProps,
 } from "./ComparisonWidgets";
+export {
+  CourseRoadmapRecap,
+  type CourseRoadmapLesson,
+  type CourseRoadmapRecapProps,
+  type CourseRoadmapRecapStep,
+} from "./CourseRoadmapRecap";
 
 // Teleprompter
 export {
