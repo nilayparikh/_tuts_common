@@ -26,7 +26,7 @@ const v = {
 };
 
 function scalePx(value: string): string {
-  return `calc(${value} * (1 + ((var(--pe-slide-enlarge, 1) - 1) * 0.4)))`;
+  return `calc(${value} * var(--pe-roadmap-density-scale, 1))`;
 }
 
 function scaleSpace(...values: string[]): string {
@@ -72,6 +72,10 @@ export function CourseRoadmapRecap({
   currentLockLabel = "Current lock",
 }: CourseRoadmapRecapProps) {
   const currentIndex = Number.parseInt(lessonNumber, 10) - 1;
+  const isDenseRoadmap = lessons.length >= 7;
+  const roadmapDensityScale = isDenseRoadmap
+    ? "clamp(0.95, calc(0.95 + ((var(--pe-slide-enlarge, 1) - 1) * 0.08)), 1.06)"
+    : "clamp(1, calc(1 + ((var(--pe-slide-enlarge, 1) - 1) * 0.4)), 1.24)";
   const { stepIndex, stepCount } = usePresentationStep();
   const activeIdx =
     stepCount > 0 ? Math.min(stepIndex, Math.max(steps.length - 1, 0)) : 0;
@@ -86,19 +90,25 @@ export function CourseRoadmapRecap({
 
   return (
     <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "minmax(0, 1.18fr) minmax(0, 0.82fr)",
-        gap: scalePx("18px"),
-        minHeight: 0,
-        flex: 1,
-        overflow: "hidden",
-      }}
+      data-roadmap-density={isDenseRoadmap ? "dense" : "default"}
+      style={
+        {
+          "--pe-roadmap-density-scale": roadmapDensityScale,
+          display: "grid",
+          gridTemplateColumns: isDenseRoadmap
+            ? "minmax(0, 1.28fr) minmax(0, 0.72fr)"
+            : "minmax(0, 1.18fr) minmax(0, 0.82fr)",
+          gap: scalePx(isDenseRoadmap ? "14px" : "18px"),
+          minHeight: 0,
+          flex: 1,
+          overflow: "hidden",
+        } as React.CSSProperties
+      }
     >
       <div
         style={{
           minHeight: 0,
-          borderRadius: scalePx("22px"),
+          borderRadius: scalePx(isDenseRoadmap ? "20px" : "22px"),
           border: `1px solid ${v.borderDefault}`,
           background: `linear-gradient(180deg, color-mix(in srgb, ${v.primary} 6%, ${v.bgSurface}) 0%, ${v.bgElevated} 100%)`,
           overflow: "hidden",
@@ -111,7 +121,12 @@ export function CourseRoadmapRecap({
             position: "relative",
             minHeight: 0,
             flex: 1,
-            padding: scaleSpace("18px", "20px", "18px", "78px"),
+            padding: scaleSpace(
+              isDenseRoadmap ? "14px" : "18px",
+              isDenseRoadmap ? "16px" : "20px",
+              isDenseRoadmap ? "14px" : "18px",
+              isDenseRoadmap ? "70px" : "78px",
+            ),
             overflow: "hidden",
           }}
         >
@@ -119,9 +134,9 @@ export function CourseRoadmapRecap({
             aria-hidden="true"
             style={{
               position: "absolute",
-              left: scalePx("42px"),
-              top: scalePx("28px"),
-              bottom: scalePx("28px"),
+              left: scalePx(isDenseRoadmap ? "38px" : "42px"),
+              top: scalePx(isDenseRoadmap ? "22px" : "28px"),
+              bottom: scalePx(isDenseRoadmap ? "22px" : "28px"),
               width: scalePx("3px"),
               borderRadius: "999px",
               background:
@@ -133,10 +148,10 @@ export function CourseRoadmapRecap({
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: scalePx("12px"),
+              gap: scalePx(isDenseRoadmap ? "9px" : "12px"),
               minHeight: 0,
               overflowY: "auto",
-              paddingRight: scalePx("8px"),
+              paddingRight: scalePx(isDenseRoadmap ? "6px" : "8px"),
             }}
           >
             {lessons.map((lesson, index) => {
@@ -186,8 +201,8 @@ export function CourseRoadmapRecap({
                   style={{
                     position: "relative",
                     display: "grid",
-                    gridTemplateColumns: `${scalePx("28px")} minmax(0, 1fr)`,
-                    gap: scalePx("14px"),
+                    gridTemplateColumns: `${scalePx(isDenseRoadmap ? "24px" : "28px")} minmax(0, 1fr)`,
+                    gap: scalePx(isDenseRoadmap ? "12px" : "14px"),
                     alignItems: "stretch",
                     opacity: emphasis ? 1 : 0.48,
                     transform: emphasis ? "translateX(0)" : "translateX(2px)",
@@ -198,7 +213,7 @@ export function CourseRoadmapRecap({
                     style={{
                       position: "relative",
                       zIndex: 1,
-                      width: scalePx("28px"),
+                      width: scalePx(isDenseRoadmap ? "24px" : "28px"),
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -206,12 +221,12 @@ export function CourseRoadmapRecap({
                   >
                     <div
                       style={{
-                        width: scalePx("18px"),
-                        height: scalePx("18px"),
+                        width: scalePx(isDenseRoadmap ? "16px" : "18px"),
+                        height: scalePx(isDenseRoadmap ? "16px" : "18px"),
                         borderRadius: "999px",
                         border: `2px solid ${palette.border}`,
                         background: palette.fill,
-                        boxShadow: `0 0 0 ${scalePx("5px")} color-mix(in srgb, ${palette.glow} 18%, transparent), 0 0 ${scalePx("24px")} color-mix(in srgb, ${palette.glow} 28%, transparent)`,
+                        boxShadow: `0 0 0 ${scalePx(isDenseRoadmap ? "4px" : "5px")} color-mix(in srgb, ${palette.glow} 18%, transparent), 0 0 ${scalePx(isDenseRoadmap ? "18px" : "24px")} color-mix(in srgb, ${palette.glow} 28%, transparent)`,
                       }}
                     />
                   </div>
@@ -219,9 +234,12 @@ export function CourseRoadmapRecap({
                     style={{
                       display: "flex",
                       flexDirection: "column",
-                      gap: scalePx("8px"),
-                      padding: scaleSpace("14px", "16px"),
-                      borderRadius: scalePx("18px"),
+                      gap: scalePx(isDenseRoadmap ? "6px" : "8px"),
+                      padding: scaleSpace(
+                        isDenseRoadmap ? "11px" : "14px",
+                        isDenseRoadmap ? "13px" : "16px",
+                      ),
+                      borderRadius: scalePx(isDenseRoadmap ? "16px" : "18px"),
                       border: `1px solid color-mix(in srgb, ${palette.border} 42%, ${v.borderDefault})`,
                       background: `linear-gradient(180deg, color-mix(in srgb, ${palette.fill} 82%, ${v.bgSurface}) 0%, color-mix(in srgb, ${v.bgElevated} 90%, ${palette.glow} 10%) 100%)`,
                       boxShadow:
@@ -233,13 +251,13 @@ export function CourseRoadmapRecap({
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
-                        gap: scalePx("12px"),
+                        gap: scalePx(isDenseRoadmap ? "10px" : "12px"),
                         alignItems: "baseline",
                       }}
                     >
                       <div
                         style={{
-                          fontSize: scalePx("12px"),
+                          fontSize: scalePx(isDenseRoadmap ? "11px" : "12px"),
                           fontWeight: 700,
                           letterSpacing: "0.08em",
                           textTransform: "uppercase",
@@ -252,7 +270,7 @@ export function CourseRoadmapRecap({
                       </div>
                       <div
                         style={{
-                          fontSize: scalePx("12px"),
+                          fontSize: scalePx(isDenseRoadmap ? "11px" : "12px"),
                           lineHeight: 1.3,
                           fontFamily: v.fontMono,
                           color: palette.label,
@@ -264,22 +282,30 @@ export function CourseRoadmapRecap({
                     </div>
                     <div
                       style={{
-                        fontSize: scalePx("25px"),
-                        lineHeight: 1.08,
+                        fontSize: scalePx(isDenseRoadmap ? "21px" : "25px"),
+                        lineHeight: isDenseRoadmap ? 1.02 : 1.08,
                         fontWeight: 800,
                         letterSpacing: "-0.02em",
                         color: palette.body,
                         fontFamily: v.fontDisplay,
+                        display: "-webkit-box",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 2,
+                        overflow: "hidden",
                       }}
                     >
                       {lesson.title}
                     </div>
                     <div
                       style={{
-                        fontSize: scalePx("14px"),
-                        lineHeight: 1.5,
+                        fontSize: scalePx(isDenseRoadmap ? "13px" : "14px"),
+                        lineHeight: isDenseRoadmap ? 1.4 : 1.5,
                         color: v.textSecondary,
-                        maxWidth: "94%",
+                        maxWidth: isDenseRoadmap ? "100%" : "94%",
+                        display: "-webkit-box",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: isDenseRoadmap ? 2 : 3,
+                        overflow: "hidden",
                       }}
                     >
                       {lesson.description}
@@ -296,22 +322,25 @@ export function CourseRoadmapRecap({
         style={{
           display: "grid",
           gridTemplateRows: "auto minmax(0, 1fr) auto",
-          gap: scalePx("14px"),
+          gap: scalePx(isDenseRoadmap ? "12px" : "14px"),
           minHeight: 0,
           overflow: "hidden",
         }}
       >
         <div
           style={{
-            padding: scaleSpace("14px", "16px"),
-            borderRadius: scalePx("18px"),
+            padding: scaleSpace(
+              isDenseRoadmap ? "12px" : "14px",
+              isDenseRoadmap ? "14px" : "16px",
+            ),
+            borderRadius: scalePx(isDenseRoadmap ? "16px" : "18px"),
             border: `1px solid color-mix(in srgb, ${v.primary} 34%, ${v.borderDefault})`,
             background: `linear-gradient(180deg, color-mix(in srgb, ${v.primary} 10%, ${v.bgSurface}) 0%, ${v.bgElevated} 100%)`,
           }}
         >
           <div
             style={{
-              fontSize: scalePx("11px"),
+              fontSize: scalePx(isDenseRoadmap ? "10px" : "11px"),
               fontWeight: 700,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
@@ -324,8 +353,8 @@ export function CourseRoadmapRecap({
           <div
             style={{
               marginTop: scalePx("8px"),
-              fontSize: scalePx("14px"),
-              lineHeight: 1.55,
+              fontSize: scalePx(isDenseRoadmap ? "13px" : "14px"),
+              lineHeight: isDenseRoadmap ? 1.45 : 1.55,
               color: v.textSecondary,
             }}
           >
@@ -335,13 +364,13 @@ export function CourseRoadmapRecap({
 
         <div
           style={{
-            padding: scalePx("18px"),
-            borderRadius: scalePx("18px"),
+            padding: scalePx(isDenseRoadmap ? "15px" : "18px"),
+            borderRadius: scalePx(isDenseRoadmap ? "16px" : "18px"),
             border: `1px solid ${v.borderDefault}`,
             background: `linear-gradient(180deg, color-mix(in srgb, ${v.accent} 8%, ${v.bgSurface}) 0%, ${v.bgElevated} 100%)`,
             display: "flex",
             flexDirection: "column",
-            gap: scalePx("12px"),
+            gap: scalePx(isDenseRoadmap ? "10px" : "12px"),
             minHeight: 0,
             overflow: "hidden",
           }}
@@ -350,9 +379,12 @@ export function CourseRoadmapRecap({
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: scalePx("8px"),
+              gap: scalePx(isDenseRoadmap ? "6px" : "8px"),
               alignSelf: "flex-start",
-              padding: scaleSpace("7px", "10px"),
+              padding: scaleSpace(
+                isDenseRoadmap ? "6px" : "7px",
+                isDenseRoadmap ? "8px" : "10px",
+              ),
               borderRadius: "999px",
               background:
                 "color-mix(in srgb, var(--tf-bg-overlay, #1f222a) 82%, transparent)",
@@ -365,12 +397,12 @@ export function CourseRoadmapRecap({
                 height: scalePx("8px"),
                 borderRadius: "999px",
                 background: v.accentLight,
-                boxShadow: `0 0 ${scalePx("18px")} color-mix(in srgb, ${v.accentLight} 58%, transparent)`,
+                boxShadow: `0 0 ${scalePx(isDenseRoadmap ? "14px" : "18px")} color-mix(in srgb, ${v.accentLight} 58%, transparent)`,
               }}
             />
             <span
               style={{
-                fontSize: scalePx("11px"),
+                fontSize: scalePx(isDenseRoadmap ? "10px" : "11px"),
                 fontWeight: 700,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
@@ -385,16 +417,16 @@ export function CourseRoadmapRecap({
           <div
             style={{
               display: "grid",
-              gap: scalePx("12px"),
+              gap: scalePx(isDenseRoadmap ? "10px" : "12px"),
               minHeight: 0,
               overflowY: "auto",
-              paddingRight: scalePx("6px"),
+              paddingRight: scalePx(isDenseRoadmap ? "4px" : "6px"),
             }}
           >
             <div
               style={{
-                fontSize: scalePx("26px"),
-                lineHeight: 1.08,
+                fontSize: scalePx(isDenseRoadmap ? "23px" : "26px"),
+                lineHeight: isDenseRoadmap ? 1.03 : 1.08,
                 fontWeight: 800,
                 letterSpacing: "-0.02em",
                 color: v.textPrimary,
@@ -405,8 +437,8 @@ export function CourseRoadmapRecap({
             </div>
             <div
               style={{
-                fontSize: scalePx("15px"),
-                lineHeight: 1.6,
+                fontSize: scalePx(isDenseRoadmap ? "14px" : "15px"),
+                lineHeight: isDenseRoadmap ? 1.5 : 1.6,
                 color: v.textSecondary,
               }}
             >
@@ -415,9 +447,12 @@ export function CourseRoadmapRecap({
             <div
               style={{
                 display: "grid",
-                gap: scalePx("8px"),
-                padding: scaleSpace("12px", "14px"),
-                borderRadius: scalePx("16px"),
+                gap: scalePx(isDenseRoadmap ? "7px" : "8px"),
+                padding: scaleSpace(
+                  isDenseRoadmap ? "10px" : "12px",
+                  isDenseRoadmap ? "12px" : "14px",
+                ),
+                borderRadius: scalePx(isDenseRoadmap ? "14px" : "16px"),
                 border: `1px solid ${v.borderSubtle}`,
                 background:
                   "color-mix(in srgb, var(--tf-bg-overlay, #1f222a) 84%, transparent)",
@@ -425,7 +460,7 @@ export function CourseRoadmapRecap({
             >
               <div
                 style={{
-                  fontSize: scalePx("11px"),
+                  fontSize: scalePx(isDenseRoadmap ? "10px" : "11px"),
                   fontWeight: 700,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
@@ -435,31 +470,36 @@ export function CourseRoadmapRecap({
               >
                 Start to finish
               </div>
-              <div style={{ display: "grid", gap: scalePx("8px") }}>
+              <div
+                style={{
+                  display: "grid",
+                  gap: scalePx(isDenseRoadmap ? "7px" : "8px"),
+                }}
+              >
                 {pathBullets.map((bullet) => (
                   <div
                     key={bullet}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: `${scalePx("8px")} minmax(0, 1fr)`,
-                      gap: scalePx("8px"),
+                      gridTemplateColumns: `${scalePx(isDenseRoadmap ? "7px" : "8px")} minmax(0, 1fr)`,
+                      gap: scalePx(isDenseRoadmap ? "7px" : "8px"),
                       alignItems: "start",
                     }}
                   >
                     <div
                       style={{
-                        width: scalePx("8px"),
-                        height: scalePx("8px"),
-                        marginTop: scalePx("7px"),
+                        width: scalePx(isDenseRoadmap ? "7px" : "8px"),
+                        height: scalePx(isDenseRoadmap ? "7px" : "8px"),
+                        marginTop: scalePx(isDenseRoadmap ? "6px" : "7px"),
                         borderRadius: "999px",
                         background: v.accentLight,
-                        boxShadow: `0 0 ${scalePx("14px")} color-mix(in srgb, ${v.accentLight} 42%, transparent)`,
+                        boxShadow: `0 0 ${scalePx(isDenseRoadmap ? "12px" : "14px")} color-mix(in srgb, ${v.accentLight} 42%, transparent)`,
                       }}
                     />
                     <div
                       style={{
-                        fontSize: scalePx("13px"),
-                        lineHeight: 1.5,
+                        fontSize: scalePx(isDenseRoadmap ? "12px" : "13px"),
+                        lineHeight: isDenseRoadmap ? 1.4 : 1.5,
                         color: v.textSecondary,
                       }}
                     >
@@ -476,13 +516,16 @@ export function CourseRoadmapRecap({
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-            gap: scalePx("10px"),
+            gap: scalePx(isDenseRoadmap ? "8px" : "10px"),
           }}
         >
           <div
             style={{
-              padding: scaleSpace("12px", "14px"),
-              borderRadius: scalePx("14px"),
+              padding: scaleSpace(
+                isDenseRoadmap ? "10px" : "12px",
+                isDenseRoadmap ? "12px" : "14px",
+              ),
+              borderRadius: scalePx(isDenseRoadmap ? "13px" : "14px"),
               border: `1px solid ${v.borderSubtle}`,
               background:
                 "color-mix(in srgb, var(--tf-bg-overlay, #1f222a) 84%, transparent)",
@@ -490,7 +533,7 @@ export function CourseRoadmapRecap({
           >
             <div
               style={{
-                fontSize: scalePx("11px"),
+                fontSize: scalePx(isDenseRoadmap ? "10px" : "11px"),
                 fontWeight: 700,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
@@ -503,7 +546,7 @@ export function CourseRoadmapRecap({
             <div
               style={{
                 marginTop: scalePx("8px"),
-                fontSize: scalePx("22px"),
+                fontSize: scalePx(isDenseRoadmap ? "20px" : "22px"),
                 lineHeight: 1,
                 fontWeight: 800,
                 color: v.textPrimary,
@@ -515,8 +558,11 @@ export function CourseRoadmapRecap({
           </div>
           <div
             style={{
-              padding: scaleSpace("12px", "14px"),
-              borderRadius: scalePx("14px"),
+              padding: scaleSpace(
+                isDenseRoadmap ? "10px" : "12px",
+                isDenseRoadmap ? "12px" : "14px",
+              ),
+              borderRadius: scalePx(isDenseRoadmap ? "13px" : "14px"),
               border: `1px solid ${v.borderSubtle}`,
               background:
                 "color-mix(in srgb, var(--tf-bg-overlay, #1f222a) 84%, transparent)",
@@ -524,7 +570,7 @@ export function CourseRoadmapRecap({
           >
             <div
               style={{
-                fontSize: scalePx("11px"),
+                fontSize: scalePx(isDenseRoadmap ? "10px" : "11px"),
                 fontWeight: 700,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
@@ -537,8 +583,8 @@ export function CourseRoadmapRecap({
             <div
               style={{
                 marginTop: scalePx("8px"),
-                fontSize: scalePx("16px"),
-                lineHeight: 1.35,
+                fontSize: scalePx(isDenseRoadmap ? "14px" : "16px"),
+                lineHeight: isDenseRoadmap ? 1.3 : 1.4,
                 fontWeight: 700,
                 color: v.textPrimary,
                 fontFamily: v.fontDisplay,
