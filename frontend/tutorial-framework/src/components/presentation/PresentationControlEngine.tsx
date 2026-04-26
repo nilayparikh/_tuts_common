@@ -1442,12 +1442,20 @@ export const PRESENTATION_ENGINE_CSS = `
     background: var(--pc-sidebar-control-bg);
     color: var(--tf-text-secondary, #bfc5d4);
     padding: 10px 12px;
-    cursor: pointer;
+    cursor: grab;
     display: flex;
     align-items: baseline;
     gap: 12px;
     box-shadow: var(--pc-sidebar-control-shadow);
     backdrop-filter: blur(16px) saturate(140%);
+  }
+  .pc-jump-item.dragging {
+    opacity: 0.55;
+    cursor: grabbing;
+  }
+  .pc-jump-item.drop-target {
+    border-color: var(--pc-action-surface-hover-border);
+    box-shadow: var(--pc-action-surface-shadow);
   }
   .pc-jump-item:hover {
     background: var(--pc-action-surface-hover-bg);
@@ -1471,6 +1479,13 @@ export const PRESENTATION_ENGINE_CSS = `
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  .pc-jump-handle {
+    font-family: 'Material Symbols Outlined';
+    font-size: 16px;
+    color: var(--tf-text-muted, #8892a8);
+    line-height: 1;
+    user-select: none;
   }
   .pc-transcript {
     position: relative;
@@ -3344,6 +3359,12 @@ type ControlCommand =
   | {
       type: "command";
       deckId: string;
+      action: "reorder-slides";
+      slideIds: string[];
+    }
+  | {
+      type: "command";
+      deckId: string;
       action: "step-prev" | "step-next" | "step-reset" | "step-goto";
       index?: number;
     }
@@ -3438,6 +3459,133 @@ function getControlStorageKey(channelId: string, kind: "command" | "state") {
 
 function getZoomStorageKey(channelId: string, deckId: string) {
   return `${channelId}:${deckId}:zoom`;
+}
+
+function getSlideOrderStorageKey(channelId: string, deckId: string) {
+  return `${channelId}:${deckId}:slide-order`;
+}
+
+function normalizeSlideOrderIds(
+  slides: readonly { id: string }[],
+  orderedSlideIds?: readonly string[] | null,
+): string[] {
+  const fallbackIds = slides.map((slide) => slide.id);
+  if (!orderedSlideIds?.length) return fallbackIds;
+
+  const knownIds = new Set(fallbackIds);
+  const normalized: string[] = [];
+
+  for (const slideId of orderedSlideIds) {
+    if (!knownIds.has(slideId) || normalized.includes(slideId)) continue;
+    normalized.push(slideId);
+  }
+
+  for (const slideId of fallbackIds) {
+    if (!normalized.includes(slideId)) {
+      normalized.push(slideId);
+    }
+  }
+
+  return normalized;
+}
+
+function readStoredSlideOrder(
+  storageKey: string,
+  slides: readonly { id: string }[],
+): string[] {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return normalizeSlideOrderIds(slides);
+    return normalizeSlideOrderIds(slides, JSON.parse(raw) as string[]);
+  } catch {
+    return normalizeSlideOrderIds(slides);
+  }
+}
+
+function writeStoredSlideOrder(
+  storageKey: string,
+  slideIds: readonly string[],
+): void {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(slideIds));
+  } catch {
+    // Ignore storage access issues.
+  }
+}
+
+function buildOrderedSlides<T extends { id: string }>(
+  slides: readonly T[],
+  orderedSlideIds: readonly string[],
+): T[] {
+  const slideMap = new Map(slides.map((slide) => [slide.id, slide]));
+
+  return normalizeSlideOrderIds(slides, orderedSlideIds)
+    .map((slideId) => slideMap.get(slideId))
+    .filter((slide): slide is T => Boolean(slide));
+}
+
+function findSlideIndexById(
+  slides: readonly { id: string }[],
+  slideId: string,
+): number {
+  return slides.findIndex((slide) => slide.id === slideId);
+}
+
+function moveSlideId(
+  orderedSlideIds: readonly string[],
+  draggedSlideId: string,
+  targetSlideId: string,
+): string[] {
+  if (draggedSlideId === targetSlideId) {
+    return [...orderedSlideIds];
+  }
+
+  const nextOrderIds = [...orderedSlideIds];
+  const fromIndex = nextOrderIds.indexOf(draggedSlideId);
+  const targetIndex = nextOrderIds.indexOf(targetSlideId);
+
+  if (fromIndex === -1 || targetIndex === -1) {
+    return nextOrderIds;
+  }
+
+  const [movedSlideId] = nextOrderIds.splice(fromIndex, 1);
+  nextOrderIds.splice(targetIndex, 0, movedSlideId);
+  return nextOrderIds;
+}
+
+function useOrderedSlides<T extends { id: string }>(
+  channelId: string,
+  deckId: string,
+  slides: readonly T[],
+) {
+  const slideOrderStorageKey = getSlideOrderStorageKey(channelId, deckId);
+  const [slideOrderIds, setSlideOrderIds] = useState<string[]>(() =>
+    readStoredSlideOrder(slideOrderStorageKey, slides),
+  );
+  const orderedSlides = useMemo(
+    () => buildOrderedSlides(slides, slideOrderIds),
+    [slides, slideOrderIds],
+  );
+
+  useLayoutEffect(() => {
+    setSlideOrderIds(readStoredSlideOrder(slideOrderStorageKey, slides));
+  }, [slideOrderStorageKey, slides]);
+
+  const applySlideOrder = useCallback(
+    (nextSlideIds: readonly string[]) => {
+      const normalizedOrderIds = normalizeSlideOrderIds(slides, nextSlideIds);
+      setSlideOrderIds(normalizedOrderIds);
+      writeStoredSlideOrder(slideOrderStorageKey, normalizedOrderIds);
+      return normalizedOrderIds;
+    },
+    [slideOrderStorageKey, slides],
+  );
+
+  return {
+    slideOrderIds,
+    orderedSlides,
+    applySlideOrder,
+  };
 }
 
 function readStoredSlideZoom(storageKey: string): number {
@@ -4717,6 +4865,11 @@ export function PresentationLayout({
   const zoomStorageKey = getZoomStorageKey(controlChannelId, deck.id);
   const stateStorageKey = getControlStorageKey(controlChannelId, "state");
   const commandStorageKey = getControlStorageKey(controlChannelId, "command");
+  const { orderedSlides, applySlideOrder } = useOrderedSlides(
+    controlChannelId,
+    deck.id,
+    deck.slides,
+  );
 
   /* ── Parse initial slide from hash ── */
   const getIndexFromHash = useCallback((): number => {
@@ -4757,11 +4910,11 @@ export function PresentationLayout({
     rootRef,
     setFullscreenPromptVisible,
   );
-  const slideCount = deck.slides.length;
+  const slideCount = orderedSlides.length;
   const elapsed = useSlideTimer(slideIndex);
 
   /* ── Derived slide data ── */
-  const currentSlide = deck.slides[slideIndex];
+  const currentSlide = orderedSlides[slideIndex];
   const currentSlideEnlarge =
     enlargeMap[currentSlide?.id ?? ""] ?? DEFAULT_ENLARGE;
   const currentSlideLayout = layoutMap[currentSlide?.id ?? ""] ?? null;
@@ -4865,7 +5018,7 @@ export function PresentationLayout({
   const postControlState = useCallback(() => {
     const channel = controlChannelRef.current;
     if (!channel) return;
-    const slide = deck.slides[slideIndex];
+    const slide = orderedSlides[slideIndex];
     const message: ControlState = {
       type: "state",
       deckId: deck.id,
@@ -4890,7 +5043,8 @@ export function PresentationLayout({
     channel.postMessage(message);
     localStorage.setItem(stateStorageKey, JSON.stringify(message));
   }, [
-    deck,
+    deck.id,
+    deck.title,
     slideIndex,
     slideCount,
     elapsed,
@@ -4901,6 +5055,7 @@ export function PresentationLayout({
     fullscreenPromptVisible,
     showGuides,
     showCrossbars,
+    orderedSlides,
   ]);
 
   /* ── Stable refs for BroadcastChannel handler (avoids effect teardown on step change) ── */
@@ -4912,6 +5067,9 @@ export function PresentationLayout({
   const resetStepRef = useRef(resetStep);
   const postControlStateRef = useRef(postControlState);
   const currentStepCountRef = useRef(currentStepCount);
+  const orderedSlidesRef = useRef(orderedSlides);
+  const slideIndexRef = useRef(slideIndex);
+  const applySlideOrderRef = useRef(applySlideOrder);
   goPrevRef.current = goPrev;
   goNextRef.current = goNext;
   goToRef.current = goTo;
@@ -4920,6 +5078,9 @@ export function PresentationLayout({
   resetStepRef.current = resetStep;
   postControlStateRef.current = postControlState;
   currentStepCountRef.current = currentStepCount;
+  orderedSlidesRef.current = orderedSlides;
+  slideIndexRef.current = slideIndex;
+  applySlideOrderRef.current = applySlideOrder;
   const lastCmdRef = useRef({ sig: "", ts: 0 });
 
   /* ── Keyboard ── */
@@ -4990,7 +5151,7 @@ export function PresentationLayout({
       if (!msg) return;
       /* Dedup: both BroadcastChannel and localStorage fire for cross-window commands */
       const now = Date.now();
-      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}:${(msg as ControlCommand & { targetSurface?: PresentationSurface }).targetSurface ?? ""}:${(msg as ControlCommand & { zoom?: number }).zoom ?? ""}`;
+      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}:${(msg as ControlCommand & { targetSurface?: PresentationSurface }).targetSurface ?? ""}:${(msg as ControlCommand & { zoom?: number }).zoom ?? ""}:${(msg as ControlCommand & { slideIds?: string[] }).slideIds?.join(",") ?? ""}`;
       if (sig === lastCmdRef.current.sig && now - lastCmdRef.current.ts < 80)
         return;
       lastCmdRef.current = { sig, ts: now };
@@ -5012,7 +5173,22 @@ export function PresentationLayout({
       if (msg.action === "prev") goPrevRef.current();
       else if (msg.action === "next") goNextRef.current();
       else if (msg.action === "goto") goToRef.current(msg.index);
-      else if (msg.action === "step-prev") stepBackRef.current();
+      else if (msg.action === "reorder-slides") {
+        const currentSlideId =
+          orderedSlidesRef.current[slideIndexRef.current]?.id ?? "";
+        const nextOrderIds = applySlideOrderRef.current(msg.slideIds);
+        const nextOrderedSlides = buildOrderedSlides(deck.slides, nextOrderIds);
+        const nextIndex = currentSlideId
+          ? findSlideIndexById(nextOrderedSlides, currentSlideId)
+          : -1;
+
+        if (nextIndex >= 0 && nextIndex !== slideIndexRef.current) {
+          setSlideIndex(nextIndex);
+          window.location.hash = hashPrefix
+            ? `${hashPrefix}/${deck.id}/${nextIndex}`
+            : `#/${deck.id}/${nextIndex}`;
+        }
+      } else if (msg.action === "step-prev") stepBackRef.current();
       else if (msg.action === "step-next") stepForwardRef.current();
       else if (msg.action === "step-reset") resetStepRef.current();
       else if (msg.action === "step-goto") {
@@ -5717,6 +5893,11 @@ export function ShortsLayout({
   const commandChannelRef = useRef<BroadcastChannel | null>(null);
   const stateStorageKey = getControlStorageKey(controlChannelId, "state");
   const commandStorageKey = getControlStorageKey(commandChannelId, "command");
+  const { orderedSlides, applySlideOrder } = useOrderedSlides(
+    controlChannelId,
+    deck.id,
+    deck.slides,
+  );
 
   /* ── Parse initial slide from hash ── */
   const getIndexFromHash = useCallback((): number => {
@@ -5735,12 +5916,12 @@ export function ShortsLayout({
     rootRef,
     setFullscreenPromptVisible,
   );
-  const slideCount = deck.slides.length;
+  const slideCount = orderedSlides.length;
   const elapsed = useSlideTimer(slideIndex);
   const captureFooterHandle = getCaptureFooterHandle(branding);
   const captureFooterLabel = getCaptureFooterLabel(deck, "shorts");
 
-  const currentSlide = deck.slides[slideIndex];
+  const currentSlide = orderedSlides[slideIndex];
   const currentSteps = currentSlide?.steps ?? [];
   const currentStepCount = currentSteps.length;
   const activeStepIndex =
@@ -5804,7 +5985,7 @@ export function ShortsLayout({
   const postControlState = useCallback(() => {
     const channel = stateChannelRef.current;
     if (!channel) return;
-    const slide = deck.slides[slideIndex];
+    const slide = orderedSlides[slideIndex];
     const message: ControlState = {
       type: "state",
       deckId: deck.id,
@@ -5829,7 +6010,8 @@ export function ShortsLayout({
     channel.postMessage(message);
     localStorage.setItem(stateStorageKey, JSON.stringify(message));
   }, [
-    deck,
+    deck.id,
+    deck.title,
     slideIndex,
     slideCount,
     elapsed,
@@ -5838,6 +6020,7 @@ export function ShortsLayout({
     fullscreenPromptVisible,
     showGuides,
     showCrossbars,
+    orderedSlides,
   ]);
 
   /* ── Stable refs for BroadcastChannel handler (avoids effect teardown on step change) ── */
@@ -5849,6 +6032,9 @@ export function ShortsLayout({
   const sResetStepRef = useRef(resetStep);
   const sPostControlStateRef = useRef(postControlState);
   const sCurrentStepCountRef = useRef(currentStepCount);
+  const sOrderedSlidesRef = useRef(orderedSlides);
+  const sSlideIndexRef = useRef(slideIndex);
+  const sApplySlideOrderRef = useRef(applySlideOrder);
   sGoPrevRef.current = goPrev;
   sGoNextRef.current = goNext;
   sGoToRef.current = goTo;
@@ -5857,6 +6043,9 @@ export function ShortsLayout({
   sResetStepRef.current = resetStep;
   sPostControlStateRef.current = postControlState;
   sCurrentStepCountRef.current = currentStepCount;
+  sOrderedSlidesRef.current = orderedSlides;
+  sSlideIndexRef.current = slideIndex;
+  sApplySlideOrderRef.current = applySlideOrder;
   const sLastCmdRef = useRef({ sig: "", ts: 0 });
 
   useEffect(() => {
@@ -5929,7 +6118,7 @@ export function ShortsLayout({
       if (!msg) return;
       /* Dedup: both BroadcastChannel and localStorage fire for cross-window commands */
       const now = Date.now();
-      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}:${(msg as ControlCommand & { targetSurface?: PresentationSurface }).targetSurface ?? ""}:${(msg as ControlCommand & { zoom?: number }).zoom ?? ""}`;
+      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}:${(msg as ControlCommand & { targetSurface?: PresentationSurface }).targetSurface ?? ""}:${(msg as ControlCommand & { zoom?: number }).zoom ?? ""}:${(msg as ControlCommand & { slideIds?: string[] }).slideIds?.join(",") ?? ""}`;
       if (sig === sLastCmdRef.current.sig && now - sLastCmdRef.current.ts < 80)
         return;
       sLastCmdRef.current = { sig, ts: now };
@@ -5951,7 +6140,22 @@ export function ShortsLayout({
       if (msg.action === "prev") sGoPrevRef.current();
       else if (msg.action === "next") sGoNextRef.current();
       else if (msg.action === "goto") sGoToRef.current(msg.index);
-      else if (msg.action === "step-prev") sStepBackRef.current();
+      else if (msg.action === "reorder-slides") {
+        const currentSlideId =
+          sOrderedSlidesRef.current[sSlideIndexRef.current]?.id ?? "";
+        const nextOrderIds = sApplySlideOrderRef.current(msg.slideIds);
+        const nextOrderedSlides = buildOrderedSlides(deck.slides, nextOrderIds);
+        const nextIndex = currentSlideId
+          ? findSlideIndexById(nextOrderedSlides, currentSlideId)
+          : -1;
+
+        if (nextIndex >= 0 && nextIndex !== sSlideIndexRef.current) {
+          setSlideIndex(nextIndex);
+          window.location.hash = hashPrefix
+            ? `${hashPrefix}/${deck.id}/${nextIndex}`
+            : `#/${deck.id}/${nextIndex}`;
+        }
+      } else if (msg.action === "step-prev") sStepBackRef.current();
       else if (msg.action === "step-next") sStepForwardRef.current();
       else if (msg.action === "step-reset") sResetStepRef.current();
       else if (msg.action === "step-goto") {
@@ -6186,6 +6390,11 @@ export function ShortsFeedLayout({
   const commandChannelRef = useRef<BroadcastChannel | null>(null);
   const stateStorageKey = getControlStorageKey(controlChannelId, "state");
   const commandStorageKey = getControlStorageKey(commandChannelId, "command");
+  const { orderedSlides, applySlideOrder } = useOrderedSlides(
+    controlChannelId,
+    deck.id,
+    deck.slides,
+  );
 
   const getIndexFromHash = useCallback((): number => {
     const hash = window.location.hash;
@@ -6203,10 +6412,10 @@ export function ShortsFeedLayout({
     rootRef,
     setFullscreenPromptVisible,
   );
-  const slideCount = deck.slides.length;
+  const slideCount = orderedSlides.length;
   const elapsed = useSlideTimer(slideIndex);
 
-  const currentSlide = deck.slides[slideIndex];
+  const currentSlide = orderedSlides[slideIndex];
   const currentSteps = currentSlide?.steps ?? [];
   const currentStepCount = currentSteps.length;
   const activeStepIndex =
@@ -6271,7 +6480,7 @@ export function ShortsFeedLayout({
   const postControlState = useCallback(() => {
     const channel = stateChannelRef.current;
     if (!channel) return;
-    const slide = deck.slides[slideIndex];
+    const slide = orderedSlides[slideIndex];
     const message: ControlState = {
       type: "state",
       deckId: deck.id,
@@ -6296,7 +6505,8 @@ export function ShortsFeedLayout({
     channel.postMessage(message);
     localStorage.setItem(stateStorageKey, JSON.stringify(message));
   }, [
-    deck,
+    deck.id,
+    deck.title,
     slideIndex,
     slideCount,
     elapsed,
@@ -6305,6 +6515,7 @@ export function ShortsFeedLayout({
     fullscreenPromptVisible,
     showGuides,
     showCrossbars,
+    orderedSlides,
   ]);
 
   /* ── Stable refs ── */
@@ -6316,6 +6527,9 @@ export function ShortsFeedLayout({
   const fResetStepRef = useRef(resetStep);
   const fPostControlStateRef = useRef(postControlState);
   const fCurrentStepCountRef = useRef(currentStepCount);
+  const fOrderedSlidesRef = useRef(orderedSlides);
+  const fSlideIndexRef = useRef(slideIndex);
+  const fApplySlideOrderRef = useRef(applySlideOrder);
   fGoPrevRef.current = goPrev;
   fGoNextRef.current = goNext;
   fGoToRef.current = goTo;
@@ -6324,6 +6538,9 @@ export function ShortsFeedLayout({
   fResetStepRef.current = resetStep;
   fPostControlStateRef.current = postControlState;
   fCurrentStepCountRef.current = currentStepCount;
+  fOrderedSlidesRef.current = orderedSlides;
+  fSlideIndexRef.current = slideIndex;
+  fApplySlideOrderRef.current = applySlideOrder;
   const fLastCmdRef = useRef({ sig: "", ts: 0 });
 
   useEffect(() => {
@@ -6394,7 +6611,7 @@ export function ShortsFeedLayout({
     const handleCommand = (msg: ControlCommand) => {
       if (!msg) return;
       const now = Date.now();
-      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}:${(msg as ControlCommand & { targetSurface?: PresentationSurface }).targetSurface ?? ""}:${(msg as ControlCommand & { zoom?: number }).zoom ?? ""}`;
+      const sig = `${msg.type}:${(msg as ControlCommand & { action?: string }).action ?? ""}:${(msg as ControlCommand & { index?: number }).index ?? ""}:${(msg as ControlCommand & { targetDeckId?: string }).targetDeckId ?? ""}:${(msg as ControlCommand & { targetSurface?: PresentationSurface }).targetSurface ?? ""}:${(msg as ControlCommand & { zoom?: number }).zoom ?? ""}:${(msg as ControlCommand & { slideIds?: string[] }).slideIds?.join(",") ?? ""}`;
       if (sig === fLastCmdRef.current.sig && now - fLastCmdRef.current.ts < 80)
         return;
       fLastCmdRef.current = { sig, ts: now };
@@ -6416,7 +6633,22 @@ export function ShortsFeedLayout({
       if (msg.action === "prev") fGoPrevRef.current();
       else if (msg.action === "next") fGoNextRef.current();
       else if (msg.action === "goto") fGoToRef.current(msg.index);
-      else if (msg.action === "step-prev") fStepBackRef.current();
+      else if (msg.action === "reorder-slides") {
+        const currentSlideId =
+          fOrderedSlidesRef.current[fSlideIndexRef.current]?.id ?? "";
+        const nextOrderIds = fApplySlideOrderRef.current(msg.slideIds);
+        const nextOrderedSlides = buildOrderedSlides(deck.slides, nextOrderIds);
+        const nextIndex = currentSlideId
+          ? findSlideIndexById(nextOrderedSlides, currentSlideId)
+          : -1;
+
+        if (nextIndex >= 0 && nextIndex !== fSlideIndexRef.current) {
+          setSlideIndex(nextIndex);
+          window.location.hash = hashPrefix
+            ? `${hashPrefix}/${deck.id}/${nextIndex}`
+            : `#/${deck.id}/${nextIndex}`;
+        }
+      } else if (msg.action === "step-prev") fStepBackRef.current();
       else if (msg.action === "step-next") fStepForwardRef.current();
       else if (msg.action === "step-reset") fResetStepRef.current();
       else if (msg.action === "step-goto") {
@@ -6666,8 +6898,17 @@ export function PresentationControlPanel({
   const stateStorageKey = getControlStorageKey(controlChannelId, "state");
   const commandStorageKey = getControlStorageKey(controlChannelId, "command");
   const zoomStorageKey = getZoomStorageKey(controlChannelId, deck.id);
+  const { orderedSlides, slideOrderIds, applySlideOrder } = useOrderedSlides(
+    controlChannelId,
+    deck.id,
+    deck.slides,
+  );
   const transcriptScaleStorageKey = `${controlChannelId}:transcript-scale`;
   const teleprompterFocusLineStorageKey = `${controlChannelId}:teleprompter-focus-line`;
+  const [draggedSlideId, setDraggedSlideId] = useState<string | null>(null);
+  const [dropTargetSlideId, setDropTargetSlideId] = useState<string | null>(
+    null,
+  );
   const buildDefaultControlState = (
     surface: PresentationSurface,
   ): ControlState => ({
@@ -6675,20 +6916,20 @@ export function PresentationControlPanel({
     deckId: deck.id,
     deckTitle: deck.title,
     slideIndex: 0,
-    slideCount: deck.slides.length,
+    slideCount: orderedSlides.length,
     elapsed: 0,
-    duration: deck.slides[0]?.duration,
+    duration: orderedSlides[0]?.duration,
     zoom: readStoredSlideZoom(zoomStorageKey),
     enlarge: readSlideEnlarge(
       controlChannelId,
       deck.id,
-      deck.slides[0]?.id ?? "",
+      orderedSlides[0]?.id ?? "",
     ),
-    slideTitle: getPresenterSlideTitle(deck.slides[0]),
-    narration: deck.slides[0]?.narration,
-    steps: deck.slides[0]?.steps,
+    slideTitle: getPresenterSlideTitle(orderedSlides[0]),
+    narration: orderedSlides[0]?.narration,
+    steps: orderedSlides[0]?.steps,
     stepIndex: 0,
-    stepCount: deck.slides[0]?.steps?.length ?? 0,
+    stepCount: orderedSlides[0]?.steps?.length ?? 0,
     surface,
     fullscreenActive: false,
     fullscreenPromptVisible: false,
@@ -6913,7 +7154,7 @@ export function PresentationControlPanel({
         const edits: Record<string, string> = stored ? JSON.parse(stored) : {};
         if (
           text.trim() === "" ||
-          text === (deck.slides[slideIdx]?.narration ?? "")
+          text === (orderedSlides[slideIdx]?.narration ?? "")
         ) {
           delete edits[String(slideIdx)];
         } else {
@@ -6924,7 +7165,7 @@ export function PresentationControlPanel({
         /* ignore */
       }
     },
-    [transcriptEditKey, deck.slides],
+    [orderedSlides, transcriptEditKey],
   );
 
   /** Check whether any edits exist for the current deck. */
@@ -6950,11 +7191,11 @@ export function PresentationControlPanel({
   useEffect(() => {
     if (transcriptEditMode) {
       const edited = getEditedTranscript(currentSlideIdx);
-      const original = deck.slides[currentSlideIdx]?.narration ?? "";
+      const original = orderedSlides[currentSlideIdx]?.narration ?? "";
       setEditDraft(edited ?? original);
       editDraftSlideRef.current = currentSlideIdx;
     }
-  }, [transcriptEditMode, currentSlideIdx, getEditedTranscript, deck.slides]);
+  }, [transcriptEditMode, currentSlideIdx, getEditedTranscript, orderedSlides]);
 
   // Auto-save draft on change (debounced via the onBlur / onChange)
   const handleTranscriptDraftChange = useCallback(
@@ -6967,8 +7208,8 @@ export function PresentationControlPanel({
 
   const revertTranscriptEdit = useCallback(() => {
     setEditedTranscript(currentSlideIdx, "");
-    setEditDraft(deck.slides[currentSlideIdx]?.narration ?? "");
-  }, [currentSlideIdx, setEditedTranscript, deck.slides]);
+    setEditDraft(orderedSlides[currentSlideIdx]?.narration ?? "");
+  }, [currentSlideIdx, setEditedTranscript, orderedSlides]);
 
   useEffect(() => {
     if (!allowTranscriptEditing && transcriptEditMode) {
@@ -6989,7 +7230,7 @@ export function PresentationControlPanel({
         [msg.surface]: hydrateControlStateEnlarge(
           controlChannelId,
           deck.id,
-          deck.slides,
+          orderedSlides,
           msg,
         ),
       }));
@@ -7006,7 +7247,7 @@ export function PresentationControlPanel({
           [msg.surface]: hydrateControlStateEnlarge(
             controlChannelId,
             deck.id,
-            deck.slides,
+            orderedSlides,
             msg,
           ),
         }));
@@ -7037,7 +7278,7 @@ export function PresentationControlPanel({
             [msg.surface]: hydrateControlStateEnlarge(
               controlChannelId,
               deck.id,
-              deck.slides,
+              orderedSlides,
               msg,
             ),
           }));
@@ -7054,7 +7295,7 @@ export function PresentationControlPanel({
       channel.close();
       channelRef.current = null;
     };
-  }, [controlChannelId, deck.id, deck.slides, stateStorageKey]);
+  }, [controlChannelId, deck.id, orderedSlides, stateStorageKey]);
 
   const send = useCallback(
     (cmd: ControlCommand) => {
@@ -7067,6 +7308,64 @@ export function PresentationControlPanel({
   const requestState = useCallback(() => {
     channelRef.current?.postMessage({ type: "request-state", deckId: deck.id });
   }, [deck.id]);
+
+  const commitSlideOrder = useCallback(
+    (nextSlideIds: string[]) => {
+      const nextOrderIds = applySlideOrder(nextSlideIds);
+      send({
+        type: "command",
+        deckId: deck.id,
+        action: "reorder-slides",
+        slideIds: nextOrderIds,
+      });
+      requestState();
+      return nextOrderIds;
+    },
+    [applySlideOrder, deck.id, requestState, send],
+  );
+
+  const clearJumpDragState = useCallback(() => {
+    setDraggedSlideId(null);
+    setDropTargetSlideId(null);
+  }, []);
+
+  const handleJumpDragStart = useCallback(
+    (event: React.DragEvent<HTMLButtonElement>, slideId: string) => {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", slideId);
+      setDraggedSlideId(slideId);
+      setDropTargetSlideId(slideId);
+    },
+    [],
+  );
+
+  const handleJumpDragOver = useCallback(
+    (event: React.DragEvent<HTMLButtonElement>, slideId: string) => {
+      if (!draggedSlideId || draggedSlideId === slideId) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+      setDropTargetSlideId(slideId);
+    },
+    [draggedSlideId],
+  );
+
+  const handleJumpDrop = useCallback(
+    (event: React.DragEvent<HTMLButtonElement>, targetSlideId: string) => {
+      event.preventDefault();
+      const draggedId =
+        event.dataTransfer.getData("text/plain") || draggedSlideId;
+
+      if (!draggedId || draggedId === targetSlideId) {
+        clearJumpDragState();
+        return;
+      }
+
+      const nextOrderIds = moveSlideId(slideOrderIds, draggedId, targetSlideId);
+      commitSlideOrder(nextOrderIds);
+      clearJumpDragState();
+    },
+    [clearJumpDragState, commitSlideOrder, draggedSlideId, slideOrderIds],
+  );
 
   /* ── Keyboard: ArrowLeft / ArrowRight → prev / next slide ──────── */
   useEffect(() => {
@@ -7130,9 +7429,10 @@ export function PresentationControlPanel({
   const activeState = hydrateControlStateEnlarge(
     controlChannelId,
     deck.id,
-    deck.slides,
+    orderedSlides,
     surfaceStates[activeSurface],
   );
+  const currentSlideHasSteps = activeState.stepCount > 0;
   const connected = Object.values(connectedSurfaces).some(Boolean);
   const activeConnected = connectedSurfaces[activeSurface];
   const atStart =
@@ -7157,6 +7457,12 @@ export function PresentationControlPanel({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const fullscreenOn =
     activeState.fullscreenActive || activeState.fullscreenPromptVisible;
+
+  useEffect(() => {
+    if (currentSlideHasSteps && transcriptEditMode) {
+      setTranscriptEditMode(false);
+    }
+  }, [currentSlideHasSteps, transcriptEditMode]);
 
   return (
     <>
@@ -7329,7 +7635,7 @@ export function PresentationControlPanel({
                             100,
                         ) / 100;
                       const slideId =
-                        deck.slides[activeState.slideIndex]?.id ?? "";
+                        orderedSlides[activeState.slideIndex]?.id ?? "";
                       setSurfaceStates((current) => ({
                         ...current,
                         [activeSurface]: {
@@ -7411,10 +7717,15 @@ export function PresentationControlPanel({
             </div>
 
             <div className="pc-jump">
-              {deck.slides.map((slide, idx) => (
+              {orderedSlides.map((slide, idx) => (
                 <button
                   key={slide.id}
-                  className={`pc-jump-item ${idx === activeState.slideIndex ? "active" : ""}${!connected ? " disabled" : ""}`}
+                  className={`pc-jump-item ${idx === activeState.slideIndex ? "active" : ""}${!connected ? " disabled" : ""}${draggedSlideId === slide.id ? " dragging" : ""}${dropTargetSlideId === slide.id && draggedSlideId !== slide.id ? " drop-target" : ""}`}
+                  draggable
+                  onDragStart={(event) => handleJumpDragStart(event, slide.id)}
+                  onDragOver={(event) => handleJumpDragOver(event, slide.id)}
+                  onDrop={(event) => handleJumpDrop(event, slide.id)}
+                  onDragEnd={clearJumpDragState}
                   onClick={() => {
                     if (!connected) return;
                     send({
@@ -7424,10 +7735,12 @@ export function PresentationControlPanel({
                       index: idx,
                     });
                   }}
-                  disabled={!connected}
                   title={!connected ? "No slide window connected" : slide.title}
                 >
                   <span className="pc-jump-index">{idx + 1}</span>
+                  <span className="pc-jump-handle" aria-hidden="true">
+                    drag_indicator
+                  </span>
                   <span className="pc-jump-title">
                     {renderSlideTitle(slide.title)}
                   </span>
@@ -7903,11 +8216,7 @@ export function PresentationControlPanel({
                   onClick={() => setTranscriptEditMode((m) => !m)}
                   data-tip={transcriptEditMode ? "Done editing" : "Edit"}
                   aria-label="Edit transcript"
-                  disabled={
-                    !transcriptEditMode &&
-                    currentSlideIdx !== 0 &&
-                    currentSlideIdx !== deck.slides.length - 1
-                  }
+                  disabled={!transcriptEditMode && currentSlideHasSteps}
                 >
                   {hasAnyTranscriptEdits() && !transcriptEditMode && (
                     <span className="pc-edit-dot" />
