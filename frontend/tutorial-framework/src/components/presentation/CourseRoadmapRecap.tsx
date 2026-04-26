@@ -64,14 +64,10 @@ export function CourseRoadmapRecap({
   steps,
   pathBullets,
   pathLabel = "One bounded course path",
-  pathSummary =
-    "Each lesson adds one mechanism and keeps the earlier contract alive.",
-  completedLessonsText =
-    "The earlier mechanisms stay live. This lesson inherits their constraints instead of replacing them.",
-  currentLessonText =
-    "This is the next mechanism on the same chain. The system only gets stronger because the earlier contract is already locked.",
-  fullMapText =
-    "Keep the full map in your head. The local diagram only matters because the whole course path is still standing behind it.",
+  pathSummary = "Each lesson adds one mechanism and keeps the earlier contract alive.",
+  completedLessonsText = "The earlier mechanisms stay live. This lesson inherits their constraints instead of replacing them.",
+  currentLessonText = "This is the next mechanism on the same chain. The system only gets stronger because the earlier contract is already locked.",
+  fullMapText = "Keep the full map in your head. The local diagram only matters because the whole course path is still standing behind it.",
   progressLabel = "Progress",
   currentLockLabel = "Current lock",
 }: CourseRoadmapRecapProps) {
@@ -386,7 +382,15 @@ export function CourseRoadmapRecap({
             </span>
           </div>
 
-          <div style={{ display: "grid", gap: scalePx("12px"), minHeight: 0, overflowY: "auto", paddingRight: scalePx("6px") }}>
+          <div
+            style={{
+              display: "grid",
+              gap: scalePx("12px"),
+              minHeight: 0,
+              overflowY: "auto",
+              paddingRight: scalePx("6px"),
+            }}
+          >
             <div
               style={{
                 fontSize: scalePx("26px"),
