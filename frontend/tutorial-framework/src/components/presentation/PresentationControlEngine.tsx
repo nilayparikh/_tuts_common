@@ -24,7 +24,12 @@ import React, {
 import { BrandLockup } from "../layout/BrandLockup";
 import { ShortsTitleStack } from "./ShortsTitleStack";
 import { TeleprompterOverlay } from "./TeleprompterOverlay";
-import { resolveTranscriptContent } from "./transcript-utils";
+import {
+  formatStepTranscriptEditValue,
+  parseStepTranscriptEditValue,
+  resolveTranscriptContent,
+  summarizeStepTranscript,
+} from "./transcript-utils";
 
 export interface PresentationSlide {
   id: string;
@@ -7152,9 +7157,13 @@ export function PresentationControlPanel({
       try {
         const stored = localStorage.getItem(transcriptEditKey);
         const edits: Record<string, string> = stored ? JSON.parse(stored) : {};
+        const slide = orderedSlides[slideIdx];
+        const originalText = slide?.steps?.length
+          ? formatStepTranscriptEditValue(slide.steps)
+          : (slide?.narration ?? "");
         if (
           text.trim() === "" ||
-          text === (orderedSlides[slideIdx]?.narration ?? "")
+          text === originalText
         ) {
           delete edits[String(slideIdx)];
         } else {
@@ -7191,7 +7200,10 @@ export function PresentationControlPanel({
   useEffect(() => {
     if (transcriptEditMode) {
       const edited = getEditedTranscript(currentSlideIdx);
-      const original = orderedSlides[currentSlideIdx]?.narration ?? "";
+      const slide = orderedSlides[currentSlideIdx];
+      const original = slide?.steps?.length
+        ? formatStepTranscriptEditValue(slide.steps)
+        : (slide?.narration ?? "");
       setEditDraft(edited ?? original);
       editDraftSlideRef.current = currentSlideIdx;
     }
@@ -7208,7 +7220,12 @@ export function PresentationControlPanel({
 
   const revertTranscriptEdit = useCallback(() => {
     setEditedTranscript(currentSlideIdx, "");
-    setEditDraft(orderedSlides[currentSlideIdx]?.narration ?? "");
+    const slide = orderedSlides[currentSlideIdx];
+    setEditDraft(
+      slide?.steps?.length
+        ? formatStepTranscriptEditValue(slide.steps)
+        : (slide?.narration ?? ""),
+    );
   }, [currentSlideIdx, setEditedTranscript, orderedSlides]);
 
   useEffect(() => {
@@ -7457,12 +7474,6 @@ export function PresentationControlPanel({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const fullscreenOn =
     activeState.fullscreenActive || activeState.fullscreenPromptVisible;
-
-  useEffect(() => {
-    if (currentSlideHasSteps && transcriptEditMode) {
-      setTranscriptEditMode(false);
-    }
-  }, [currentSlideHasSteps, transcriptEditMode]);
 
   return (
     <>
@@ -7766,7 +7777,11 @@ export function PresentationControlPanel({
                     onChange={(e) =>
                       handleTranscriptDraftChange(e.target.value)
                     }
-                    placeholder="Type your updated transcript here…"
+                    placeholder={
+                      currentSlideHasSteps
+                        ? "# Step 1\nShort summary for the first step.\n\n# Step 2\nShort summary for the next step…"
+                        : "Type your updated transcript here…"
+                    }
                     spellCheck
                   />
                   {activeState.narration &&
@@ -7794,16 +7809,31 @@ export function PresentationControlPanel({
                     const editedText = getEditedTranscript(
                       activeState.slideIndex,
                     );
+                    const editedSteps =
+                      activeState.stepCount > 0 && activeState.steps?.length
+                        ? parseStepTranscriptEditValue(
+                            editedText ?? "",
+                            activeState.steps,
+                          )
+                        : activeState.steps ?? [];
                     if (
                       activeState.stepCount > 0 &&
-                      activeState.steps?.length
+                      editedSteps.length
                     ) {
+                      const activeEditedStep =
+                        editedSteps[
+                          Math.min(
+                            activeState.stepIndex,
+                            Math.max(editedSteps.length - 1, 0),
+                          )
+                        ] ?? null;
+
                       return (
                         <>
                           <div
                             className="pc-transcript-current"
                             key={
-                              activeState.steps[activeState.stepIndex]?.id ??
+                              activeEditedStep?.id ??
                               `step-${activeState.stepIndex}`
                             }
                           >
@@ -7821,13 +7851,10 @@ export function PresentationControlPanel({
                               </span>
                             </div>
                             <div className="pc-transcript-current-heading">
-                              {activeState.steps[activeState.stepIndex]?.title}
+                              {activeEditedStep?.title}
                             </div>
                             <div className="pc-transcript-current-text">
-                              {
-                                activeState.steps[activeState.stepIndex]
-                                  ?.transcript
-                              }
+                              {activeEditedStep?.transcript}
                             </div>
                           </div>
 
@@ -7841,7 +7868,7 @@ export function PresentationControlPanel({
                           </div>
 
                           <div className="pc-transcript-steps">
-                            {activeState.steps.map((step, index) => (
+                            {editedSteps.map((step, index) => (
                               <button
                                 key={step.id}
                                 type="button"
@@ -7864,7 +7891,7 @@ export function PresentationControlPanel({
                                   </span>
                                 </div>
                                 <div className="pc-transcript-step-text">
-                                  {step.transcript}
+                                  {summarizeStepTranscript(step.transcript)}
                                 </div>
                               </button>
                             ))}
@@ -8216,7 +8243,6 @@ export function PresentationControlPanel({
                   onClick={() => setTranscriptEditMode((m) => !m)}
                   data-tip={transcriptEditMode ? "Done editing" : "Edit"}
                   aria-label="Edit transcript"
-                  disabled={!transcriptEditMode && currentSlideHasSteps}
                 >
                   {hasAnyTranscriptEdits() && !transcriptEditMode && (
                     <span className="pc-edit-dot" />
