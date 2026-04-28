@@ -8297,25 +8297,21 @@ export function PresentationControlPanel({
   const fullscreenOn =
     activeState.fullscreenActive || activeState.fullscreenPromptVisible;
 
-  const readTranscriptUploadText = useCallback(
-    (file: File): Promise<string> => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (typeof reader.result === "string") {
-            resolve(reader.result);
-            return;
-          }
+  const readTranscriptUploadText = useCallback((file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+          return;
+        }
 
-          reject(new Error("Could not read transcript file."));
-        };
-        reader.onerror = () =>
-          reject(new Error("Could not read transcript file."));
-        reader.readAsText(file);
-      });
-    },
-    [],
-  );
+        reject(new Error("Could not read transcript file."));
+      };
+      reader.onerror = () => reject(new Error("Could not read transcript file."));
+      reader.readAsText(file);
+    });
+  }, []);
 
   const handleTranscriptUploadSelection = useCallback(
     async (
@@ -8653,7 +8649,9 @@ export function PresentationControlPanel({
                   Transcript · {activeTranscriptLanguageLabel}
                 </div>
                 <div className="pc-transcript-header-tools">
-                  <span className="pc-transcript-language-label">Language</span>
+                  <span className="pc-transcript-language-label">
+                    Language
+                  </span>
                   <ControlPanelMenuSelect
                     value={selectedTranscriptLanguage}
                     options={TRANSCRIPT_LANGUAGE_OPTIONS}
@@ -9175,9 +9173,7 @@ export function PresentationControlPanel({
                   />
                   <button
                     className="pc-dock-btn"
-                    onClick={() =>
-                      lessonTranscriptUploadInputRef.current?.click()
-                    }
+                    onClick={() => lessonTranscriptUploadInputRef.current?.click()}
                     disabled={transcriptUploadBusy !== null}
                     data-tip={`Upload lesson transcript · ${activeTranscriptLanguageLabel}`}
                     aria-label="Upload lesson transcript"
@@ -9208,9 +9204,7 @@ export function PresentationControlPanel({
                   />
                   <button
                     className="pc-dock-btn"
-                    onClick={() =>
-                      courseTranscriptUploadInputRef.current?.click()
-                    }
+                    onClick={() => courseTranscriptUploadInputRef.current?.click()}
                     disabled={transcriptUploadBusy !== null}
                     data-tip={`Upload course transcript · ${activeTranscriptLanguageLabel}`}
                     aria-label="Upload course transcript"
