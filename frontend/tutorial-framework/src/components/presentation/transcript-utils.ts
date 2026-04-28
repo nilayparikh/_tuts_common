@@ -2,6 +2,10 @@ import type { PresentationStep } from "./PresentationControlEngine";
 
 const STEP_HEADING_PATTERN = /^#\s*step\s+(\d+)\s*$/imu;
 
+export function looksLikeStepTranscriptEditValue(text: string): boolean {
+  return STEP_HEADING_PATTERN.test(text.trim());
+}
+
 function normalizeStepText(text: string): string {
   return text.replace(/\r\n?/gu, "\n").trim();
 }

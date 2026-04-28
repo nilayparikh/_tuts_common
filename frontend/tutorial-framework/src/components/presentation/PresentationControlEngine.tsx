@@ -26,6 +26,7 @@ import { ShortsTitleStack } from "./ShortsTitleStack";
 import { TeleprompterOverlay } from "./TeleprompterOverlay";
 import {
   formatStepTranscriptEditValue,
+  looksLikeStepTranscriptEditValue,
   parseStepTranscriptEditValue,
   resolveTranscriptContent,
   summarizeStepTranscript,
@@ -3419,6 +3420,11 @@ type ControlCommand =
       action: "set-adjust-mode";
       adjustMode: boolean;
     };
+
+type LocalNavigationCommand =
+  | { type: "command"; deckId: string; action: "prev" | "next" }
+  | { type: "command"; deckId: string; action: "goto"; index: number }
+  | { type: "command"; deckId: string; action: "step-goto"; index: number };
 
 type PresentationSurface = "presentation" | "shorts" | "feed";
 
@@ -7137,18 +7143,33 @@ export function PresentationControlPanel({
   const getEditedTranscript = useCallback(
     (slideIdx: number): string | null => {
       try {
+        const slide = orderedSlides[slideIdx];
         const stored = localStorage.getItem(transcriptEditKey);
         if (stored) {
           const edits = JSON.parse(stored) as Record<string, string>;
-          const val = edits[String(slideIdx)];
-          return val != null && val !== "" ? val : null;
+          const stableVal = slide?.id ? edits[slide.id] : undefined;
+          if (stableVal != null && stableVal !== "") {
+            return stableVal;
+          }
+
+          const legacyVal = edits[String(slideIdx)];
+          if (legacyVal == null || legacyVal === "") {
+            return null;
+          }
+
+          if (
+            slide?.steps?.length ||
+            !looksLikeStepTranscriptEditValue(legacyVal)
+          ) {
+            return legacyVal;
+          }
         }
       } catch {
         /* ignore */
       }
       return null;
     },
-    [transcriptEditKey],
+    [orderedSlides, transcriptEditKey],
   );
 
   /** Persist a transcript edit to localStorage. Empty string = delete. */
@@ -7158,16 +7179,19 @@ export function PresentationControlPanel({
         const stored = localStorage.getItem(transcriptEditKey);
         const edits: Record<string, string> = stored ? JSON.parse(stored) : {};
         const slide = orderedSlides[slideIdx];
+        const editStorageId = slide?.id ?? String(slideIdx);
+        const legacyStorageId = String(slideIdx);
         const originalText = slide?.steps?.length
           ? formatStepTranscriptEditValue(slide.steps)
           : (slide?.narration ?? "");
-        if (
-          text.trim() === "" ||
-          text === originalText
-        ) {
-          delete edits[String(slideIdx)];
+        if (text.trim() === "" || text === originalText) {
+          delete edits[editStorageId];
+          delete edits[legacyStorageId];
         } else {
-          edits[String(slideIdx)] = text;
+          edits[editStorageId] = text;
+          if (legacyStorageId !== editStorageId) {
+            delete edits[legacyStorageId];
+          }
         }
         localStorage.setItem(transcriptEditKey, JSON.stringify(edits));
       } catch {
@@ -7322,6 +7346,102 @@ export function PresentationControlPanel({
     [commandStorageKey],
   );
 
+  const applyLocalNavigation = useCallback(
+    (cmd: LocalNavigationCommand) => {
+      const surface = activeSurfaceRef.current;
+
+      setSurfaceStates((current) => {
+        const previousState = current[surface];
+        const previousSlideIndex = Math.max(
+          0,
+          Math.min(
+            previousState.slideIndex,
+            Math.max(orderedSlides.length - 1, 0),
+          ),
+        );
+        const previousSlide = orderedSlides[previousSlideIndex];
+        const previousStepCount = previousSlide?.steps?.length ?? 0;
+        const previousStepIndex =
+          previousStepCount > 0
+            ? Math.min(previousState.stepIndex, previousStepCount - 1)
+            : 0;
+
+        let nextSlideIndex = previousSlideIndex;
+        let nextStepIndex = previousStepIndex;
+
+        if (cmd.action === "goto") {
+          nextSlideIndex = Math.max(
+            0,
+            Math.min(cmd.index, Math.max(orderedSlides.length - 1, 0)),
+          );
+          nextStepIndex = 0;
+        } else if (cmd.action === "step-goto") {
+          if (previousStepCount > 0) {
+            nextStepIndex = Math.max(
+              0,
+              Math.min(cmd.index, previousStepCount - 1),
+            );
+          }
+        } else if (cmd.action === "prev") {
+          if (previousStepCount > 0 && previousStepIndex > 0) {
+            nextStepIndex = previousStepIndex - 1;
+          } else {
+            nextSlideIndex = Math.max(0, previousSlideIndex - 1);
+            nextStepIndex = 0;
+          }
+        } else if (
+          previousStepCount > 0 &&
+          previousStepIndex < previousStepCount - 1
+        ) {
+          nextStepIndex = previousStepIndex + 1;
+        } else {
+          nextSlideIndex = Math.min(
+            orderedSlides.length - 1,
+            previousSlideIndex + 1,
+          );
+          nextStepIndex = 0;
+        }
+
+        const nextSlide = orderedSlides[nextSlideIndex];
+        const nextStepCount = nextSlide?.steps?.length ?? 0;
+
+        return {
+          ...current,
+          [surface]: {
+            ...previousState,
+            deckId: deck.id,
+            deckTitle: deck.title,
+            slideIndex: nextSlideIndex,
+            slideCount: orderedSlides.length,
+            elapsed: 0,
+            duration: nextSlide?.duration,
+            slideTitle: getPresenterSlideTitle(nextSlide),
+            narration: nextSlide?.narration,
+            steps: nextSlide?.steps,
+            stepIndex:
+              nextStepCount > 0
+                ? Math.max(0, Math.min(nextStepIndex, nextStepCount - 1))
+                : 0,
+            stepCount: nextStepCount,
+            surface,
+          },
+        };
+      });
+    },
+    [deck.id, deck.title, orderedSlides],
+  );
+
+  const dispatchNavigation = useCallback(
+    (cmd: LocalNavigationCommand) => {
+      applyLocalNavigation(cmd);
+
+      if (connectedSurfaces[activeSurfaceRef.current]) {
+        send(cmd);
+      }
+    },
+    [applyLocalNavigation, connectedSurfaces, send],
+  );
+
   const requestState = useCallback(() => {
     channelRef.current?.postMessage({ type: "request-state", deckId: deck.id });
   }, [deck.id]);
@@ -7391,15 +7511,23 @@ export function PresentationControlPanel({
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        send({ type: "command", deckId: deck.id, action: "prev" });
+        dispatchNavigation({
+          type: "command",
+          deckId: deck.id,
+          action: "prev",
+        });
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
-        send({ type: "command", deckId: deck.id, action: "next" });
+        dispatchNavigation({
+          type: "command",
+          deckId: deck.id,
+          action: "next",
+        });
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [deck.id, send]);
+  }, [deck.id, dispatchNavigation]);
 
   const handleSelectDeck = useCallback(
     (nextDeckId: string) => {
@@ -7708,20 +7836,26 @@ export function PresentationControlPanel({
               <button
                 className="pc-btn"
                 onClick={() =>
-                  send({ type: "command", deckId: deck.id, action: "prev" })
+                  dispatchNavigation({
+                    type: "command",
+                    deckId: deck.id,
+                    action: "prev",
+                  })
                 }
-                disabled={!connected || atStart}
-                title={!connected ? "No slide window connected" : undefined}
+                disabled={atStart}
               >
                 Previous
               </button>
               <button
                 className="pc-btn"
                 onClick={() =>
-                  send({ type: "command", deckId: deck.id, action: "next" })
+                  dispatchNavigation({
+                    type: "command",
+                    deckId: deck.id,
+                    action: "next",
+                  })
                 }
-                disabled={!connected || atEnd}
-                title={!connected ? "No slide window connected" : undefined}
+                disabled={atEnd}
               >
                 Next
               </button>
@@ -7731,22 +7865,21 @@ export function PresentationControlPanel({
               {orderedSlides.map((slide, idx) => (
                 <button
                   key={slide.id}
-                  className={`pc-jump-item ${idx === activeState.slideIndex ? "active" : ""}${!connected ? " disabled" : ""}${draggedSlideId === slide.id ? " dragging" : ""}${dropTargetSlideId === slide.id && draggedSlideId !== slide.id ? " drop-target" : ""}`}
+                  className={`pc-jump-item ${idx === activeState.slideIndex ? "active" : ""}${draggedSlideId === slide.id ? " dragging" : ""}${dropTargetSlideId === slide.id && draggedSlideId !== slide.id ? " drop-target" : ""}`}
                   draggable
                   onDragStart={(event) => handleJumpDragStart(event, slide.id)}
                   onDragOver={(event) => handleJumpDragOver(event, slide.id)}
                   onDrop={(event) => handleJumpDrop(event, slide.id)}
                   onDragEnd={clearJumpDragState}
                   onClick={() => {
-                    if (!connected) return;
-                    send({
+                    dispatchNavigation({
                       type: "command",
                       deckId: deck.id,
                       action: "goto",
                       index: idx,
                     });
                   }}
-                  title={!connected ? "No slide window connected" : slide.title}
+                  title={slide.title}
                 >
                   <span className="pc-jump-index">{idx + 1}</span>
                   <span className="pc-jump-handle" aria-hidden="true">
@@ -7815,11 +7948,8 @@ export function PresentationControlPanel({
                             editedText ?? "",
                             activeState.steps,
                           )
-                        : activeState.steps ?? [];
-                    if (
-                      activeState.stepCount > 0 &&
-                      editedSteps.length
-                    ) {
+                        : (activeState.steps ?? []);
+                    if (activeState.stepCount > 0 && editedSteps.length) {
                       const activeEditedStep =
                         editedSteps[
                           Math.min(
@@ -7874,7 +8004,7 @@ export function PresentationControlPanel({
                                 type="button"
                                 className={`pc-transcript-step ${index === activeState.stepIndex ? "active" : ""} ${index < activeState.stepIndex ? "complete" : ""}`}
                                 onClick={() =>
-                                  send({
+                                  dispatchNavigation({
                                     type: "command",
                                     deckId: deck.id,
                                     action: "step-goto",
