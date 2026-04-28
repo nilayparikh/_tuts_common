@@ -55,13 +55,10 @@ export function parseStoredTranscriptEditRecord(
   );
 }
 
-<<<<<<< HEAD
-=======
 export function looksLikeStepTranscriptEditValue(text: string): boolean {
   return STEP_HEADING_PATTERN.test(text.replace(/\r\n?/gu, "\n").trim());
 }
 
->>>>>>> ae4168ce3973a44e8c3d858044c91b9adbf25399
 export function resolveTranscriptEditForLanguage(
   value: TranscriptEditValue | undefined,
   language: TranscriptLanguageCode = DEFAULT_TRANSCRIPT_LANGUAGE,
@@ -180,13 +177,6 @@ export function resolveStepsForLanguage<T extends StepTranscriptLike>(
   }));
 }
 
-<<<<<<< HEAD
-export function looksLikeStepTranscriptEditValue(text: string): boolean {
-  return STEP_HEADING_PATTERN.test(text.replace(/\r\n?/gu, "\n").trim());
-}
-
-=======
->>>>>>> ae4168ce3973a44e8c3d858044c91b9adbf25399
 function normalizeStepText(text: string): string {
   return text.replace(/\r\n?/gu, "\n").trim();
 }

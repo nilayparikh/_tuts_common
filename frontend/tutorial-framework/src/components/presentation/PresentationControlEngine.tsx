@@ -22,16 +22,12 @@ import React, {
   useMemo,
   useId,
 } from "react";
-import { BrandLockup } from "../layout/BrandLockup";
 import { ShortsTitleStack } from "./ShortsTitleStack";
 import { TeleprompterOverlay } from "./TeleprompterOverlay";
 import {
   DEFAULT_TRANSCRIPT_LANGUAGE,
   formatStepTranscriptEditValue,
-<<<<<<< HEAD
-=======
   looksLikeStepTranscriptEditValue,
->>>>>>> ae4168ce3973a44e8c3d858044c91b9adbf25399
   parseStoredTranscriptEditRecord,
   parseStepTranscriptEditValue,
   resolveTranscriptContent,
@@ -1949,25 +1945,6 @@ export const PRESENTATION_ENGINE_CSS = `
     letter-spacing: 0.1em;
     color: var(--tf-text-muted, #8892a8);
   }
-<<<<<<< HEAD
-  .pc-transcript-language-select {
-    height: 30px;
-    min-width: 124px;
-    border-radius: 10px;
-    border: 1px solid var(--pc-rail-chip-border);
-    background: var(--pc-rail-chip-bg);
-    box-shadow: var(--pc-rail-chip-shadow);
-    color: var(--tf-text-primary, #e2e6f0);
-    padding: 0 12px;
-    font-size: 12px;
-    font-weight: 600;
-    outline: none;
-  }
-  .pc-transcript-language-select:focus {
-    border-color: var(--tf-color-primary-light, #818cf8);
-  }
-=======
->>>>>>> ae4168ce3973a44e8c3d858044c91b9adbf25399
   .pc-transcript-body {
     flex: 1;
     min-height: 0;
@@ -7537,7 +7514,6 @@ export function PresentationControlPanel({
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   headerSlot,
   headerBarSlot,
-  showHeaderMeta = true,
   transcriptText,
   allowTranscriptEditing = true,
   teleprompterText,
@@ -7811,14 +7787,12 @@ export function PresentationControlPanel({
         const stored = localStorage.getItem(transcriptEditKey);
         if (stored) {
           const edits = parseStoredTranscriptEditRecord(JSON.parse(stored));
-<<<<<<< HEAD
-          const slide = orderedSlides[slideIdx];
           const editStorageId = slide?.id ?? String(slideIdx);
           const stableTranscript = resolveTranscriptEditForLanguage(
             edits[editStorageId],
             language,
           );
-          if (stableTranscript != null) {
+          if (stableTranscript != null && stableTranscript !== "") {
             return stableTranscript;
           }
 
@@ -7826,34 +7800,16 @@ export function PresentationControlPanel({
             edits[String(slideIdx)],
             language,
           );
-          return legacyTranscript != null && legacyTranscript !== ""
-            ? legacyTranscript
-            : null;
-=======
-          const editStorageId = slide?.id ?? String(slideIdx);
-          const stableVal = resolveTranscriptEditForLanguage(
-            edits[editStorageId],
-            language,
-          );
-          if (stableVal != null && stableVal !== "") {
-            return stableVal;
-          }
-
-          const legacyVal = resolveTranscriptEditForLanguage(
-            edits[String(slideIdx)],
-            language,
-          );
-          if (legacyVal == null || legacyVal === "") {
+          if (legacyTranscript == null || legacyTranscript === "") {
             return null;
           }
 
           if (
             slide?.steps?.length ||
-            !looksLikeStepTranscriptEditValue(legacyVal)
+            !looksLikeStepTranscriptEditValue(legacyTranscript)
           ) {
-            return legacyVal;
+            return legacyTranscript;
           }
->>>>>>> ae4168ce3973a44e8c3d858044c91b9adbf25399
         }
       } catch {
         /* ignore */
@@ -7877,10 +7833,7 @@ export function PresentationControlPanel({
           : {};
         const slide = orderedSlides[slideIdx];
         const editStorageId = slide?.id ?? String(slideIdx);
-<<<<<<< HEAD
-=======
         const legacyStorageId = String(slideIdx);
->>>>>>> ae4168ce3973a44e8c3d858044c91b9adbf25399
         const originalText = slide?.steps?.length
           ? formatStepTranscriptEditValue(slide.steps, language)
           : resolveSlideNarration(slide, language);
@@ -7895,25 +7848,16 @@ export function PresentationControlPanel({
           } else {
             edits[editStorageId] = nextValue;
           }
-<<<<<<< HEAD
-=======
           delete edits[legacyStorageId];
->>>>>>> ae4168ce3973a44e8c3d858044c91b9adbf25399
         } else {
           edits[editStorageId] = writeTranscriptEditForLanguage(
             edits[editStorageId],
             language,
             text,
           );
-<<<<<<< HEAD
-        }
-        if (editStorageId !== String(slideIdx)) {
-          delete edits[String(slideIdx)];
-=======
           if (legacyStorageId !== editStorageId) {
             delete edits[legacyStorageId];
           }
->>>>>>> ae4168ce3973a44e8c3d858044c91b9adbf25399
         }
         localStorage.setItem(transcriptEditKey, JSON.stringify(edits));
       } catch {
@@ -8328,7 +8272,6 @@ export function PresentationControlPanel({
       (option) => option.value === selectedTranscriptLanguage,
     )?.label ?? selectedTranscriptLanguage.toUpperCase();
   const connected = Object.values(connectedSurfaces).some(Boolean);
-  const activeConnected = connectedSurfaces[activeSurface];
   const atStart =
     activeState.slideIndex <= 0 &&
     (activeState.stepCount === 0 || activeState.stepIndex <= 0);
@@ -8339,12 +8282,9 @@ export function PresentationControlPanel({
   const transcriptFontScale =
     TRANSCRIPT_FONT_SCALE_STOPS[transcriptScaleIndex] ??
     TRANSCRIPT_FONT_SCALE_STOPS[DEFAULT_TRANSCRIPT_FONT_SCALE_INDEX];
-  const transcriptFontScaleLabel = `${Math.round(transcriptFontScale * 100)}%`;
   const teleprompterFocusLinePosition =
     TELEPROMPTER_FOCUS_LINE_STOPS[teleprompterFocusLineIndex] ??
     TELEPROMPTER_FOCUS_LINE_STOPS[DEFAULT_TELEPROMPTER_FOCUS_LINE_INDEX];
-  const timerOver =
-    activeState.duration != null && activeState.elapsed > activeState.duration;
   const guidesOn = activeState.showGuides;
   const crossbarsOn = activeState.showCrossbars;
   const [teleprompterOn, setTeleprompterOn] = useState(false);
@@ -8357,21 +8297,25 @@ export function PresentationControlPanel({
   const fullscreenOn =
     activeState.fullscreenActive || activeState.fullscreenPromptVisible;
 
-  const readTranscriptUploadText = useCallback((file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          resolve(reader.result);
-          return;
-        }
+  const readTranscriptUploadText = useCallback(
+    (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === "string") {
+            resolve(reader.result);
+            return;
+          }
 
-        reject(new Error("Could not read transcript file."));
-      };
-      reader.onerror = () => reject(new Error("Could not read transcript file."));
-      reader.readAsText(file);
-    });
-  }, []);
+          reject(new Error("Could not read transcript file."));
+        };
+        reader.onerror = () =>
+          reject(new Error("Could not read transcript file."));
+        reader.readAsText(file);
+      });
+    },
+    [],
+  );
 
   const handleTranscriptUploadSelection = useCallback(
     async (
@@ -8709,34 +8653,7 @@ export function PresentationControlPanel({
                   Transcript · {activeTranscriptLanguageLabel}
                 </div>
                 <div className="pc-transcript-header-tools">
-<<<<<<< HEAD
-                  <label
-                    className="pc-transcript-language-label"
-                    htmlFor="pc-transcript-language-select"
-                  >
-                    Language
-                  </label>
-                  <select
-                    id="pc-transcript-language-select"
-                    className="pc-transcript-language-select"
-                    value={selectedTranscriptLanguage}
-                    onChange={(e) =>
-                      setSelectedTranscriptLanguage(
-                        e.target.value as TranscriptLanguageCode,
-                      )
-                    }
-                    aria-label="Select transcript language"
-                  >
-                    {TRANSCRIPT_LANGUAGE_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-=======
-                  <span className="pc-transcript-language-label">
-                    Language
-                  </span>
+                  <span className="pc-transcript-language-label">Language</span>
                   <ControlPanelMenuSelect
                     value={selectedTranscriptLanguage}
                     options={TRANSCRIPT_LANGUAGE_OPTIONS}
@@ -8748,7 +8665,6 @@ export function PresentationControlPanel({
                     aria-label="Select transcript language"
                     variant="transcript"
                   />
->>>>>>> ae4168ce3973a44e8c3d858044c91b9adbf25399
                 </div>
               </div>
               {transcriptEditMode ? (
@@ -9259,7 +9175,9 @@ export function PresentationControlPanel({
                   />
                   <button
                     className="pc-dock-btn"
-                    onClick={() => lessonTranscriptUploadInputRef.current?.click()}
+                    onClick={() =>
+                      lessonTranscriptUploadInputRef.current?.click()
+                    }
                     disabled={transcriptUploadBusy !== null}
                     data-tip={`Upload lesson transcript · ${activeTranscriptLanguageLabel}`}
                     aria-label="Upload lesson transcript"
@@ -9290,7 +9208,9 @@ export function PresentationControlPanel({
                   />
                   <button
                     className="pc-dock-btn"
-                    onClick={() => courseTranscriptUploadInputRef.current?.click()}
+                    onClick={() =>
+                      courseTranscriptUploadInputRef.current?.click()
+                    }
                     disabled={transcriptUploadBusy !== null}
                     data-tip={`Upload course transcript · ${activeTranscriptLanguageLabel}`}
                     aria-label="Upload course transcript"
