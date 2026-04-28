@@ -20,16 +20,26 @@ import React, {
   useCallback,
   useRef,
   useMemo,
+  useId,
 } from "react";
 import { BrandLockup } from "../layout/BrandLockup";
 import { ShortsTitleStack } from "./ShortsTitleStack";
 import { TeleprompterOverlay } from "./TeleprompterOverlay";
 import {
+  DEFAULT_TRANSCRIPT_LANGUAGE,
   formatStepTranscriptEditValue,
   looksLikeStepTranscriptEditValue,
+  parseStoredTranscriptEditRecord,
   parseStepTranscriptEditValue,
   resolveTranscriptContent,
+  resolveSlideNarration,
+  resolveStepsForLanguage,
+  resolveTranscriptEditForLanguage,
   summarizeStepTranscript,
+  type TranscriptEditRecord,
+  type TranscriptLanguageCode,
+  type TranscriptLanguageMap,
+  writeTranscriptEditForLanguage,
 } from "./transcript-utils";
 
 export interface PresentationSlide {
@@ -38,6 +48,7 @@ export interface PresentationSlide {
   presenterTitle?: string;
   duration?: number;
   narration?: string;
+  narrationByLanguage?: TranscriptLanguageMap;
   steps?: PresentationStep[];
   content: React.ReactNode;
   /** When true, suppresses the ShortsTitleStack header bar for this slide in ShortsLayout/FeedLayout. */
@@ -48,6 +59,7 @@ export interface PresentationStep {
   id: string;
   title: string;
   transcript: string;
+  transcriptByLanguage?: TranscriptLanguageMap;
 }
 
 export type DeckType = "course" | "mono" | "short" | "short-single";
@@ -188,7 +200,8 @@ function getBlankSlideTitleState(slideIndex: number): {
 
 export const PRESENTATION_ENGINE_CSS = `
   /* ── Reset ─────────────────────────── */
-  .pe-root {
+  .pe-root,
+  .pc-root {
     --pe-slide-stage-ratio: 1.4;
     --pe-standard-stage-height: calc(100vh - 134px);
     --pe-shell-bg: var(--tf-bg-backdrop, var(--tf-gradient-stage, linear-gradient(135deg, var(--tf-bg-base, #0b0d12) 0%, var(--tf-bg-surface, #111318) 46%, var(--tf-bg-overlay, #1f222a) 100%)));
@@ -1176,14 +1189,44 @@ export const PRESENTATION_ENGINE_CSS = `
 
   /* ── Separate control window ───────── */
   .pc-root {
+    position: relative;
+    isolation: isolate;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background: radial-gradient(ellipse at top left, color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 10%, transparent) 0%, transparent 38%), radial-gradient(ellipse at bottom right, color-mix(in srgb, var(--tf-color-accent, #f59e0b) 8%, transparent) 0%, transparent 42%), var(--pe-shell-bg);
+    background:
+      radial-gradient(circle at 12% 12%, color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 18%, transparent) 0%, transparent 28%),
+      radial-gradient(circle at 86% 16%, color-mix(in srgb, var(--tf-color-secondary, #14b8a6) 14%, transparent) 0%, transparent 24%),
+      radial-gradient(circle at 78% 84%, color-mix(in srgb, var(--tf-color-accent, #f59e0b) 14%, transparent) 0%, transparent 26%),
+      linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-stage-bg, #0b0d12) 88%, #05070d 12%) 0%, color-mix(in srgb, var(--tf-surface-stage-bg, #0b0d12) 72%, var(--tf-surface-panel-bg, #111318) 28%) 100%);
     color: var(--tf-text-primary, #e2e6f0);
     font-family: 'Inter', system-ui, sans-serif;
+  }
+  .pc-root::before,
+  .pc-root::after {
+    content: "";
+    position: absolute;
+    inset: auto;
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(44px);
+    opacity: 0.5;
+  }
+  .pc-root::before {
+    width: 26vw;
+    height: 26vw;
+    top: -8vw;
+    left: -6vw;
+    background: color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 26%, transparent);
+  }
+  .pc-root::after {
+    width: 24vw;
+    height: 24vw;
+    right: -6vw;
+    bottom: -8vw;
+    background: color-mix(in srgb, var(--tf-color-secondary, #14b8a6) 18%, transparent);
   }
   .pc-body {
     position: relative;
@@ -1191,32 +1234,53 @@ export const PRESENTATION_ENGINE_CSS = `
     min-height: 0;
     display: grid;
     grid-template-columns: 368px 1fr;
-    gap: 18px;
-    padding: 18px;
+    gap: 20px;
+    padding: 20px;
+  }
+  .pc-body::before {
+    content: "";
+    position: absolute;
+    top: 24px;
+    bottom: 24px;
+    left: calc(368px + 10px);
+    width: 1px;
+    background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 18%, transparent) 18%, color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 28%, transparent) 50%, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 18%, transparent) 82%, transparent 100%);
+    opacity: 0.75;
   }
   .pc-sidebar {
     border: 1px solid var(--pc-sidebar-border);
-    border-radius: 28px;
+    border-radius: 30px;
     background: var(--pc-sidebar-bg);
     box-shadow: var(--pc-panel-shadow);
-    backdrop-filter: blur(18px) saturate(145%);
+    backdrop-filter: blur(24px) saturate(155%);
     display: flex;
     flex-direction: column;
     min-height: 0;
-    padding: 16px 14px 14px;
-    gap: 14px;
+    padding: 16px 16px 16px;
+    gap: 16px;
     overflow: hidden;
+    position: relative;
+  }
+  .pc-sidebar::before,
+  .pc-transcript::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 8%, transparent) 0%, transparent 18%, transparent 82%, color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 10%, transparent) 100%);
+    opacity: 0.7;
   }
   .pc-camera-preview {
-    padding: 12px;
+    padding: 14px;
     border: 1px solid var(--pc-sidebar-section-border);
-    border-radius: 20px;
+    border-radius: 22px;
     background: var(--pc-sidebar-section-bg);
     box-shadow: var(--pc-sidebar-section-shadow);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     flex-shrink: 0;
   }
   .pc-camera-video {
@@ -1247,49 +1311,27 @@ export const PRESENTATION_ENGINE_CSS = `
     height: 24px;
     opacity: 0.4;
   }
-  .pc-camera-select {
-    width: 100%;
-    height: 34px;
-    border-radius: 10px;
-    border: 1px solid var(--pc-sidebar-control-border);
-    background: var(--pc-sidebar-control-bg);
-    color: var(--tf-text-primary, #e2e6f0);
-    font-size: 12px;
-    padding: 0 10px;
-    outline: none;
-    cursor: pointer;
-    transition: all 150ms;
-    box-shadow: var(--pc-sidebar-control-shadow);
-  }
-  .pc-camera-select:hover,
-  .pc-camera-select:focus-visible {
-    border-color: var(--pc-action-surface-hover-border);
-  }
-  .pc-camera-select option {
-    background: var(--tf-bg-surface, #111318);
-    color: var(--tf-text-primary, #e2e6f0);
-  }
   .pc-controls {
-    padding: 14px;
+    padding: 16px;
     border: 1px solid var(--pc-sidebar-section-border);
-    border-radius: 20px;
+    border-radius: 22px;
     background: var(--pc-sidebar-section-bg);
     box-shadow: var(--pc-sidebar-section-shadow);
     overflow: hidden;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 14px;
   }
   .pc-lessons {
-    padding: 14px;
+    padding: 16px;
     border: 1px solid var(--pc-sidebar-section-border);
-    border-radius: 20px;
+    border-radius: 22px;
     background: var(--pc-sidebar-section-bg);
     box-shadow: var(--pc-sidebar-section-shadow);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
   }
   .pc-section-label {
     font-size: 11px;
@@ -1302,9 +1344,9 @@ export const PRESENTATION_ENGINE_CSS = `
   .pc-sidebar-control-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 12px 14px;
-    border-radius: 16px;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 18px;
     border: 1px solid var(--pc-sidebar-control-border);
     background: var(--pc-sidebar-control-bg);
     box-shadow: var(--pc-sidebar-control-shadow);
@@ -1312,22 +1354,183 @@ export const PRESENTATION_ENGINE_CSS = `
   .pc-sidebar-control-group .pc-section-label {
     padding: 0;
   }
+  .pc-menu-select {
+    position: relative;
+    width: 100%;
+  }
+  .pc-menu-trigger {
+    width: 100%;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--pc-sidebar-control-border);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--tf-bg-overlay, #1f222a) 78%, transparent) 0%, color-mix(in srgb, var(--tf-bg-elevated, #191c23) 88%, transparent) 100%);
+    box-shadow: var(--pc-sidebar-control-shadow);
+    color: var(--tf-text-primary, #e2e6f0);
+    cursor: pointer;
+    text-align: left;
+    transition: transform 150ms ease, border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+    backdrop-filter: blur(18px) saturate(150%);
+  }
+  .pc-menu-trigger:hover,
+  .pc-menu-trigger:focus-visible,
+  .pc-menu-select.open .pc-menu-trigger {
+    border-color: var(--pc-action-surface-hover-border);
+    background: var(--pc-action-surface-hover-bg);
+    box-shadow: var(--pc-action-surface-shadow);
+    transform: translateY(-1px);
+    outline: none;
+  }
+  .pc-menu-trigger:disabled {
+    opacity: 0.45;
+    cursor: default;
+    transform: none;
+  }
+  .pc-menu-trigger-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .pc-menu-trigger-value {
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--tf-text-primary, #e2e6f0);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pc-menu-trigger-meta {
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tf-text-muted, #8892a8);
+  }
+  .pc-menu-trigger-icon,
+  .pc-menu-option-check {
+    font-family: 'Material Symbols Outlined';
+    font-size: 18px;
+    line-height: 1;
+    font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+  }
+  .pc-menu-trigger-icon {
+    color: var(--tf-text-muted, #8892a8);
+    transition: transform 150ms ease, color 150ms ease;
+  }
+  .pc-menu-select.open .pc-menu-trigger-icon {
+    color: var(--tf-text-primary, #e2e6f0);
+    transform: rotate(180deg);
+  }
+  .pc-menu-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    max-height: 280px;
+    overflow-y: auto;
+    border-radius: 20px;
+    border: 1px solid var(--pc-panel-border, rgba(255, 255, 255, 0.12));
+    background-color: #14171f;
+    background-image: linear-gradient(180deg, color-mix(in srgb, var(--tf-bg-elevated, #191c23) 96%, transparent) 0%, color-mix(in srgb, var(--tf-bg-overlay, #1f222a) 96%, transparent) 100%);
+    box-shadow: var(--pc-dialog-shadow, 0 24px 48px rgba(0, 0, 0, 0.45));
+    backdrop-filter: blur(26px) saturate(165%);
+  }
+  .pc-menu-panel::-webkit-scrollbar {
+    width: 6px;
+  }
+  .pc-menu-panel::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 16%, transparent);
+    border-radius: 999px;
+  }
+  .pc-menu-option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 11px 12px;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--tf-text-secondary, #bfc5d4);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 140ms ease;
+  }
+  .pc-menu-option:hover,
+  .pc-menu-option:focus-visible,
+  .pc-menu-option.active {
+    border-color: var(--pc-action-surface-hover-border);
+    background: var(--pc-action-surface-hover-bg);
+    color: var(--tf-text-primary, #e2e6f0);
+    outline: none;
+    transform: translateX(1px);
+  }
+  .pc-menu-option-copy {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .pc-menu-option-label {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .pc-menu-option-meta {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tf-text-muted, #8892a8);
+  }
+  .pc-menu-option-check {
+    color: var(--tf-color-secondary, #14b8a6);
+  }
+  .pc-menu-select-compact .pc-menu-trigger {
+    min-height: 36px;
+    padding: 8px 12px;
+    border-radius: 14px;
+  }
+  .pc-menu-select-compact .pc-menu-trigger-value {
+    font-size: 12px;
+  }
+  .pc-menu-select-transcript {
+    min-width: 148px;
+  }
+  .pc-menu-select-transcript .pc-menu-panel {
+    left: auto;
+    min-width: 176px;
+  }
   .pc-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     height: 40px;
-    border-radius: 12px;
+    border-radius: 14px;
     border: 1px solid var(--pc-action-surface-border);
     background: var(--pc-action-surface-bg);
     color: var(--tf-text-primary, #e2e6f0);
     cursor: pointer;
     font-size: 14px;
     font-weight: 700;
-    transition: all 150ms;
-    padding: 0 14px;
+    transition: transform 150ms ease, border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+    padding: 0 15px;
     box-shadow: var(--pc-action-surface-shadow);
-    backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(150%);
   }
   .pc-btn:hover:not(:disabled) {
     color: var(--pc-action-surface-hover-text);
@@ -1364,28 +1567,23 @@ export const PRESENTATION_ENGINE_CSS = `
     border-color: var(--pc-action-surface-hover-border);
     box-shadow: var(--pc-action-surface-shadow);
   }
-  .pc-lesson-select {
+  .pc-field-input {
     width: 100%;
     height: 40px;
-    border-radius: 12px;
+    border-radius: 14px;
     border: 1px solid var(--pc-sidebar-control-border);
     background: var(--pc-sidebar-control-bg);
     color: var(--tf-text-primary, #e2e6f0);
     font-size: 14px;
     padding: 0 12px;
     outline: none;
-    cursor: pointer;
     transition: all 150ms;
     box-shadow: var(--pc-sidebar-control-shadow);
-    backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(150%);
   }
-  .pc-lesson-select:hover,
-  .pc-lesson-select:focus-visible {
+  .pc-field-input:hover,
+  .pc-field-input:focus-visible {
     border-color: var(--pc-action-surface-hover-border);
-  }
-  .pc-lesson-select option {
-    background: var(--tf-bg-surface, #111318);
-    color: var(--tf-text-primary, #e2e6f0);
   }
   .pc-slider-row {
     display: grid;
@@ -1427,9 +1625,9 @@ export const PRESENTATION_ENGINE_CSS = `
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 12px;
+    padding: 14px;
     border: 1px solid var(--pc-sidebar-section-border);
-    border-radius: 20px;
+    border-radius: 22px;
     background: var(--pc-sidebar-section-bg);
     box-shadow: var(--pc-sidebar-section-shadow);
     overflow-y: auto;
@@ -1442,18 +1640,19 @@ export const PRESENTATION_ENGINE_CSS = `
   .pc-jump-item {
     width: 100%;
     text-align: left;
-    margin-bottom: 6px;
-    border-radius: 12px;
+    margin-bottom: 8px;
+    border-radius: 16px;
     border: 1px solid var(--pc-action-surface-border);
     background: var(--pc-sidebar-control-bg);
     color: var(--tf-text-secondary, #bfc5d4);
-    padding: 10px 12px;
+    padding: 12px 14px;
     cursor: grab;
     display: flex;
     align-items: baseline;
     gap: 12px;
     box-shadow: var(--pc-sidebar-control-shadow);
-    backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(150%);
+    transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
   }
   .pc-jump-item.dragging {
     opacity: 0.55;
@@ -1465,6 +1664,7 @@ export const PRESENTATION_ENGINE_CSS = `
   }
   .pc-jump-item:hover {
     background: var(--pc-action-surface-hover-bg);
+    transform: translateX(2px);
   }
   .pc-jump-item.active {
     background: var(--pc-action-surface-hover-bg);
@@ -1501,9 +1701,9 @@ export const PRESENTATION_ENGINE_CSS = `
     overflow: hidden;
     background: var(--pc-transcript-shell-bg);
     border: 1px solid var(--pc-transcript-shell-border);
-    border-radius: 32px;
+    border-radius: 34px;
     box-shadow: var(--pc-panel-shadow), inset 1px 0 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 4%, transparent);
-    backdrop-filter: blur(18px) saturate(145%);
+    backdrop-filter: blur(24px) saturate(160%);
   }
   .pc-transcript-main {
     position: relative;
@@ -1511,9 +1711,9 @@ export const PRESENTATION_ENGINE_CSS = `
     min-height: 0;
     display: flex;
     flex-direction: column;
-    margin: 12px 0 12px 12px;
-    padding: 18px;
-    border-radius: 26px;
+    margin: 14px 0 14px 14px;
+    padding: 20px;
+    border-radius: 28px;
     border: 1px solid color-mix(in srgb, var(--pc-transcript-shell-border) 82%, transparent);
     background: var(--pc-transcript-bg);
     box-shadow: var(--pc-action-surface-shadow);
@@ -1527,14 +1727,14 @@ export const PRESENTATION_ENGINE_CSS = `
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 12px 0;
-    margin: 12px 12px 12px 0;
-    gap: 10px;
+    padding: 14px 0;
+    margin: 14px 14px 14px 0;
+    gap: 12px;
     border: 1px solid var(--pc-transcript-shell-border);
-    border-radius: 24px;
+    border-radius: 26px;
     background: var(--pc-rail-bg);
     box-shadow: inset 1px 0 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 6%, transparent);
-    backdrop-filter: blur(18px) saturate(145%);
+    backdrop-filter: blur(24px) saturate(155%);
   }
   .pc-transcript-rail::-webkit-scrollbar { width: 0; }
 
@@ -1544,15 +1744,15 @@ export const PRESENTATION_ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 14px;
+    width: 42px;
+    height: 42px;
+    border-radius: 16px;
     border: 1px solid var(--pc-rail-chip-border);
     background: var(--pc-rail-chip-bg);
     box-shadow: var(--pc-rail-chip-shadow);
     color: var(--tf-text-secondary, #bfc5d4);
     cursor: pointer;
-    transition: all 120ms ease;
+    transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, box-shadow 120ms ease, color 120ms ease;
     flex-shrink: 0;
   }
   .pc-dock-btn svg,
@@ -1565,6 +1765,7 @@ export const PRESENTATION_ENGINE_CSS = `
     color: var(--tf-text-primary, #e2e6f0);
     background: var(--pc-action-surface-hover-bg);
     border-color: var(--pc-action-surface-hover-border);
+    transform: translateY(-1px);
   }
   .pc-dock-btn.active {
     color: var(--tf-text-primary, #e2e6f0);
@@ -1714,13 +1915,13 @@ export const PRESENTATION_ENGINE_CSS = `
   @keyframes pc-fade-in { from { opacity: 0; } to { opacity: 1; } }
   @keyframes pc-scale-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
   .pc-transcript-header {
-    height: 44px;
-    min-height: 44px;
+    height: 48px;
+    min-height: 48px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 0 16px;
+    padding: 0 18px;
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -1740,11 +1941,16 @@ export const PRESENTATION_ENGINE_CSS = `
     gap: 12px;
     min-width: 0;
   }
+  .pc-transcript-language-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--tf-text-muted, #8892a8);
+  }
   .pc-transcript-body {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 16px;
+    padding: 18px;
     line-height: 1.7;
     color: var(--tf-text-secondary, #bfc5d4);
     font-size: calc(14px * var(--pc-transcript-font-scale, 1.1));
@@ -1756,13 +1962,13 @@ export const PRESENTATION_ENGINE_CSS = `
   }
   .pc-transcript-current {
     margin-bottom: 16px;
-    padding: 16px 18px;
-    border-radius: 14px;
+    padding: 18px 20px;
+    border-radius: 18px;
     border: 1px solid var(--pc-action-surface-hover-border);
     background: var(--pc-action-surface-bg);
     box-shadow: var(--pc-action-surface-shadow);
     animation: pc-active-transcript-enter 220ms ease;
-    backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(150%);
   }
   .pc-transcript-current-title {
     display: flex;
@@ -1824,14 +2030,14 @@ export const PRESENTATION_ENGINE_CSS = `
     -webkit-appearance: none;
     font: inherit;
     color: var(--tf-text-secondary, #bfc5d4);
-    padding: 12px 14px;
-    border-radius: 12px;
+    padding: 14px 16px;
+    border-radius: 16px;
     border: 1px solid var(--tf-border-subtle, rgba(202,211,230,0.08));
     background: var(--pc-action-surface-bg);
     opacity: 0.68;
     transition: all 180ms ease;
     cursor: pointer;
-    backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(150%);
   }
   .pc-transcript-step:hover {
     opacity: 0.92;
@@ -2027,17 +2233,26 @@ export const PRESENTATION_ENGINE_CSS = `
     .pc-body {
       grid-template-columns: 320px 1fr;
     }
+    .pc-body::before {
+      left: calc(320px + 10px);
+    }
   }
 
   @media (max-width: 1120px) {
     .pc-body {
       grid-template-columns: 260px 1fr;
     }
+    .pc-body::before {
+      left: calc(260px + 10px);
+    }
   }
 
   @media (max-width: 820px) {
     .pc-body {
       grid-template-columns: 200px 1fr;
+    }
+    .pc-body::before {
+      left: calc(200px + 10px);
     }
   }
 
@@ -2676,14 +2891,19 @@ export const PRESENTATION_ENGINE_CSS = `
   /* Deck-type filter & badge styles in control panel */
   .pc-deck-type-row {
     display: flex;
-    gap: 4px;
-    margin-bottom: 6px;
+    gap: 6px;
+    margin-bottom: 8px;
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 10%, transparent);
+    background: color-mix(in srgb, var(--tf-surface-stage-bg, #0b0d12) 62%, transparent);
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 6%, transparent);
   }
   .pc-deck-type-btn {
     flex: 1;
-    padding: 0.2em 0;
+    padding: 0.45em 0;
     border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
-    border-radius: 0.375em;
+    border-radius: 999px;
     background: transparent;
     color: var(--tf-text-muted, #8892a8);
     font-size: 0.6875rem;
@@ -2699,9 +2919,10 @@ export const PRESENTATION_ENGINE_CSS = `
     color: var(--tf-text-primary, #e2e6f0);
   }
   .pc-deck-type-btn.active {
-    background: var(--pc-action-surface-bg);
-    border-color: var(--pc-action-surface-border);
+    background: var(--pc-action-surface-hover-bg);
+    border-color: var(--pc-action-surface-hover-border);
     color: var(--tf-text-primary, #e2e6f0);
+    box-shadow: var(--pc-action-surface-shadow);
   }
 
   /* Shorts toggle button */
@@ -2902,6 +3123,217 @@ export const PRESENTATION_ENGINE_CSS = `
     font-weight: 700;
     color: var(--tf-text-secondary, #bfc5d4);
     white-space: nowrap;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════════ */
+  /*  FLAT CONTROL PANEL OVERRIDES (Dashdark-X-style)                       */
+  /*  Three columns separated by background tint only — no nested boxes,    */
+  /*  no curved borders, fluid middle pane.                                 */
+  /* ═══════════════════════════════════════════════════════════════════════ */
+  .pc-root {
+    background: #0b0d12;
+  }
+  .pc-root::before,
+  .pc-root::after {
+    display: none;
+  }
+  .pc-body {
+    grid-template-columns: 320px minmax(0, 1fr) auto;
+    gap: 0;
+    padding: 0;
+  }
+  .pc-body::before {
+    display: none;
+  }
+
+  /* ── Sidebar (left): darker shade, flat, full bleed ── */
+  .pc-sidebar {
+    border: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 0;
+    background: #0d1016;
+    box-shadow: none;
+    backdrop-filter: none;
+    padding: 20px 18px;
+    gap: 22px;
+  }
+  .pc-sidebar::before,
+  .pc-transcript::before {
+    display: none;
+  }
+
+  /* ── Strip nested boxes inside sidebar ── */
+  .pc-camera-preview,
+  .pc-controls,
+  .pc-lessons,
+  .pc-sidebar-control-group {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .pc-camera-preview { gap: 8px; }
+  .pc-controls { gap: 10px; }
+  .pc-lessons { gap: 6px; }
+  .pc-sidebar-control-group { gap: 8px; }
+  .pc-section-label {
+    color: rgba(255, 255, 255, 0.42);
+    letter-spacing: 0.10em;
+    font-size: 10px;
+    padding: 0;
+  }
+
+  /* ── Form controls inside sidebar: low-radius, flat ── */
+  .pc-menu-trigger {
+    min-height: 40px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #14181f;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  .pc-menu-trigger:hover,
+  .pc-menu-trigger:focus-visible,
+  .pc-menu-select.open .pc-menu-trigger {
+    background: #181d26;
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: none;
+    transform: none;
+  }
+  .pc-menu-panel {
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background-color: #14181f;
+    background-image: none;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+    backdrop-filter: none;
+  }
+  .pc-menu-option {
+    border-radius: 4px;
+  }
+  .pc-menu-option:hover,
+  .pc-menu-option:focus-visible,
+  .pc-menu-option.active {
+    background: #1d2330;
+    border-color: rgba(255, 255, 255, 0.10);
+    transform: none;
+  }
+  .pc-field-input {
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #14181f;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  .pc-field-input:hover,
+  .pc-field-input:focus-visible {
+    background: #181d26;
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: none;
+  }
+  .pc-btn {
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #14181f;
+    box-shadow: none;
+  }
+  .pc-btn:hover:not(:disabled) {
+    background: #181d26;
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: none;
+    transform: none;
+  }
+  .pc-deck-type-row {
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #14181f;
+    padding: 3px;
+    box-shadow: none;
+  }
+  .pc-deck-type-btn {
+    border-radius: 3px;
+  }
+
+  /* ── Lesson list rows: flat, separator-only ── */
+  .pc-jump-item {
+    border-radius: 0;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    background: transparent;
+    box-shadow: none;
+    margin-bottom: 0;
+    padding: 10px 6px;
+  }
+  .pc-jump-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+    transform: none;
+  }
+  .pc-jump-item.active {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: transparent;
+  }
+
+  /* ── Transcript (middle): default shade, full bleed, fluid ── */
+  .pc-transcript {
+    grid-template-columns: minmax(0, 1fr) 56px;
+    border: none;
+    border-radius: 0;
+    background: #0f1218;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+  .pc-transcript-main {
+    margin: 0;
+    padding: 22px 28px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* ── Right rail: slightly different shade, flat ── */
+  .pc-transcript-rail {
+    width: 56px;
+    min-width: 56px;
+    margin: 0;
+    padding: 14px 0;
+    border: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 0;
+    background: #0d1016;
+    box-shadow: none;
+    backdrop-filter: none;
+    gap: 6px;
+  }
+  .pc-dock-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+  .pc-dock-btn:hover:not(:disabled) {
+    background: #181d26;
+    border-color: rgba(255, 255, 255, 0.10);
+    transform: none;
+  }
+  .pc-dock-btn.active {
+    background: #1d2330;
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: none;
+  }
+  .pc-dock-btn[data-tip]::after {
+    border-radius: 4px;
+    background: #14181f;
+    border-color: rgba(255, 255, 255, 0.10);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  }
+  .pc-dock-divider {
+    background: rgba(255, 255, 255, 0.06);
   }
 `;
 
@@ -3289,6 +3721,30 @@ const Icons = {
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
   ),
+  transcriptLesson: (
+    <span
+      style={{
+        fontSize: 10,
+        fontWeight: 800,
+        lineHeight: 1,
+        letterSpacing: "0.04em",
+      }}
+    >
+      L↓
+    </span>
+  ),
+  transcriptCourse: (
+    <span
+      style={{
+        fontSize: 10,
+        fontWeight: 800,
+        lineHeight: 1,
+        letterSpacing: "0.04em",
+      }}
+    >
+      C↓
+    </span>
+  ),
 };
 
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -3452,6 +3908,11 @@ type ControlState = {
 
 const DEFAULT_CONTROL_CHANNEL = "tf-slides-control";
 const DEFAULT_CONTROL_WINDOW_NAME = "tf-slide-control-window";
+const TRANSCRIPT_LANGUAGE_OPTIONS = [
+  { value: "en", label: "English" },
+  { value: "hi", label: "Hindi" },
+  { value: "gu", label: "Gujarati" },
+] as const;
 const DEFAULT_SLIDE_ZOOM = 1.15;
 const ENLARGE_MIN = 0.5;
 const ENLARGE_MAX = 5;
@@ -3474,6 +3935,35 @@ function getZoomStorageKey(channelId: string, deckId: string) {
 
 function getSlideOrderStorageKey(channelId: string, deckId: string) {
   return `${channelId}:${deckId}:slide-order`;
+}
+
+function getTranscriptLanguageStorageKey(channelId: string) {
+  return `${channelId}:transcript-language`;
+}
+
+function readStoredTranscriptLanguage(
+  storageKey: string,
+): TranscriptLanguageCode {
+  try {
+    const stored = localStorage.getItem(storageKey);
+    return stored && stored.trim()
+      ? (stored as TranscriptLanguageCode)
+      : DEFAULT_TRANSCRIPT_LANGUAGE;
+  } catch {
+    return DEFAULT_TRANSCRIPT_LANGUAGE;
+  }
+}
+
+function hasTranscriptEdits(edits: TranscriptEditRecord): boolean {
+  return Object.values(edits).some((value) => {
+    if (typeof value === "string") {
+      return value.trim().length > 0;
+    }
+
+    return Object.values(value ?? {}).some(
+      (entry) => typeof entry === "string" && entry.trim().length > 0,
+    );
+  });
 }
 
 function normalizeSlideOrderIds(
@@ -6882,6 +7372,135 @@ interface PresentationControlPanelProps {
   allowTranscriptEditing?: boolean;
   /** External transcript text for the teleprompter (e.g. from IndexedDB for blank slides). */
   teleprompterText?: string;
+  onDownloadLessonTranscript?: (language: TranscriptLanguageCode) => void;
+  onDownloadCourseTranscript?: (
+    language: TranscriptLanguageCode,
+  ) => void | Promise<void>;
+  onUploadLessonTranscript?: (
+    language: TranscriptLanguageCode,
+    text: string,
+  ) => void | Promise<void>;
+  onUploadCourseTranscript?: (
+    language: TranscriptLanguageCode,
+    text: string,
+  ) => void | Promise<void>;
+}
+
+type ControlPanelMenuOption = {
+  value: string;
+  label: string;
+  meta?: string;
+  disabled?: boolean;
+};
+
+export function ControlPanelMenuSelect({
+  value,
+  options,
+  onChange,
+  "aria-label": ariaLabel,
+  placeholder,
+  variant = "sidebar",
+  disabled = false,
+}: {
+  value: string;
+  options: readonly ControlPanelMenuOption[];
+  onChange: (value: string) => void;
+  "aria-label": string;
+  placeholder?: string;
+  variant?: "sidebar" | "transcript" | "compact";
+  disabled?: boolean;
+}): React.ReactElement {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const listboxId = useId();
+  const selectedOption =
+    options.find((option) => option.value === value) ?? null;
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    window.addEventListener("mousedown", handlePointerDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("mousedown", handlePointerDown);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div
+      ref={rootRef}
+      className={`pc-menu-select pc-menu-select-${variant}${open ? " open" : ""}`}
+    >
+      <button
+        type="button"
+        className="pc-menu-trigger"
+        onClick={() => setOpen((current) => !current)}
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listboxId}
+        disabled={disabled}
+      >
+        <span className="pc-menu-trigger-copy">
+          <span className="pc-menu-trigger-value">
+            {selectedOption?.label ?? placeholder ?? "Select"}
+          </span>
+          {selectedOption?.meta ? (
+            <span className="pc-menu-trigger-meta">{selectedOption.meta}</span>
+          ) : null}
+        </span>
+        <span className="pc-menu-trigger-icon" aria-hidden="true">
+          expand_more
+        </span>
+      </button>
+      {open ? (
+        <div id={listboxId} role="listbox" className="pc-menu-panel">
+          {options.map((option) => {
+            const active = option.value === value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={active}
+                className={`pc-menu-option${active ? " active" : ""}`}
+                disabled={option.disabled}
+                onClick={() => {
+                  onChange(option.value);
+                  setOpen(false);
+                }}
+              >
+                <span className="pc-menu-option-copy">
+                  <span className="pc-menu-option-label">{option.label}</span>
+                  {option.meta ? (
+                    <span className="pc-menu-option-meta">{option.meta}</span>
+                  ) : null}
+                </span>
+                <span className="pc-menu-option-check" aria-hidden="true">
+                  {active ? "check" : ""}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export function PresentationControlPanel({
@@ -6900,6 +7519,10 @@ export function PresentationControlPanel({
   transcriptText,
   allowTranscriptEditing = true,
   teleprompterText,
+  onDownloadLessonTranscript,
+  onDownloadCourseTranscript,
+  onUploadLessonTranscript,
+  onUploadCourseTranscript,
 }: PresentationControlPanelProps) {
   const brandLogoSrc =
     branding?.logoSrc ?? "/brand/og-image-template-1200x630.png";
@@ -6915,11 +7538,17 @@ export function PresentationControlPanel({
     deck.slides,
   );
   const transcriptScaleStorageKey = `${controlChannelId}:transcript-scale`;
+  const transcriptLanguageStorageKey =
+    getTranscriptLanguageStorageKey(controlChannelId);
   const teleprompterFocusLineStorageKey = `${controlChannelId}:teleprompter-focus-line`;
   const [draggedSlideId, setDraggedSlideId] = useState<string | null>(null);
   const [dropTargetSlideId, setDropTargetSlideId] = useState<string | null>(
     null,
   );
+  const [selectedTranscriptLanguage, setSelectedTranscriptLanguage] =
+    useState<TranscriptLanguageCode>(() =>
+      readStoredTranscriptLanguage(transcriptLanguageStorageKey),
+    );
   const buildDefaultControlState = (
     surface: PresentationSurface,
   ): ControlState => ({
@@ -7023,6 +7652,16 @@ export function PresentationControlPanel({
       // Ignore localStorage access issues.
     }
   }, [transcriptScaleIndex, transcriptScaleStorageKey]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        transcriptLanguageStorageKey,
+        selectedTranscriptLanguage,
+      );
+    } catch {
+      // Ignore localStorage access issues.
+    }
+  }, [selectedTranscriptLanguage, transcriptLanguageStorageKey]);
   const [teleprompterFocusLineIndex, setTeleprompterFocusLineIndex] =
     useState<number>(() => {
       try {
@@ -7141,18 +7780,28 @@ export function PresentationControlPanel({
 
   /** Read a persisted transcript edit from localStorage, or return null. */
   const getEditedTranscript = useCallback(
-    (slideIdx: number): string | null => {
+    (
+      slideIdx: number,
+      language: TranscriptLanguageCode = selectedTranscriptLanguage,
+    ): string | null => {
       try {
         const slide = orderedSlides[slideIdx];
         const stored = localStorage.getItem(transcriptEditKey);
         if (stored) {
-          const edits = JSON.parse(stored) as Record<string, string>;
-          const stableVal = slide?.id ? edits[slide.id] : undefined;
+          const edits = parseStoredTranscriptEditRecord(JSON.parse(stored));
+          const editStorageId = slide?.id ?? String(slideIdx);
+          const stableVal = resolveTranscriptEditForLanguage(
+            edits[editStorageId],
+            language,
+          );
           if (stableVal != null && stableVal !== "") {
             return stableVal;
           }
 
-          const legacyVal = edits[String(slideIdx)];
+          const legacyVal = resolveTranscriptEditForLanguage(
+            edits[String(slideIdx)],
+            language,
+          );
           if (legacyVal == null || legacyVal === "") {
             return null;
           }
@@ -7169,26 +7818,45 @@ export function PresentationControlPanel({
       }
       return null;
     },
-    [orderedSlides, transcriptEditKey],
+    [orderedSlides, selectedTranscriptLanguage, transcriptEditKey],
   );
 
   /** Persist a transcript edit to localStorage. Empty string = delete. */
   const setEditedTranscript = useCallback(
-    (slideIdx: number, text: string) => {
+    (
+      slideIdx: number,
+      text: string,
+      language: TranscriptLanguageCode = selectedTranscriptLanguage,
+    ) => {
       try {
         const stored = localStorage.getItem(transcriptEditKey);
-        const edits: Record<string, string> = stored ? JSON.parse(stored) : {};
+        const edits = stored
+          ? parseStoredTranscriptEditRecord(JSON.parse(stored))
+          : {};
         const slide = orderedSlides[slideIdx];
         const editStorageId = slide?.id ?? String(slideIdx);
         const legacyStorageId = String(slideIdx);
         const originalText = slide?.steps?.length
-          ? formatStepTranscriptEditValue(slide.steps)
-          : (slide?.narration ?? "");
+          ? formatStepTranscriptEditValue(slide.steps, language)
+          : resolveSlideNarration(slide, language);
         if (text.trim() === "" || text === originalText) {
-          delete edits[editStorageId];
+          const nextValue = writeTranscriptEditForLanguage(
+            edits[editStorageId],
+            language,
+            "",
+          );
+          if (nextValue === undefined) {
+            delete edits[editStorageId];
+          } else {
+            edits[editStorageId] = nextValue;
+          }
           delete edits[legacyStorageId];
         } else {
-          edits[editStorageId] = text;
+          edits[editStorageId] = writeTranscriptEditForLanguage(
+            edits[editStorageId],
+            language,
+            text,
+          );
           if (legacyStorageId !== editStorageId) {
             delete edits[legacyStorageId];
           }
@@ -7198,7 +7866,7 @@ export function PresentationControlPanel({
         /* ignore */
       }
     },
-    [orderedSlides, transcriptEditKey],
+    [orderedSlides, selectedTranscriptLanguage, transcriptEditKey],
   );
 
   /** Check whether any edits exist for the current deck. */
@@ -7206,8 +7874,8 @@ export function PresentationControlPanel({
     try {
       const stored = localStorage.getItem(transcriptEditKey);
       if (stored) {
-        const edits = JSON.parse(stored) as Record<string, string>;
-        return Object.keys(edits).length > 0;
+        const edits = parseStoredTranscriptEditRecord(JSON.parse(stored));
+        return hasTranscriptEdits(edits);
       }
     } catch {
       /* ignore */
@@ -7223,34 +7891,48 @@ export function PresentationControlPanel({
   // Sync draft when slide changes or edit mode toggles
   useEffect(() => {
     if (transcriptEditMode) {
-      const edited = getEditedTranscript(currentSlideIdx);
+      const edited = getEditedTranscript(
+        currentSlideIdx,
+        selectedTranscriptLanguage,
+      );
       const slide = orderedSlides[currentSlideIdx];
       const original = slide?.steps?.length
-        ? formatStepTranscriptEditValue(slide.steps)
-        : (slide?.narration ?? "");
+        ? formatStepTranscriptEditValue(slide.steps, selectedTranscriptLanguage)
+        : resolveSlideNarration(slide, selectedTranscriptLanguage);
       setEditDraft(edited ?? original);
       editDraftSlideRef.current = currentSlideIdx;
     }
-  }, [transcriptEditMode, currentSlideIdx, getEditedTranscript, orderedSlides]);
+  }, [
+    transcriptEditMode,
+    currentSlideIdx,
+    getEditedTranscript,
+    orderedSlides,
+    selectedTranscriptLanguage,
+  ]);
 
   // Auto-save draft on change (debounced via the onBlur / onChange)
   const handleTranscriptDraftChange = useCallback(
     (text: string) => {
       setEditDraft(text);
-      setEditedTranscript(currentSlideIdx, text);
+      setEditedTranscript(currentSlideIdx, text, selectedTranscriptLanguage);
     },
-    [currentSlideIdx, setEditedTranscript],
+    [currentSlideIdx, selectedTranscriptLanguage, setEditedTranscript],
   );
 
   const revertTranscriptEdit = useCallback(() => {
-    setEditedTranscript(currentSlideIdx, "");
+    setEditedTranscript(currentSlideIdx, "", selectedTranscriptLanguage);
     const slide = orderedSlides[currentSlideIdx];
     setEditDraft(
       slide?.steps?.length
-        ? formatStepTranscriptEditValue(slide.steps)
-        : (slide?.narration ?? ""),
+        ? formatStepTranscriptEditValue(slide.steps, selectedTranscriptLanguage)
+        : resolveSlideNarration(slide, selectedTranscriptLanguage),
     );
-  }, [currentSlideIdx, setEditedTranscript, orderedSlides]);
+  }, [
+    currentSlideIdx,
+    orderedSlides,
+    selectedTranscriptLanguage,
+    setEditedTranscript,
+  ]);
 
   useEffect(() => {
     if (!allowTranscriptEditing && transcriptEditMode) {
@@ -7578,6 +8260,19 @@ export function PresentationControlPanel({
     surfaceStates[activeSurface],
   );
   const currentSlideHasSteps = activeState.stepCount > 0;
+  const currentSlide = orderedSlides[activeState.slideIndex];
+  const currentSlideNarration = resolveSlideNarration(
+    currentSlide,
+    selectedTranscriptLanguage,
+  );
+  const currentSlideSteps = resolveStepsForLanguage(
+    currentSlide?.steps,
+    selectedTranscriptLanguage,
+  );
+  const activeTranscriptLanguageLabel =
+    TRANSCRIPT_LANGUAGE_OPTIONS.find(
+      (option) => option.value === selectedTranscriptLanguage,
+    )?.label ?? selectedTranscriptLanguage.toUpperCase();
   const connected = Object.values(connectedSurfaces).some(Boolean);
   const activeConnected = connectedSurfaces[activeSurface];
   const atStart =
@@ -7600,8 +8295,100 @@ export function PresentationControlPanel({
   const crossbarsOn = activeState.showCrossbars;
   const [teleprompterOn, setTeleprompterOn] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const lessonTranscriptUploadInputRef = useRef<HTMLInputElement | null>(null);
+  const courseTranscriptUploadInputRef = useRef<HTMLInputElement | null>(null);
+  const [transcriptUploadBusy, setTranscriptUploadBusy] = useState<
+    "lesson" | "course" | null
+  >(null);
   const fullscreenOn =
     activeState.fullscreenActive || activeState.fullscreenPromptVisible;
+
+  const readTranscriptUploadText = useCallback((file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+          return;
+        }
+
+        reject(new Error("Could not read transcript file."));
+      };
+      reader.onerror = () => reject(new Error("Could not read transcript file."));
+      reader.readAsText(file);
+    });
+  }, []);
+
+  const handleTranscriptUploadSelection = useCallback(
+    async (
+      action: "lesson" | "course",
+      event: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+      const file = event.target.files?.[0];
+      event.target.value = "";
+      if (!file) {
+        return;
+      }
+
+      try {
+        setTranscriptUploadBusy(action);
+        const text = await readTranscriptUploadText(file);
+        if (action === "lesson") {
+          if (onUploadLessonTranscript) {
+            void onUploadLessonTranscript(selectedTranscriptLanguage, text);
+          }
+          return;
+        }
+
+        if (onUploadCourseTranscript) {
+          void onUploadCourseTranscript(selectedTranscriptLanguage, text);
+        }
+      } finally {
+        setTranscriptUploadBusy(null);
+      }
+    },
+    [
+      onUploadCourseTranscript,
+      onUploadLessonTranscript,
+      readTranscriptUploadText,
+      selectedTranscriptLanguage,
+    ],
+  );
+  const cameraMenuOptions = cameraDevices.map((device) => ({
+    value: device.deviceId,
+    label: device.label || `Camera ${device.deviceId.slice(0, 8)}`,
+  }));
+  const lessonMenuOptions = filteredDecks.map((lessonDeck) => ({
+    value: lessonDeck.id,
+    label: `${lessonDeck.number}. ${sanitizePresentationTitle(lessonDeck.title)}`,
+    meta: isShortDeck(lessonDeck.deckType)
+      ? "Short"
+      : lessonDeck.deckType === "mono"
+        ? "Mono"
+        : "Course",
+  }));
+  const zoomMenuOptions: ControlPanelMenuOption[] = [
+    "1.00",
+    "1.05",
+    "1.08",
+    "1.10",
+    "1.12",
+    "1.15",
+    "1.20",
+    "1.25",
+    "1.30",
+    "1.40",
+    "1.50",
+    "1.60",
+    "1.75",
+    "2.00",
+    "2.25",
+    "2.50",
+  ].map((zoomValue) => ({
+    value: zoomValue,
+    label: `${zoomValue}x`,
+    meta: zoomValue === activeState.zoom.toFixed(2) ? "Live" : undefined,
+  }));
 
   return (
     <>
@@ -7619,18 +8406,14 @@ export function PresentationControlPanel({
                     muted
                     playsInline
                   />
-                  <select
-                    className="pc-camera-select"
+                  <ControlPanelMenuSelect
                     value={selectedCameraId}
-                    onChange={(e) => setSelectedCameraId(e.target.value)}
+                    options={cameraMenuOptions}
+                    onChange={setSelectedCameraId}
                     aria-label="Select camera"
-                  >
-                    {cameraDevices.map((d) => (
-                      <option key={d.deviceId} value={d.deviceId}>
-                        {d.label || `Camera ${d.deviceId.slice(0, 8)}`}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Select camera"
+                    variant="compact"
+                  />
                 </>
               ) : (
                 <div className="pc-camera-placeholder">
@@ -7680,40 +8463,22 @@ export function PresentationControlPanel({
               )}
               <div className="pc-sidebar-control-group">
                 <span className="pc-section-label">Jump Lesson</span>
-                <select
-                  className="pc-lesson-select"
+                <ControlPanelMenuSelect
                   value={currentDeckInFilter ? deck.id : ""}
-                  onChange={(e) => handleSelectDeck(e.target.value)}
+                  options={lessonMenuOptions}
+                  onChange={handleSelectDeck}
                   aria-label="Jump to lesson"
-                >
-                  {!currentDeckInFilter && (
-                    <option value="" disabled>
-                      Select a {filteredDeckTypeLabel}
-                    </option>
-                  )}
-                  {filteredDecks.map((lessonDeck) => {
-                    const typeMarker = isShortDeck(lessonDeck.deckType)
-                      ? "📱 "
-                      : lessonDeck.deckType === "mono"
-                        ? "▶ "
-                        : "";
-                    return (
-                      <option key={lessonDeck.id} value={lessonDeck.id}>
-                        {lessonDeck.number}. {typeMarker}
-                        {sanitizePresentationTitle(lessonDeck.title)}
-                      </option>
-                    );
-                  })}
-                </select>
+                  placeholder={`Select a ${filteredDeckTypeLabel}`}
+                />
               </div>
 
               <div className="pc-sidebar-control-group">
                 <span className="pc-section-label">Slide Zoom</span>
-                <select
-                  className="pc-lesson-select"
+                <ControlPanelMenuSelect
                   value={activeState.zoom.toFixed(2)}
-                  onChange={(e) => {
-                    const nextZoom = parseFloat(e.target.value);
+                  options={zoomMenuOptions}
+                  onChange={(zoomValue) => {
+                    const nextZoom = parseFloat(zoomValue);
                     setSurfaceStates((current) => ({
                       ...current,
                       [activeSurface]: {
@@ -7734,24 +8499,7 @@ export function PresentationControlPanel({
                     });
                   }}
                   aria-label="Slide zoom"
-                >
-                  <option value="1.00">1.00x</option>
-                  <option value="1.05">1.05x</option>
-                  <option value="1.08">1.08x</option>
-                  <option value="1.10">1.10x</option>
-                  <option value="1.12">1.12x</option>
-                  <option value="1.15">1.15x</option>
-                  <option value="1.20">1.20x</option>
-                  <option value="1.25">1.25x</option>
-                  <option value="1.30">1.30x</option>
-                  <option value="1.40">1.40x</option>
-                  <option value="1.50">1.50x</option>
-                  <option value="1.60">1.60x</option>
-                  <option value="1.75">1.75x</option>
-                  <option value="2.00">2.00x</option>
-                  <option value="2.25">2.25x</option>
-                  <option value="2.50">2.50x</option>
-                </select>
+                />
               </div>
 
               <div className="pc-sidebar-control-group">
@@ -7759,7 +8507,7 @@ export function PresentationControlPanel({
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   <input
                     type="number"
-                    className="pc-lesson-select"
+                    className="pc-field-input"
                     style={{ flex: 1 }}
                     value={activeState.enlarge}
                     min={ENLARGE_MIN}
@@ -7902,6 +8650,27 @@ export function PresentationControlPanel({
             }
           >
             <div className="pc-transcript-main">
+              <div className="pc-transcript-header">
+                <div className="pc-transcript-header-title">
+                  Transcript · {activeTranscriptLanguageLabel}
+                </div>
+                <div className="pc-transcript-header-tools">
+                  <span className="pc-transcript-language-label">
+                    Language
+                  </span>
+                  <ControlPanelMenuSelect
+                    value={selectedTranscriptLanguage}
+                    options={TRANSCRIPT_LANGUAGE_OPTIONS}
+                    onChange={(value) =>
+                      setSelectedTranscriptLanguage(
+                        value as TranscriptLanguageCode,
+                      )
+                    }
+                    aria-label="Select transcript language"
+                    variant="transcript"
+                  />
+                </div>
+              </div>
               {transcriptEditMode ? (
                 <>
                   <textarea
@@ -7917,14 +8686,17 @@ export function PresentationControlPanel({
                     }
                     spellCheck
                   />
-                  {activeState.narration &&
-                    getEditedTranscript(activeState.slideIndex) != null && (
+                  {currentSlideNarration &&
+                    getEditedTranscript(
+                      activeState.slideIndex,
+                      selectedTranscriptLanguage,
+                    ) != null && (
                       <div className="pc-transcript-original">
                         <div className="pc-transcript-original-label">
                           Original
                         </div>
                         <div className="pc-transcript-original-text">
-                          {activeState.narration}
+                          {currentSlideNarration}
                         </div>
                         <button
                           type="button"
@@ -7941,14 +8713,16 @@ export function PresentationControlPanel({
                   {(() => {
                     const editedText = getEditedTranscript(
                       activeState.slideIndex,
+                      selectedTranscriptLanguage,
                     );
                     const editedSteps =
-                      activeState.stepCount > 0 && activeState.steps?.length
+                      activeState.stepCount > 0 && currentSlideSteps.length
                         ? parseStepTranscriptEditValue(
                             editedText ?? "",
-                            activeState.steps,
+                            currentSlideSteps,
+                            selectedTranscriptLanguage,
                           )
-                        : (activeState.steps ?? []);
+                        : currentSlideSteps;
                     if (activeState.stepCount > 0 && editedSteps.length) {
                       const activeEditedStep =
                         editedSteps[
@@ -8030,14 +8804,14 @@ export function PresentationControlPanel({
                       );
                     }
                     const transcriptContent = resolveTranscriptContent({
-                      narration: activeState.narration,
+                      narration: currentSlideNarration,
                       transcriptText,
                       editedText,
                     });
                     if (
                       !transcriptContent.usesExternalTranscript &&
                       editedText != null &&
-                      activeState.narration
+                      currentSlideNarration
                     ) {
                       return (
                         <>
@@ -8054,7 +8828,7 @@ export function PresentationControlPanel({
                               Original
                             </div>
                             <div className="pc-transcript-split-text original">
-                              {activeState.narration}
+                              {currentSlideNarration}
                             </div>
                             <button
                               type="button"
@@ -8089,10 +8863,11 @@ export function PresentationControlPanel({
                     teleprompterText !== undefined
                       ? teleprompterText
                       : resolveTranscriptContent({
-                          narration: activeState.narration,
+                          narration: currentSlideNarration,
                           transcriptText,
                           editedText: getEditedTranscript(
                             activeState.slideIndex,
+                            selectedTranscriptLanguage,
                           ),
                         }).displayText
                   }
@@ -8367,6 +9142,92 @@ export function PresentationControlPanel({
               <div className="pc-dock-divider" aria-hidden="true" />
 
               {/* ── Transcript ── */}
+              {onDownloadLessonTranscript ? (
+                <button
+                  className="pc-dock-btn"
+                  onClick={() =>
+                    onDownloadLessonTranscript(selectedTranscriptLanguage)
+                  }
+                  data-tip={`Download lesson transcript · ${activeTranscriptLanguageLabel}`}
+                  aria-label="Download lesson transcript"
+                >
+                  {Icons.transcriptLesson}
+                </button>
+              ) : null}
+              {onDownloadCourseTranscript ? (
+                <button
+                  className="pc-dock-btn"
+                  onClick={() => {
+                    void onDownloadCourseTranscript(selectedTranscriptLanguage);
+                  }}
+                  data-tip={`Download course transcript · ${activeTranscriptLanguageLabel}`}
+                  aria-label="Download course transcript"
+                >
+                  {Icons.transcriptCourse}
+                </button>
+              ) : null}
+              {onUploadLessonTranscript ? (
+                <>
+                  <input
+                    ref={lessonTranscriptUploadInputRef}
+                    type="file"
+                    accept=".txt,.md,text/plain"
+                    style={{ display: "none" }}
+                    onChange={(event) => {
+                      void handleTranscriptUploadSelection("lesson", event);
+                    }}
+                  />
+                  <button
+                    className="pc-dock-btn"
+                    onClick={() => lessonTranscriptUploadInputRef.current?.click()}
+                    disabled={transcriptUploadBusy !== null}
+                    data-tip={`Upload lesson transcript · ${activeTranscriptLanguageLabel}`}
+                    aria-label="Upload lesson transcript"
+                  >
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 800,
+                        lineHeight: 1,
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      L↑
+                    </span>
+                  </button>
+                </>
+              ) : null}
+              {onUploadCourseTranscript ? (
+                <>
+                  <input
+                    ref={courseTranscriptUploadInputRef}
+                    type="file"
+                    accept=".txt,.md,text/plain"
+                    style={{ display: "none" }}
+                    onChange={(event) => {
+                      void handleTranscriptUploadSelection("course", event);
+                    }}
+                  />
+                  <button
+                    className="pc-dock-btn"
+                    onClick={() => courseTranscriptUploadInputRef.current?.click()}
+                    disabled={transcriptUploadBusy !== null}
+                    data-tip={`Upload course transcript · ${activeTranscriptLanguageLabel}`}
+                    aria-label="Upload course transcript"
+                  >
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 800,
+                        lineHeight: 1,
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      C↑
+                    </span>
+                  </button>
+                </>
+              ) : null}
               {allowTranscriptEditing ? (
                 <button
                   className={`pc-dock-btn${transcriptEditMode ? " active" : ""}`}

@@ -20,6 +20,7 @@ export {
 export {
   PresentationLayout,
   PresentationControlPanel,
+  ControlPanelMenuSelect,
   ShortsLayout,
   ShortsFeedLayout,
   usePresentationStep,
@@ -32,6 +33,10 @@ export {
   type PresentationStep,
   type PresentationBranding,
 } from "./PresentationControlEngine";
+export type {
+  TranscriptLanguageCode,
+  TranscriptLanguageMap,
+} from "./transcript-utils";
 export { SlideDrawer } from "./SlideDrawer";
 export { SlideFooter } from "./SlideFooter";
 export { SlideNavButtons } from "./SlideNavButtons";
