@@ -25,10 +25,19 @@ import { BrandLockup } from "../layout/BrandLockup";
 import { ShortsTitleStack } from "./ShortsTitleStack";
 import { TeleprompterOverlay } from "./TeleprompterOverlay";
 import {
+  DEFAULT_TRANSCRIPT_LANGUAGE,
   formatStepTranscriptEditValue,
+  parseStoredTranscriptEditRecord,
   parseStepTranscriptEditValue,
   resolveTranscriptContent,
+  resolveSlideNarration,
+  resolveStepsForLanguage,
+  resolveTranscriptEditForLanguage,
   summarizeStepTranscript,
+  type TranscriptEditRecord,
+  type TranscriptLanguageCode,
+  type TranscriptLanguageMap,
+  writeTranscriptEditForLanguage,
 } from "./transcript-utils";
 
 export interface PresentationSlide {
@@ -37,6 +46,7 @@ export interface PresentationSlide {
   presenterTitle?: string;
   duration?: number;
   narration?: string;
+  narrationByLanguage?: TranscriptLanguageMap;
   steps?: PresentationStep[];
   content: React.ReactNode;
   /** When true, suppresses the ShortsTitleStack header bar for this slide in ShortsLayout/FeedLayout. */
@@ -47,6 +57,7 @@ export interface PresentationStep {
   id: string;
   title: string;
   transcript: string;
+  transcriptByLanguage?: TranscriptLanguageMap;
 }
 
 export type DeckType = "course" | "mono" | "short" | "short-single";
@@ -1738,6 +1749,27 @@ export const PRESENTATION_ENGINE_CSS = `
     align-items: center;
     gap: 12px;
     min-width: 0;
+  }
+  .pc-transcript-language-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--tf-text-muted, #8892a8);
+  }
+  .pc-transcript-language-select {
+    height: 30px;
+    min-width: 124px;
+    border-radius: 10px;
+    border: 1px solid var(--pc-rail-chip-border);
+    background: var(--pc-rail-chip-bg);
+    box-shadow: var(--pc-rail-chip-shadow);
+    color: var(--tf-text-primary, #e2e6f0);
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    outline: none;
+  }
+  .pc-transcript-language-select:focus {
+    border-color: var(--tf-color-primary-light, #818cf8);
   }
   .pc-transcript-body {
     flex: 1;
@@ -3446,6 +3478,11 @@ type ControlState = {
 
 const DEFAULT_CONTROL_CHANNEL = "tf-slides-control";
 const DEFAULT_CONTROL_WINDOW_NAME = "tf-slide-control-window";
+const TRANSCRIPT_LANGUAGE_OPTIONS = [
+  { value: "en", label: "English" },
+  { value: "hi", label: "Hindi" },
+  { value: "gu", label: "Gujarati" },
+] as const;
 const DEFAULT_SLIDE_ZOOM = 1.15;
 const ENLARGE_MIN = 0.5;
 const ENLARGE_MAX = 5;
@@ -3468,6 +3505,35 @@ function getZoomStorageKey(channelId: string, deckId: string) {
 
 function getSlideOrderStorageKey(channelId: string, deckId: string) {
   return `${channelId}:${deckId}:slide-order`;
+}
+
+function getTranscriptLanguageStorageKey(channelId: string) {
+  return `${channelId}:transcript-language`;
+}
+
+function readStoredTranscriptLanguage(
+  storageKey: string,
+): TranscriptLanguageCode {
+  try {
+    const stored = localStorage.getItem(storageKey);
+    return stored && stored.trim()
+      ? (stored as TranscriptLanguageCode)
+      : DEFAULT_TRANSCRIPT_LANGUAGE;
+  } catch {
+    return DEFAULT_TRANSCRIPT_LANGUAGE;
+  }
+}
+
+function hasTranscriptEdits(edits: TranscriptEditRecord): boolean {
+  return Object.values(edits).some((value) => {
+    if (typeof value === "string") {
+      return value.trim().length > 0;
+    }
+
+    return Object.values(value ?? {}).some(
+      (entry) => typeof entry === "string" && entry.trim().length > 0,
+    );
+  });
 }
 
 function normalizeSlideOrderIds(
@@ -6909,11 +6975,17 @@ export function PresentationControlPanel({
     deck.slides,
   );
   const transcriptScaleStorageKey = `${controlChannelId}:transcript-scale`;
+  const transcriptLanguageStorageKey =
+    getTranscriptLanguageStorageKey(controlChannelId);
   const teleprompterFocusLineStorageKey = `${controlChannelId}:teleprompter-focus-line`;
   const [draggedSlideId, setDraggedSlideId] = useState<string | null>(null);
   const [dropTargetSlideId, setDropTargetSlideId] = useState<string | null>(
     null,
   );
+  const [selectedTranscriptLanguage, setSelectedTranscriptLanguage] =
+    useState<TranscriptLanguageCode>(() =>
+      readStoredTranscriptLanguage(transcriptLanguageStorageKey),
+    );
   const buildDefaultControlState = (
     surface: PresentationSurface,
   ): ControlState => ({
@@ -7017,6 +7089,16 @@ export function PresentationControlPanel({
       // Ignore localStorage access issues.
     }
   }, [transcriptScaleIndex, transcriptScaleStorageKey]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        transcriptLanguageStorageKey,
+        selectedTranscriptLanguage,
+      );
+    } catch {
+      // Ignore localStorage access issues.
+    }
+  }, [selectedTranscriptLanguage, transcriptLanguageStorageKey]);
   const [teleprompterFocusLineIndex, setTeleprompterFocusLineIndex] =
     useState<number>(() => {
       try {
@@ -7135,46 +7217,84 @@ export function PresentationControlPanel({
 
   /** Read a persisted transcript edit from localStorage, or return null. */
   const getEditedTranscript = useCallback(
-    (slideIdx: number): string | null => {
+    (
+      slideIdx: number,
+      language: TranscriptLanguageCode = selectedTranscriptLanguage,
+    ): string | null => {
       try {
         const stored = localStorage.getItem(transcriptEditKey);
         if (stored) {
-          const edits = JSON.parse(stored) as Record<string, string>;
-          const val = edits[String(slideIdx)];
-          return val != null && val !== "" ? val : null;
+          const edits = parseStoredTranscriptEditRecord(JSON.parse(stored));
+          const slide = orderedSlides[slideIdx];
+          const editStorageId = slide?.id ?? String(slideIdx);
+          const stableTranscript = resolveTranscriptEditForLanguage(
+            edits[editStorageId],
+            language,
+          );
+          if (stableTranscript != null) {
+            return stableTranscript;
+          }
+
+          const legacyTranscript = resolveTranscriptEditForLanguage(
+            edits[String(slideIdx)],
+            language,
+          );
+          return legacyTranscript != null && legacyTranscript !== ""
+            ? legacyTranscript
+            : null;
         }
       } catch {
         /* ignore */
       }
       return null;
     },
-    [transcriptEditKey],
+    [orderedSlides, selectedTranscriptLanguage, transcriptEditKey],
   );
 
   /** Persist a transcript edit to localStorage. Empty string = delete. */
   const setEditedTranscript = useCallback(
-    (slideIdx: number, text: string) => {
+    (
+      slideIdx: number,
+      text: string,
+      language: TranscriptLanguageCode = selectedTranscriptLanguage,
+    ) => {
       try {
         const stored = localStorage.getItem(transcriptEditKey);
-        const edits: Record<string, string> = stored ? JSON.parse(stored) : {};
+        const edits = stored
+          ? parseStoredTranscriptEditRecord(JSON.parse(stored))
+          : {};
         const slide = orderedSlides[slideIdx];
+        const editStorageId = slide?.id ?? String(slideIdx);
         const originalText = slide?.steps?.length
-          ? formatStepTranscriptEditValue(slide.steps)
-          : (slide?.narration ?? "");
-        if (
-          text.trim() === "" ||
-          text === originalText
-        ) {
-          delete edits[String(slideIdx)];
+          ? formatStepTranscriptEditValue(slide.steps, language)
+          : resolveSlideNarration(slide, language);
+        if (text.trim() === "" || text === originalText) {
+          const nextValue = writeTranscriptEditForLanguage(
+            edits[editStorageId],
+            language,
+            "",
+          );
+          if (nextValue === undefined) {
+            delete edits[editStorageId];
+          } else {
+            edits[editStorageId] = nextValue;
+          }
         } else {
-          edits[String(slideIdx)] = text;
+          edits[editStorageId] = writeTranscriptEditForLanguage(
+            edits[editStorageId],
+            language,
+            text,
+          );
+        }
+        if (editStorageId !== String(slideIdx)) {
+          delete edits[String(slideIdx)];
         }
         localStorage.setItem(transcriptEditKey, JSON.stringify(edits));
       } catch {
         /* ignore */
       }
     },
-    [orderedSlides, transcriptEditKey],
+    [orderedSlides, selectedTranscriptLanguage, transcriptEditKey],
   );
 
   /** Check whether any edits exist for the current deck. */
@@ -7182,8 +7302,8 @@ export function PresentationControlPanel({
     try {
       const stored = localStorage.getItem(transcriptEditKey);
       if (stored) {
-        const edits = JSON.parse(stored) as Record<string, string>;
-        return Object.keys(edits).length > 0;
+        const edits = parseStoredTranscriptEditRecord(JSON.parse(stored));
+        return hasTranscriptEdits(edits);
       }
     } catch {
       /* ignore */
@@ -7199,34 +7319,48 @@ export function PresentationControlPanel({
   // Sync draft when slide changes or edit mode toggles
   useEffect(() => {
     if (transcriptEditMode) {
-      const edited = getEditedTranscript(currentSlideIdx);
+      const edited = getEditedTranscript(
+        currentSlideIdx,
+        selectedTranscriptLanguage,
+      );
       const slide = orderedSlides[currentSlideIdx];
       const original = slide?.steps?.length
-        ? formatStepTranscriptEditValue(slide.steps)
-        : (slide?.narration ?? "");
+        ? formatStepTranscriptEditValue(slide.steps, selectedTranscriptLanguage)
+        : resolveSlideNarration(slide, selectedTranscriptLanguage);
       setEditDraft(edited ?? original);
       editDraftSlideRef.current = currentSlideIdx;
     }
-  }, [transcriptEditMode, currentSlideIdx, getEditedTranscript, orderedSlides]);
+  }, [
+    transcriptEditMode,
+    currentSlideIdx,
+    getEditedTranscript,
+    orderedSlides,
+    selectedTranscriptLanguage,
+  ]);
 
   // Auto-save draft on change (debounced via the onBlur / onChange)
   const handleTranscriptDraftChange = useCallback(
     (text: string) => {
       setEditDraft(text);
-      setEditedTranscript(currentSlideIdx, text);
+      setEditedTranscript(currentSlideIdx, text, selectedTranscriptLanguage);
     },
-    [currentSlideIdx, setEditedTranscript],
+    [currentSlideIdx, selectedTranscriptLanguage, setEditedTranscript],
   );
 
   const revertTranscriptEdit = useCallback(() => {
-    setEditedTranscript(currentSlideIdx, "");
+    setEditedTranscript(currentSlideIdx, "", selectedTranscriptLanguage);
     const slide = orderedSlides[currentSlideIdx];
     setEditDraft(
       slide?.steps?.length
-        ? formatStepTranscriptEditValue(slide.steps)
-        : (slide?.narration ?? ""),
+        ? formatStepTranscriptEditValue(slide.steps, selectedTranscriptLanguage)
+        : resolveSlideNarration(slide, selectedTranscriptLanguage),
     );
-  }, [currentSlideIdx, setEditedTranscript, orderedSlides]);
+  }, [
+    currentSlideIdx,
+    orderedSlides,
+    selectedTranscriptLanguage,
+    setEditedTranscript,
+  ]);
 
   useEffect(() => {
     if (!allowTranscriptEditing && transcriptEditMode) {
@@ -7450,6 +7584,19 @@ export function PresentationControlPanel({
     surfaceStates[activeSurface],
   );
   const currentSlideHasSteps = activeState.stepCount > 0;
+  const currentSlide = orderedSlides[activeState.slideIndex];
+  const currentSlideNarration = resolveSlideNarration(
+    currentSlide,
+    selectedTranscriptLanguage,
+  );
+  const currentSlideSteps = resolveStepsForLanguage(
+    currentSlide?.steps,
+    selectedTranscriptLanguage,
+  );
+  const activeTranscriptLanguageLabel =
+    TRANSCRIPT_LANGUAGE_OPTIONS.find(
+      (option) => option.value === selectedTranscriptLanguage,
+    )?.label ?? selectedTranscriptLanguage.toUpperCase();
   const connected = Object.values(connectedSurfaces).some(Boolean);
   const activeConnected = connectedSurfaces[activeSurface];
   const atStart =
@@ -7769,6 +7916,36 @@ export function PresentationControlPanel({
             }
           >
             <div className="pc-transcript-main">
+              <div className="pc-transcript-header">
+                <div className="pc-transcript-header-title">
+                  Transcript · {activeTranscriptLanguageLabel}
+                </div>
+                <div className="pc-transcript-header-tools">
+                  <label
+                    className="pc-transcript-language-label"
+                    htmlFor="pc-transcript-language-select"
+                  >
+                    Language
+                  </label>
+                  <select
+                    id="pc-transcript-language-select"
+                    className="pc-transcript-language-select"
+                    value={selectedTranscriptLanguage}
+                    onChange={(e) =>
+                      setSelectedTranscriptLanguage(
+                        e.target.value as TranscriptLanguageCode,
+                      )
+                    }
+                    aria-label="Select transcript language"
+                  >
+                    {TRANSCRIPT_LANGUAGE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               {transcriptEditMode ? (
                 <>
                   <textarea
@@ -7784,14 +7961,17 @@ export function PresentationControlPanel({
                     }
                     spellCheck
                   />
-                  {activeState.narration &&
-                    getEditedTranscript(activeState.slideIndex) != null && (
+                  {currentSlideNarration &&
+                    getEditedTranscript(
+                      activeState.slideIndex,
+                      selectedTranscriptLanguage,
+                    ) != null && (
                       <div className="pc-transcript-original">
                         <div className="pc-transcript-original-label">
                           Original
                         </div>
                         <div className="pc-transcript-original-text">
-                          {activeState.narration}
+                          {currentSlideNarration}
                         </div>
                         <button
                           type="button"
@@ -7808,18 +7988,17 @@ export function PresentationControlPanel({
                   {(() => {
                     const editedText = getEditedTranscript(
                       activeState.slideIndex,
+                      selectedTranscriptLanguage,
                     );
                     const editedSteps =
-                      activeState.stepCount > 0 && activeState.steps?.length
+                      activeState.stepCount > 0 && currentSlideSteps.length
                         ? parseStepTranscriptEditValue(
                             editedText ?? "",
-                            activeState.steps,
+                            currentSlideSteps,
+                            selectedTranscriptLanguage,
                           )
-                        : activeState.steps ?? [];
-                    if (
-                      activeState.stepCount > 0 &&
-                      editedSteps.length
-                    ) {
+                        : currentSlideSteps;
+                    if (activeState.stepCount > 0 && editedSteps.length) {
                       const activeEditedStep =
                         editedSteps[
                           Math.min(
@@ -7900,14 +8079,14 @@ export function PresentationControlPanel({
                       );
                     }
                     const transcriptContent = resolveTranscriptContent({
-                      narration: activeState.narration,
+                      narration: currentSlideNarration,
                       transcriptText,
                       editedText,
                     });
                     if (
                       !transcriptContent.usesExternalTranscript &&
                       editedText != null &&
-                      activeState.narration
+                      currentSlideNarration
                     ) {
                       return (
                         <>
@@ -7924,7 +8103,7 @@ export function PresentationControlPanel({
                               Original
                             </div>
                             <div className="pc-transcript-split-text original">
-                              {activeState.narration}
+                              {currentSlideNarration}
                             </div>
                             <button
                               type="button"
@@ -7959,10 +8138,11 @@ export function PresentationControlPanel({
                     teleprompterText !== undefined
                       ? teleprompterText
                       : resolveTranscriptContent({
-                          narration: activeState.narration,
+                          narration: currentSlideNarration,
                           transcriptText,
                           editedText: getEditedTranscript(
                             activeState.slideIndex,
+                            selectedTranscriptLanguage,
                           ),
                         }).displayText
                   }
