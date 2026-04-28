@@ -20,6 +20,7 @@ export {
 export {
   PresentationLayout,
   PresentationControlPanel,
+  ControlPanelMenuSelect,
   ShortsLayout,
   ShortsFeedLayout,
   usePresentationStep,
