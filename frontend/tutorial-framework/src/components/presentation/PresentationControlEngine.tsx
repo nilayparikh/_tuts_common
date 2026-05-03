@@ -1913,43 +1913,11 @@ export const PRESENTATION_ENGINE_CSS = `
   }
   @keyframes pc-fade-in { from { opacity: 0; } to { opacity: 1; } }
   @keyframes pc-scale-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-  .pc-transcript-header {
-    height: 48px;
-    min-height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 0 18px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--tf-text-muted, #8892a8);
-    border-bottom: 1px solid var(--pc-transcript-shell-border);
-    background: var(--pc-transcript-header-bg);
-    box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 4%, transparent);
-  }
-  .pc-transcript-header-title {
-    min-width: 0;
-    white-space: nowrap;
-  }
-  .pc-transcript-header-tools {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-  }
-  .pc-transcript-language-label {
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    color: var(--tf-text-muted, #8892a8);
-  }
   .pc-transcript-body {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 18px;
+    padding: 16px;
     line-height: 1.7;
     color: var(--tf-text-secondary, #bfc5d4);
     font-size: calc(14px * var(--pc-transcript-font-scale, 1.1));
@@ -1961,20 +1929,40 @@ export const PRESENTATION_ENGINE_CSS = `
   }
   .pc-transcript-current {
     margin-bottom: 16px;
-    padding: 18px 20px;
+    padding: 14px 16px;
     border-radius: 18px;
     border: 1px solid var(--pc-action-surface-hover-border);
     background: var(--pc-action-surface-bg);
     box-shadow: var(--pc-action-surface-shadow);
     animation: pc-active-transcript-enter 220ms ease;
     backdrop-filter: blur(18px) saturate(150%);
+    position: relative;
+    overflow: hidden;
+  }
+  .pc-transcript-current::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 4px;
+    background: color-mix(in srgb, var(--tf-color-primary, #6366f1) 88%, white 12%);
+  }
+  .pc-transcript-current.first-step::before {
+    background: color-mix(in srgb, var(--tf-color-success, #22c55e) 88%, white 12%);
+  }
+  .pc-transcript-current.last-step::before {
+    background: color-mix(in srgb, var(--tf-color-danger, #ef4444) 88%, white 12%);
   }
   .pc-transcript-current-title {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
+  }
+  .pc-transcript-current-title-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
   }
   .pc-transcript-current-label {
     font-size: 11px;
@@ -1990,18 +1978,48 @@ export const PRESENTATION_ENGINE_CSS = `
     text-transform: uppercase;
     color: var(--tf-text-muted, #8892a8);
   }
-  .pc-transcript-current-heading {
-    font-size: 20px;
-    line-height: 1.35;
-    font-weight: 700;
-    color: var(--tf-text-primary, #e2e6f0);
-    margin-bottom: 10px;
+  .pc-transcript-height-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
-  .pc-transcript-current-text {
+  .pc-transcript-height-btn {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
+    background: color-mix(in srgb, var(--tf-bg-overlay, #1f222a) 76%, transparent);
+    color: var(--tf-text-primary, #e2e6f0);
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .pc-transcript-height-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .pc-transcript-current-window {
+    min-height: calc(1.75em * var(--pc-transcript-window-lines, 6));
+    max-height: calc(1.75em * var(--pc-transcript-window-lines, 6));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding-right: 8px;
     color: var(--tf-text-secondary, #bfc5d4);
     font-family: 'Inter', system-ui, sans-serif;
     font-size: calc(15px * var(--pc-transcript-font-scale, 1.1));
     line-height: 1.75;
+  }
+  .pc-transcript-current-window::-webkit-scrollbar { width: 3px; }
+  .pc-transcript-current-window::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 18%, transparent);
+    border-radius: 999px;
+  }
+  .pc-transcript-current-text {
     white-space: pre-wrap;
   }
   .pc-transcript-steps-header {
@@ -2705,6 +2723,10 @@ export const PRESENTATION_ENGINE_CSS = `
     position: relative;
   }
 
+  .pe-shorts-frame:has(.blank-shorts-title-shell) {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
   /* Content area at the top — renders actual slide content (flex: 1fr) */
   .pe-shorts-header {
     min-height: 0;
@@ -2724,6 +2746,11 @@ export const PRESENTATION_ENGINE_CSS = `
     box-sizing: border-box;
     position: relative;
   }
+
+  .pe-shorts-frame:has(.blank-shorts-title-shell) .pe-shorts-header {
+    height: auto;
+  }
+
   /* Scale slide content to fit the available content area */
   .pe-shorts-slide-content {
     width: 100%;
@@ -2732,10 +2759,19 @@ export const PRESENTATION_ENGINE_CSS = `
     display: flex;
     flex-direction: column;
   }
+
+  .pe-shorts-frame:has(.blank-shorts-title-shell) .pe-shorts-slide-content {
+    height: auto;
+  }
+
   .pe-shorts-slide-content > * {
     flex: 1;
     min-height: 0;
     overflow: hidden;
+  }
+
+  .pe-shorts-frame:has(.blank-shorts-title-shell) .pe-shorts-slide-content > .blank-shorts-title-shell {
+    flex: 0 0 auto;
   }
   .pe-shorts-slide-content .lm-slide-frame {
     padding: 1.4vh 3.5vw 1.4vh;
@@ -3917,6 +3953,8 @@ const ENLARGE_MIN = 0.5;
 const ENLARGE_MAX = 5;
 const ENLARGE_STEP = 0.05;
 const DEFAULT_ENLARGE = 1;
+const ACTIVE_TRANSCRIPT_LINE_STOPS = [4, 5, 6, 7, 8, 9];
+const DEFAULT_ACTIVE_TRANSCRIPT_LINE_COUNT = 6;
 const TRANSCRIPT_FONT_SCALE_STOPS = [1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7];
 const DEFAULT_TRANSCRIPT_FONT_SCALE_INDEX = 1;
 const TELEPROMPTER_FOCUS_LINE_STOPS = [
@@ -3938,6 +3976,10 @@ function getSlideOrderStorageKey(channelId: string, deckId: string) {
 
 function getTranscriptLanguageStorageKey(channelId: string) {
   return `${channelId}:transcript-language`;
+}
+
+function getActiveTranscriptLinesStorageKey(channelId: string, deckId: string) {
+  return `${channelId}:${deckId}:active-transcript-lines`;
 }
 
 function readStoredTranscriptLanguage(
@@ -7530,6 +7572,10 @@ export function PresentationControlPanel({
   const stateStorageKey = getControlStorageKey(controlChannelId, "state");
   const commandStorageKey = getControlStorageKey(controlChannelId, "command");
   const zoomStorageKey = getZoomStorageKey(controlChannelId, deck.id);
+  const activeTranscriptLinesStorageKey = getActiveTranscriptLinesStorageKey(
+    controlChannelId,
+    deck.id,
+  );
   const { orderedSlides, slideOrderIds, applySlideOrder } = useOrderedSlides(
     controlChannelId,
     deck.id,
@@ -7650,6 +7696,33 @@ export function PresentationControlPanel({
       // Ignore localStorage access issues.
     }
   }, [transcriptScaleIndex, transcriptScaleStorageKey]);
+  const [activeTranscriptLineCount, setActiveTranscriptLineCount] =
+    useState<number>(() => {
+      try {
+        const cachedItem = localStorage.getItem(
+          activeTranscriptLinesStorageKey,
+        );
+        if (cachedItem != null) {
+          const cachedValue = Number(cachedItem);
+          if (ACTIVE_TRANSCRIPT_LINE_STOPS.includes(cachedValue)) {
+            return cachedValue;
+          }
+        }
+      } catch {
+        // Ignore localStorage access issues.
+      }
+      return DEFAULT_ACTIVE_TRANSCRIPT_LINE_COUNT;
+    });
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        activeTranscriptLinesStorageKey,
+        String(activeTranscriptLineCount),
+      );
+    } catch {
+      // Ignore localStorage access issues.
+    }
+  }, [activeTranscriptLineCount, activeTranscriptLinesStorageKey]);
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -7774,6 +7847,7 @@ export function PresentationControlPanel({
 
   /* ── Editable transcript state ─────────────────────────────────────── */
   const [transcriptEditMode, setTranscriptEditMode] = useState(false);
+  const activeTranscriptWindowRef = useRef<HTMLDivElement | null>(null);
   const transcriptEditKey = `${controlChannelId}:${deck.id}:transcript-edits`;
 
   /** Read a persisted transcript edit from localStorage, or return null. */
@@ -8184,31 +8258,6 @@ export function PresentationControlPanel({
     [clearJumpDragState, commitSlideOrder, draggedSlideId, slideOrderIds],
   );
 
-  /* ── Keyboard: ArrowLeft / ArrowRight → prev / next slide ──────── */
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        dispatchNavigation({
-          type: "command",
-          deckId: deck.id,
-          action: "prev",
-        });
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        dispatchNavigation({
-          type: "command",
-          deckId: deck.id,
-          action: "next",
-        });
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [deck.id, dispatchNavigation]);
-
   const handleSelectDeck = useCallback(
     (nextDeckId: string) => {
       if (!nextDeckId || nextDeckId === deck.id) return;
@@ -8279,6 +8328,64 @@ export function PresentationControlPanel({
     activeState.slideIndex >= activeState.slideCount - 1 &&
     (activeState.stepCount === 0 ||
       activeState.stepIndex >= activeState.stepCount - 1);
+
+  const scrollActiveTranscriptWindow = useCallback(
+    (direction: "up" | "down") => {
+      if (transcriptEditMode || activeState.stepCount <= 0) {
+        return false;
+      }
+
+      const transcriptWindow = activeTranscriptWindowRef.current;
+      if (!transcriptWindow) {
+        return false;
+      }
+
+      const scrollAmount = Math.max(transcriptWindow.clientHeight - 32, 48);
+      transcriptWindow.scrollBy({
+        top: direction === "down" ? scrollAmount : -scrollAmount,
+        behavior: "smooth",
+      });
+      return true;
+    },
+    [activeState.stepCount, transcriptEditMode],
+  );
+
+  /* ── Keyboard: ArrowLeft / ArrowRight → prev / next slide ──────── */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+
+      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        const didScroll = scrollActiveTranscriptWindow(
+          e.key === "ArrowDown" ? "down" : "up",
+        );
+        if (didScroll) {
+          e.preventDefault();
+        }
+        return;
+      }
+
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        dispatchNavigation({
+          type: "command",
+          deckId: deck.id,
+          action: "prev",
+        });
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        dispatchNavigation({
+          type: "command",
+          deckId: deck.id,
+          action: "next",
+        });
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [deck.id, dispatchNavigation, scrollActiveTranscriptWindow]);
+
   const transcriptFontScale =
     TRANSCRIPT_FONT_SCALE_STOPS[transcriptScaleIndex] ??
     TRANSCRIPT_FONT_SCALE_STOPS[DEFAULT_TRANSCRIPT_FONT_SCALE_INDEX];
@@ -8297,21 +8404,25 @@ export function PresentationControlPanel({
   const fullscreenOn =
     activeState.fullscreenActive || activeState.fullscreenPromptVisible;
 
-  const readTranscriptUploadText = useCallback((file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === "string") {
-          resolve(reader.result);
-          return;
-        }
+  const readTranscriptUploadText = useCallback(
+    (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === "string") {
+            resolve(reader.result);
+            return;
+          }
 
-        reject(new Error("Could not read transcript file."));
-      };
-      reader.onerror = () => reject(new Error("Could not read transcript file."));
-      reader.readAsText(file);
-    });
-  }, []);
+          reject(new Error("Could not read transcript file."));
+        };
+        reader.onerror = () =>
+          reject(new Error("Could not read transcript file."));
+        reader.readAsText(file);
+      });
+    },
+    [],
+  );
 
   const handleTranscriptUploadSelection = useCallback(
     async (
@@ -8497,6 +8608,20 @@ export function PresentationControlPanel({
               </div>
 
               <div className="pc-sidebar-control-group">
+                <span className="pc-section-label">Transcript Language</span>
+                <ControlPanelMenuSelect
+                  value={selectedTranscriptLanguage}
+                  options={TRANSCRIPT_LANGUAGE_OPTIONS}
+                  onChange={(value) =>
+                    setSelectedTranscriptLanguage(
+                      value as TranscriptLanguageCode,
+                    )
+                  }
+                  aria-label="Select transcript language"
+                />
+              </div>
+
+              <div className="pc-sidebar-control-group">
                 <span className="pc-section-label">Slide Enlarge</span>
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   <input
@@ -8644,27 +8769,6 @@ export function PresentationControlPanel({
             }
           >
             <div className="pc-transcript-main">
-              <div className="pc-transcript-header">
-                <div className="pc-transcript-header-title">
-                  Transcript · {activeTranscriptLanguageLabel}
-                </div>
-                <div className="pc-transcript-header-tools">
-                  <span className="pc-transcript-language-label">
-                    Language
-                  </span>
-                  <ControlPanelMenuSelect
-                    value={selectedTranscriptLanguage}
-                    options={TRANSCRIPT_LANGUAGE_OPTIONS}
-                    onChange={(value) =>
-                      setSelectedTranscriptLanguage(
-                        value as TranscriptLanguageCode,
-                      )
-                    }
-                    aria-label="Select transcript language"
-                    variant="transcript"
-                  />
-                </div>
-              </div>
               {transcriptEditMode ? (
                 <>
                   <textarea
@@ -8725,34 +8829,95 @@ export function PresentationControlPanel({
                             Math.max(editedSteps.length - 1, 0),
                           )
                         ] ?? null;
+                      const activeStepNumber = Math.min(
+                        activeState.stepIndex + 1,
+                        activeState.stepCount,
+                      );
+                      const activeTranscriptCardClassName =
+                        `pc-transcript-current ${activeStepNumber <= 1 ? "first-step" : ""} ${activeStepNumber >= activeState.stepCount ? "last-step" : ""}`.trim();
+                      const activeTranscriptLineIndex =
+                        ACTIVE_TRANSCRIPT_LINE_STOPS.indexOf(
+                          activeTranscriptLineCount,
+                        );
 
                       return (
                         <>
                           <div
-                            className="pc-transcript-current"
+                            className={activeTranscriptCardClassName}
                             key={
                               activeEditedStep?.id ??
                               `step-${activeState.stepIndex}`
+                            }
+                            style={
+                              {
+                                "--pc-transcript-window-lines": String(
+                                  activeTranscriptLineCount,
+                                ),
+                              } as React.CSSProperties
                             }
                           >
                             <div className="pc-transcript-current-title">
                               <span className="pc-transcript-current-label">
                                 Active Transcript
                               </span>
-                              <span className="pc-transcript-current-step">
-                                Step{" "}
-                                {Math.min(
-                                  activeState.stepIndex + 1,
-                                  activeState.stepCount,
-                                )}{" "}
-                                / {activeState.stepCount}
+                              <span className="pc-transcript-current-title-right">
+                                <span className="pc-transcript-current-step">
+                                  Step {activeStepNumber} /{" "}
+                                  {activeState.stepCount}
+                                </span>
+                                <span className="pc-transcript-height-controls">
+                                  <button
+                                    type="button"
+                                    className="pc-transcript-height-btn"
+                                    onClick={() =>
+                                      setActiveTranscriptLineCount(
+                                        ACTIVE_TRANSCRIPT_LINE_STOPS[
+                                          Math.max(
+                                            activeTranscriptLineIndex - 1,
+                                            0,
+                                          )
+                                        ] ??
+                                          DEFAULT_ACTIVE_TRANSCRIPT_LINE_COUNT,
+                                      )
+                                    }
+                                    disabled={activeTranscriptLineIndex <= 0}
+                                    aria-label="Decrease active transcript height"
+                                  >
+                                    -
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="pc-transcript-height-btn"
+                                    onClick={() =>
+                                      setActiveTranscriptLineCount(
+                                        ACTIVE_TRANSCRIPT_LINE_STOPS[
+                                          Math.min(
+                                            activeTranscriptLineIndex + 1,
+                                            ACTIVE_TRANSCRIPT_LINE_STOPS.length -
+                                              1,
+                                          )
+                                        ] ??
+                                          DEFAULT_ACTIVE_TRANSCRIPT_LINE_COUNT,
+                                      )
+                                    }
+                                    disabled={
+                                      activeTranscriptLineIndex >=
+                                      ACTIVE_TRANSCRIPT_LINE_STOPS.length - 1
+                                    }
+                                    aria-label="Increase active transcript height"
+                                  >
+                                    +
+                                  </button>
+                                </span>
                               </span>
                             </div>
-                            <div className="pc-transcript-current-heading">
-                              {activeEditedStep?.title}
-                            </div>
-                            <div className="pc-transcript-current-text">
-                              {activeEditedStep?.transcript}
+                            <div
+                              ref={activeTranscriptWindowRef}
+                              className="pc-transcript-current-window"
+                            >
+                              <div className="pc-transcript-current-text">
+                                {activeEditedStep?.transcript}
+                              </div>
                             </div>
                           </div>
 
@@ -9173,7 +9338,9 @@ export function PresentationControlPanel({
                   />
                   <button
                     className="pc-dock-btn"
-                    onClick={() => lessonTranscriptUploadInputRef.current?.click()}
+                    onClick={() =>
+                      lessonTranscriptUploadInputRef.current?.click()
+                    }
                     disabled={transcriptUploadBusy !== null}
                     data-tip={`Upload lesson transcript · ${activeTranscriptLanguageLabel}`}
                     aria-label="Upload lesson transcript"
@@ -9204,7 +9371,9 @@ export function PresentationControlPanel({
                   />
                   <button
                     className="pc-dock-btn"
-                    onClick={() => courseTranscriptUploadInputRef.current?.click()}
+                    onClick={() =>
+                      courseTranscriptUploadInputRef.current?.click()
+                    }
                     disabled={transcriptUploadBusy !== null}
                     data-tip={`Upload course transcript · ${activeTranscriptLanguageLabel}`}
                     aria-label="Upload course transcript"

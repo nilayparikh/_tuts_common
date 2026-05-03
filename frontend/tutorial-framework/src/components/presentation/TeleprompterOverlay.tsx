@@ -49,6 +49,57 @@ interface LayoutLine {
   paragraphStart: boolean;
 }
 
+export function wrapTeleprompterParagraphs(
+  text: string,
+  measureWidth: (value: string) => number,
+  maxTextWidth: number,
+): string[][] {
+  const normalizedText = text.replace(/\r\n?/g, "\n");
+  const paragraphs = normalizedText.split(/\n\s*\n/);
+
+  return paragraphs.reduce<string[][]>((wrappedParagraphs, rawParagraph) => {
+    const hardLines = rawParagraph
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    if (hardLines.length === 0) {
+      return wrappedParagraphs;
+    }
+
+    const wrappedLines: string[] = [];
+
+    for (const hardLine of hardLines) {
+      const words = hardLine.split(/\s+/).filter(Boolean);
+      if (words.length === 0) {
+        continue;
+      }
+
+      let currentLine = "";
+
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        if (measureWidth(testLine) > maxTextWidth && currentLine) {
+          wrappedLines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+
+      if (currentLine) {
+        wrappedLines.push(currentLine);
+      }
+    }
+
+    if (wrappedLines.length > 0) {
+      wrappedParagraphs.push(wrappedLines);
+    }
+
+    return wrappedParagraphs;
+  }, []);
+}
+
 export interface TeleprompterOverlayProps {
   /** Raw narration text (may contain \n\n paragraph breaks). */
   text: string;
@@ -271,33 +322,24 @@ export function TeleprompterOverlay({
 
     const maxTextWidth = canvasSize.w - PAD_X * 2;
 
-    /* Split into paragraphs then word-wrap each. */
-    const paragraphs = text.split(/\n\s*\n/);
+    /* Preserve manual line breaks, while still adding extra gap for paragraphs. */
+    const paragraphs = wrapTeleprompterParagraphs(
+      text,
+      (value) => ctx.measureText(value).width,
+      maxTextWidth,
+    );
     const lines: LayoutLine[] = [];
     let y = PAD_TOP;
 
     for (let pi = 0; pi < paragraphs.length; pi++) {
-      const para = paragraphs[pi].trim();
-      if (!para) continue;
       if (pi > 0) y += lineHeight * PARAGRAPH_GAP_MULTIPLIER;
 
-      const words = para.split(/\s+/);
-      let currentLine = "";
-      let isFirst = true;
-
-      for (const word of words) {
-        const testLine = currentLine ? `${currentLine} ${word}` : word;
-        if (ctx.measureText(testLine).width > maxTextWidth && currentLine) {
-          lines.push({ text: currentLine, y, paragraphStart: isFirst });
-          y += lineHeight;
-          currentLine = word;
-          isFirst = false;
-        } else {
-          currentLine = testLine;
-        }
-      }
-      if (currentLine) {
-        lines.push({ text: currentLine, y, paragraphStart: isFirst });
+      for (let li = 0; li < paragraphs[pi].length; li++) {
+        lines.push({
+          text: paragraphs[pi][li],
+          y,
+          paragraphStart: li === 0,
+        });
         y += lineHeight;
       }
     }
