@@ -1195,104 +1195,51 @@ export const PRESENTATION_ENGINE_CSS = `
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background:
-      radial-gradient(circle at 12% 12%, color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 18%, transparent) 0%, transparent 28%),
-      radial-gradient(circle at 86% 16%, color-mix(in srgb, var(--tf-color-secondary, #14b8a6) 14%, transparent) 0%, transparent 24%),
-      radial-gradient(circle at 78% 84%, color-mix(in srgb, var(--tf-color-accent, #f59e0b) 14%, transparent) 0%, transparent 26%),
-      linear-gradient(180deg, color-mix(in srgb, var(--tf-surface-stage-bg, #0b0d12) 88%, #05070d 12%) 0%, color-mix(in srgb, var(--tf-surface-stage-bg, #0b0d12) 72%, var(--tf-surface-panel-bg, #111318) 28%) 100%);
+    background: var(--tf-surface-stage-bg, #0b0d12);
     color: var(--tf-text-primary, #e2e6f0);
     font-family: 'Inter', system-ui, sans-serif;
-  }
-  .pc-root::before,
-  .pc-root::after {
-    content: "";
-    position: absolute;
-    inset: auto;
-    pointer-events: none;
-    z-index: -1;
-    filter: blur(44px);
-    opacity: 0.5;
-  }
-  .pc-root::before {
-    width: 26vw;
-    height: 26vw;
-    top: -8vw;
-    left: -6vw;
-    background: color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 26%, transparent);
-  }
-  .pc-root::after {
-    width: 24vw;
-    height: 24vw;
-    right: -6vw;
-    bottom: -8vw;
-    background: color-mix(in srgb, var(--tf-color-secondary, #14b8a6) 18%, transparent);
   }
   .pc-body {
     position: relative;
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: 368px 1fr;
-    gap: 20px;
-    padding: 20px;
-  }
-  .pc-body::before {
-    content: "";
-    position: absolute;
-    top: 24px;
-    bottom: 24px;
-    left: calc(368px + 10px);
-    width: 1px;
-    background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 18%, transparent) 18%, color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 28%, transparent) 50%, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 18%, transparent) 82%, transparent 100%);
-    opacity: 0.75;
+    grid-template-columns: 320px 1fr;
+    gap: 0;
+    padding: 0;
   }
   .pc-sidebar {
-    border: 1px solid var(--pc-sidebar-border);
-    border-radius: 30px;
+    border-right: 1px solid var(--pc-sidebar-border);
     background: var(--pc-sidebar-bg);
-    box-shadow: var(--pc-panel-shadow);
-    backdrop-filter: blur(24px) saturate(155%);
     display: flex;
     flex-direction: column;
     min-height: 0;
-    padding: 16px 16px 16px;
-    gap: 16px;
+    padding: 0;
+    gap: 0;
     overflow: hidden;
     position: relative;
   }
-  .pc-sidebar::before,
-  .pc-transcript::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 8%, transparent) 0%, transparent 18%, transparent 82%, color-mix(in srgb, var(--tf-color-primary-light, #818cf8) 10%, transparent) 100%);
-    opacity: 0.7;
-  }
   .pc-camera-preview {
-    padding: 14px;
-    border: 1px solid var(--pc-sidebar-section-border);
-    border-radius: 22px;
-    background: var(--pc-sidebar-section-bg);
-    box-shadow: var(--pc-sidebar-section-shadow);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--pc-sidebar-section-border);
+    background: transparent;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     flex-shrink: 0;
   }
   .pc-camera-video {
     width: 100%;
     aspect-ratio: 16/9;
-    border-radius: 10px;
+    border-radius: 6px;
     background: var(--tf-bg-base, #0b0d12);
     object-fit: contain;
   }
   .pc-camera-placeholder {
     width: 100%;
     aspect-ratio: 16/9;
-    border-radius: 10px;
+    border-radius: 6px;
     background: var(--pc-placeholder-bg);
     border: 1px dashed var(--pc-placeholder-border);
     display: flex;
@@ -1311,44 +1258,47 @@ export const PRESENTATION_ENGINE_CSS = `
     opacity: 0.4;
   }
   .pc-controls {
-    padding: 16px;
-    border: 1px solid var(--pc-sidebar-section-border);
-    border-radius: 22px;
-    background: var(--pc-sidebar-section-bg);
-    box-shadow: var(--pc-sidebar-section-shadow);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--pc-sidebar-section-border);
+    background: transparent;
     overflow: hidden;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 8px;
+    flex-shrink: 0;
   }
   .pc-lessons {
-    padding: 16px;
-    border: 1px solid var(--pc-sidebar-section-border);
-    border-radius: 22px;
-    background: var(--pc-sidebar-section-bg);
-    box-shadow: var(--pc-sidebar-section-shadow);
-    overflow: hidden;
+    min-height: 0;
+    flex: 1;
+    padding: 12px 16px 16px;
+    background: transparent;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
+  }
+  .pc-lessons::-webkit-scrollbar { width: 4px; }
+  .pc-lessons::-webkit-scrollbar-thumb {
+    background: var(--tf-border-default, rgba(202,211,230,0.14));
+    border-radius: 999px;
   }
   .pc-section-label {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--tf-text-secondary, #bfc5d4);
-    padding: 0 2px;
+    color: var(--tf-text-muted, #8892a8);
+    padding: 0;
   }
   .pc-sidebar-control-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 14px 16px;
-    border-radius: 18px;
-    border: 1px solid var(--pc-sidebar-control-border);
-    background: var(--pc-sidebar-control-bg);
-    box-shadow: var(--pc-sidebar-control-shadow);
+    gap: 6px;
+    padding: 12px 16px;
+    border: none;
+    border-bottom: 1px solid var(--pc-sidebar-section-border);
+    background: transparent;
+    box-shadow: none;
   }
   .pc-sidebar-control-group .pc-section-label {
     padding: 0;
@@ -1359,29 +1309,26 @@ export const PRESENTATION_ENGINE_CSS = `
   }
   .pc-menu-trigger {
     width: 100%;
-    min-height: 42px;
+    min-height: 36px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 10px 14px;
-    border-radius: 16px;
+    padding: 8px 12px;
+    border-radius: 8px;
     border: 1px solid var(--pc-sidebar-control-border);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--tf-bg-overlay, #1f222a) 78%, transparent) 0%, color-mix(in srgb, var(--tf-bg-elevated, #191c23) 88%, transparent) 100%);
-    box-shadow: var(--pc-sidebar-control-shadow);
+    background: var(--tf-bg-elevated, #191c23);
+    box-shadow: none;
     color: var(--tf-text-primary, #e2e6f0);
     cursor: pointer;
     text-align: left;
-    transition: transform 150ms ease, border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
-    backdrop-filter: blur(18px) saturate(150%);
+    transition: border-color 150ms ease, background 150ms ease;
   }
   .pc-menu-trigger:hover,
   .pc-menu-trigger:focus-visible,
   .pc-menu-select.open .pc-menu-trigger {
     border-color: var(--pc-action-surface-hover-border);
     background: var(--pc-action-surface-hover-bg);
-    box-shadow: var(--pc-action-surface-shadow);
-    transform: translateY(-1px);
     outline: none;
   }
   .pc-menu-trigger:disabled {
@@ -1430,22 +1377,20 @@ export const PRESENTATION_ENGINE_CSS = `
   }
   .pc-menu-panel {
     position: absolute;
-    top: calc(100% + 10px);
+    top: calc(100% + 6px);
     left: 0;
     right: 0;
     z-index: 20;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: 10px;
+    gap: 2px;
+    padding: 6px;
     max-height: 280px;
     overflow-y: auto;
-    border-radius: 20px;
+    border-radius: 8px;
     border: 1px solid var(--pc-panel-border, rgba(255, 255, 255, 0.12));
-    background-color: #14171f;
-    background-image: linear-gradient(180deg, color-mix(in srgb, var(--tf-bg-elevated, #191c23) 96%, transparent) 0%, color-mix(in srgb, var(--tf-bg-overlay, #1f222a) 96%, transparent) 100%);
+    background: var(--tf-bg-elevated, #191c23);
     box-shadow: var(--pc-dialog-shadow, 0 24px 48px rgba(0, 0, 0, 0.45));
-    backdrop-filter: blur(26px) saturate(165%);
   }
   .pc-menu-panel::-webkit-scrollbar {
     width: 6px;
@@ -1460,14 +1405,14 @@ export const PRESENTATION_ENGINE_CSS = `
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 11px 12px;
+    padding: 9px 10px;
     border: 1px solid transparent;
-    border-radius: 14px;
+    border-radius: 6px;
     background: transparent;
     color: var(--tf-text-secondary, #bfc5d4);
     cursor: pointer;
     text-align: left;
-    transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 140ms ease;
+    transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
   }
   .pc-menu-option:hover,
   .pc-menu-option:focus-visible,
@@ -1476,7 +1421,6 @@ export const PRESENTATION_ENGINE_CSS = `
     background: var(--pc-action-surface-hover-bg);
     color: var(--tf-text-primary, #e2e6f0);
     outline: none;
-    transform: translateX(1px);
   }
   .pc-menu-option-copy {
     min-width: 0;
@@ -1500,9 +1444,9 @@ export const PRESENTATION_ENGINE_CSS = `
     color: var(--tf-color-secondary, #14b8a6);
   }
   .pc-menu-select-compact .pc-menu-trigger {
-    min-height: 36px;
-    padding: 8px 12px;
-    border-radius: 14px;
+    min-height: 34px;
+    padding: 6px 10px;
+    border-radius: 8px;
   }
   .pc-menu-select-compact .pc-menu-trigger-value {
     font-size: 12px;
@@ -1518,39 +1462,39 @@ export const PRESENTATION_ENGINE_CSS = `
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 40px;
-    border-radius: 14px;
+    height: 36px;
+    border-radius: 8px;
     border: 1px solid var(--pc-action-surface-border);
     background: var(--pc-action-surface-bg);
     color: var(--tf-text-primary, #e2e6f0);
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 700;
-    transition: transform 150ms ease, border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
-    padding: 0 15px;
-    box-shadow: var(--pc-action-surface-shadow);
-    backdrop-filter: blur(18px) saturate(150%);
+    font-size: 13px;
+    font-weight: 600;
+    transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+    padding: 0 14px;
+    box-shadow: none;
+    white-space: nowrap;
   }
   .pc-btn:hover:not(:disabled) {
     color: var(--pc-action-surface-hover-text);
     border-color: var(--pc-action-surface-hover-border);
     background: var(--pc-action-surface-hover-bg);
-    transform: translateY(-1px);
   }
   .pc-btn-header {
-    height: 34px;
+    height: 32px;
     background: var(--pc-sidebar-control-bg);
     border-color: var(--pc-sidebar-control-border);
-    box-shadow: var(--pc-sidebar-control-shadow);
+    box-shadow: none;
     color: var(--tf-text-secondary, #bfc5d4);
     font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
   }
   .pc-btn-header.pc-btn-icon {
-    width: 34px;
-    min-width: 34px;
+    width: 32px;
+    min-width: 32px;
     padding: 0;
   }
   .pc-btn-header.pc-btn-ratio {
@@ -1564,21 +1508,20 @@ export const PRESENTATION_ENGINE_CSS = `
     background: var(--pc-action-surface-hover-bg);
     color: var(--tf-text-primary);
     border-color: var(--pc-action-surface-hover-border);
-    box-shadow: var(--pc-action-surface-shadow);
+    box-shadow: none;
   }
   .pc-field-input {
     width: 100%;
-    height: 40px;
-    border-radius: 14px;
+    height: 36px;
+    border-radius: 8px;
     border: 1px solid var(--pc-sidebar-control-border);
-    background: var(--pc-sidebar-control-bg);
+    background: var(--tf-bg-elevated, #191c23);
     color: var(--tf-text-primary, #e2e6f0);
-    font-size: 14px;
+    font-size: 13px;
     padding: 0 12px;
     outline: none;
-    transition: all 150ms;
-    box-shadow: var(--pc-sidebar-control-shadow);
-    backdrop-filter: blur(18px) saturate(150%);
+    transition: border-color 150ms ease, background 150ms ease;
+    box-shadow: none;
   }
   .pc-field-input:hover,
   .pc-field-input:focus-visible {
@@ -1624,12 +1567,9 @@ export const PRESENTATION_ENGINE_CSS = `
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 14px;
-    border: 1px solid var(--pc-sidebar-section-border);
-    border-radius: 22px;
-    background: var(--pc-sidebar-section-bg);
-    box-shadow: var(--pc-sidebar-section-shadow);
-    overflow-y: auto;
+    padding: 8px 0;
+    border: none;
+    background: transparent;
   }
   .pc-jump::-webkit-scrollbar { width: 4px; }
   .pc-jump::-webkit-scrollbar-thumb {
@@ -1639,19 +1579,18 @@ export const PRESENTATION_ENGINE_CSS = `
   .pc-jump-item {
     width: 100%;
     text-align: left;
-    margin-bottom: 8px;
-    border-radius: 16px;
-    border: 1px solid var(--pc-action-surface-border);
-    background: var(--pc-sidebar-control-bg);
+    margin-bottom: 4px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
     color: var(--tf-text-secondary, #bfc5d4);
-    padding: 12px 14px;
+    padding: 10px 12px;
     cursor: grab;
     display: flex;
     align-items: baseline;
     gap: 12px;
-    box-shadow: var(--pc-sidebar-control-shadow);
-    backdrop-filter: blur(18px) saturate(150%);
-    transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+    box-shadow: none;
+    transition: border-color 140ms ease, background 140ms ease;
   }
   .pc-jump-item.dragging {
     opacity: 0.55;
@@ -1659,17 +1598,14 @@ export const PRESENTATION_ENGINE_CSS = `
   }
   .pc-jump-item.drop-target {
     border-color: var(--pc-action-surface-hover-border);
-    box-shadow: var(--pc-action-surface-shadow);
   }
   .pc-jump-item:hover {
     background: var(--pc-action-surface-hover-bg);
-    transform: translateX(2px);
   }
   .pc-jump-item.active {
     background: var(--pc-action-surface-hover-bg);
     border-color: var(--pc-action-surface-hover-border);
     color: var(--tf-text-primary, #e2e6f0);
-    box-shadow: var(--pc-action-surface-shadow);
   }
   .pc-jump-index {
     font-family: 'JetBrains Mono', monospace;
@@ -1696,13 +1632,10 @@ export const PRESENTATION_ENGINE_CSS = `
     position: relative;
     min-height: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 52px;
+    grid-template-columns: minmax(0, 1fr) 48px;
     overflow: hidden;
     background: var(--pc-transcript-shell-bg);
-    border: 1px solid var(--pc-transcript-shell-border);
-    border-radius: 34px;
-    box-shadow: var(--pc-panel-shadow), inset 1px 0 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 4%, transparent);
-    backdrop-filter: blur(24px) saturate(160%);
+    border: none;
   }
   .pc-transcript-main {
     position: relative;
@@ -1710,30 +1643,26 @@ export const PRESENTATION_ENGINE_CSS = `
     min-height: 0;
     display: flex;
     flex-direction: column;
-    margin: 14px 0 14px 14px;
-    padding: 20px;
-    border-radius: 28px;
-    border: 1px solid color-mix(in srgb, var(--pc-transcript-shell-border) 82%, transparent);
-    background: var(--pc-transcript-bg);
-    box-shadow: var(--pc-action-surface-shadow);
+    margin: 0;
+    padding: 20px 24px;
+    border: none;
+    background: transparent;
+    box-shadow: none;
     overflow: hidden;
   }
   .pc-transcript-rail {
-    width: 52px;
-    min-width: 52px;
+    width: 48px;
+    min-width: 48px;
     min-height: 0;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 14px 0;
-    margin: 14px 14px 14px 0;
-    gap: 12px;
-    border: 1px solid var(--pc-transcript-shell-border);
-    border-radius: 26px;
-    background: var(--pc-rail-bg);
-    box-shadow: inset 1px 0 0 color-mix(in srgb, var(--tf-text-primary, #e2e6f0) 6%, transparent);
-    backdrop-filter: blur(24px) saturate(155%);
+    padding: 12px 0;
+    margin: 0;
+    gap: 10px;
+    border-left: 1px solid var(--pc-transcript-shell-border);
+    background: transparent;
   }
   .pc-transcript-rail::-webkit-scrollbar { width: 0; }
 
@@ -1743,15 +1672,15 @@ export const PRESENTATION_ENGINE_CSS = `
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 42px;
-    height: 42px;
-    border-radius: 16px;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
     border: 1px solid var(--pc-rail-chip-border);
     background: var(--pc-rail-chip-bg);
-    box-shadow: var(--pc-rail-chip-shadow);
+    box-shadow: none;
     color: var(--tf-text-secondary, #bfc5d4);
     cursor: pointer;
-    transition: transform 120ms ease, border-color 120ms ease, background 120ms ease, box-shadow 120ms ease, color 120ms ease;
+    transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
     flex-shrink: 0;
   }
   .pc-dock-btn svg,
@@ -1764,13 +1693,11 @@ export const PRESENTATION_ENGINE_CSS = `
     color: var(--tf-text-primary, #e2e6f0);
     background: var(--pc-action-surface-hover-bg);
     border-color: var(--pc-action-surface-hover-border);
-    transform: translateY(-1px);
   }
   .pc-dock-btn.active {
     color: var(--tf-text-primary, #e2e6f0);
     background: var(--pc-action-surface-hover-bg);
     border-color: var(--pc-action-surface-hover-border);
-    box-shadow: var(--pc-action-surface-shadow);
   }
   .pc-dock-btn:disabled {
     opacity: 0.28;
@@ -1871,11 +1798,13 @@ export const PRESENTATION_ENGINE_CSS = `
   }
   .pc-settings-dialog {
     position: relative;
-    width: min(460px, calc(100vw - 48px));
+    display: flex;
+    flex-direction: column;
+    width: min(520px, calc(100vw - 48px));
     max-height: calc(100vh - 80px);
-    overflow-y: auto;
-    padding: 20px;
-    border-radius: 16px;
+    overflow: hidden;
+    padding: 0;
+    border-radius: 12px;
     border: 1px solid var(--pc-dialog-border);
     background: var(--pc-dialog-bg);
     box-shadow: var(--pc-dialog-shadow);
@@ -1883,18 +1812,41 @@ export const PRESENTATION_ENGINE_CSS = `
     animation: pc-scale-in 150ms ease;
     backdrop-filter: blur(22px) saturate(150%);
   }
-  .pc-settings-dialog::-webkit-scrollbar { width: 4px; }
-  .pc-settings-dialog::-webkit-scrollbar-thumb {
+  .pc-settings-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--pc-dialog-section-border);
+    flex-shrink: 0;
+  }
+  .pc-settings-dialog-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--tf-text-primary, #e2e6f0);
+  }
+  .pc-settings-dialog-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .pc-settings-dialog-body::-webkit-scrollbar { width: 4px; }
+  .pc-settings-dialog-body::-webkit-scrollbar-thumb {
     background: var(--tf-border-default, rgba(202,211,230,0.14));
     border-radius: 999px;
   }
   .pc-settings-close {
-    position: absolute;
-    top: 12px;
-    right: 12px;
+    position: relative;
     width: 28px;
     height: 28px;
-    border-radius: 8px;
+    border-radius: 6px;
     border: 1px solid var(--pc-action-surface-border);
     background: var(--pc-action-surface-bg);
     color: var(--tf-text-muted, #8892a8);
@@ -1904,7 +1856,8 @@ export const PRESENTATION_ENGINE_CSS = `
     justify-content: center;
     font-size: 16px;
     line-height: 1;
-    transition: all 120ms;
+    transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+    flex-shrink: 0;
   }
   .pc-settings-close:hover {
     color: var(--tf-text-primary, #e2e6f0);
@@ -3160,216 +3113,6 @@ export const PRESENTATION_ENGINE_CSS = `
     white-space: nowrap;
   }
 
-  /* ═══════════════════════════════════════════════════════════════════════ */
-  /*  FLAT CONTROL PANEL OVERRIDES (Dashdark-X-style)                       */
-  /*  Three columns separated by background tint only — no nested boxes,    */
-  /*  no curved borders, fluid middle pane.                                 */
-  /* ═══════════════════════════════════════════════════════════════════════ */
-  .pc-root {
-    background: #0b0d12;
-  }
-  .pc-root::before,
-  .pc-root::after {
-    display: none;
-  }
-  .pc-body {
-    grid-template-columns: 320px minmax(0, 1fr) auto;
-    gap: 0;
-    padding: 0;
-  }
-  .pc-body::before {
-    display: none;
-  }
-
-  /* ── Sidebar (left): darker shade, flat, full bleed ── */
-  .pc-sidebar {
-    border: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 0;
-    background: #0d1016;
-    box-shadow: none;
-    backdrop-filter: none;
-    padding: 20px 18px;
-    gap: 22px;
-  }
-  .pc-sidebar::before,
-  .pc-transcript::before {
-    display: none;
-  }
-
-  /* ── Strip nested boxes inside sidebar ── */
-  .pc-camera-preview,
-  .pc-controls,
-  .pc-lessons,
-  .pc-sidebar-control-group {
-    padding: 0;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    overflow: visible;
-  }
-  .pc-camera-preview { gap: 8px; }
-  .pc-controls { gap: 10px; }
-  .pc-lessons { gap: 6px; }
-  .pc-sidebar-control-group { gap: 8px; }
-  .pc-section-label {
-    color: rgba(255, 255, 255, 0.42);
-    letter-spacing: 0.10em;
-    font-size: 10px;
-    padding: 0;
-  }
-
-  /* ── Form controls inside sidebar: low-radius, flat ── */
-  .pc-menu-trigger {
-    min-height: 40px;
-    padding: 8px 12px;
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: #14181f;
-    box-shadow: none;
-    backdrop-filter: none;
-  }
-  .pc-menu-trigger:hover,
-  .pc-menu-trigger:focus-visible,
-  .pc-menu-select.open .pc-menu-trigger {
-    background: #181d26;
-    border-color: rgba(255, 255, 255, 0.16);
-    box-shadow: none;
-    transform: none;
-  }
-  .pc-menu-panel {
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    background-color: #14181f;
-    background-image: none;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
-    backdrop-filter: none;
-  }
-  .pc-menu-option {
-    border-radius: 4px;
-  }
-  .pc-menu-option:hover,
-  .pc-menu-option:focus-visible,
-  .pc-menu-option.active {
-    background: #1d2330;
-    border-color: rgba(255, 255, 255, 0.10);
-    transform: none;
-  }
-  .pc-field-input {
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: #14181f;
-    box-shadow: none;
-    backdrop-filter: none;
-  }
-  .pc-field-input:hover,
-  .pc-field-input:focus-visible {
-    background: #181d26;
-    border-color: rgba(255, 255, 255, 0.16);
-    box-shadow: none;
-  }
-  .pc-btn {
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: #14181f;
-    box-shadow: none;
-  }
-  .pc-btn:hover:not(:disabled) {
-    background: #181d26;
-    border-color: rgba(255, 255, 255, 0.16);
-    box-shadow: none;
-    transform: none;
-  }
-  .pc-deck-type-row {
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: #14181f;
-    padding: 3px;
-    box-shadow: none;
-  }
-  .pc-deck-type-btn {
-    border-radius: 3px;
-  }
-
-  /* ── Lesson list rows: flat, separator-only ── */
-  .pc-jump-item {
-    border-radius: 0;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    background: transparent;
-    box-shadow: none;
-    margin-bottom: 0;
-    padding: 10px 6px;
-  }
-  .pc-jump-item:hover {
-    background: rgba(255, 255, 255, 0.03);
-    transform: none;
-  }
-  .pc-jump-item.active {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: transparent;
-  }
-
-  /* ── Transcript (middle): default shade, full bleed, fluid ── */
-  .pc-transcript {
-    grid-template-columns: minmax(0, 1fr) 56px;
-    border: none;
-    border-radius: 0;
-    background: #0f1218;
-    box-shadow: none;
-    backdrop-filter: none;
-  }
-  .pc-transcript-main {
-    margin: 0;
-    padding: 22px 28px;
-    border: none;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  /* ── Right rail: slightly different shade, flat ── */
-  .pc-transcript-rail {
-    width: 56px;
-    min-width: 56px;
-    margin: 0;
-    padding: 14px 0;
-    border: none;
-    border-left: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 0;
-    background: #0d1016;
-    box-shadow: none;
-    backdrop-filter: none;
-    gap: 6px;
-  }
-  .pc-dock-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 4px;
-    border: 1px solid transparent;
-    background: transparent;
-    box-shadow: none;
-  }
-  .pc-dock-btn:hover:not(:disabled) {
-    background: #181d26;
-    border-color: rgba(255, 255, 255, 0.10);
-    transform: none;
-  }
-  .pc-dock-btn.active {
-    background: #1d2330;
-    border-color: rgba(255, 255, 255, 0.14);
-    box-shadow: none;
-  }
-  .pc-dock-btn[data-tip]::after {
-    border-radius: 4px;
-    background: #14181f;
-    border-color: rgba(255, 255, 255, 0.10);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-  }
-  .pc-dock-divider {
-    background: rgba(255, 255, 255, 0.06);
-  }
 `;
 
 /* ═══════════════════════════════════════════════════════════════════════ */
@@ -3614,6 +3357,21 @@ const Icons = {
     >
       <rect x="7" y="2" width="10" height="20" rx="2" />
       <line x1="10" y1="6" x2="14" y2="6" />
+    </svg>
+  ),
+  feed: (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="5" y="2" width="14" height="20" rx="2" />
+      <path d="M8 7h8M8 12h8M8 17h5" />
     </svg>
   ),
   bell: (
@@ -3949,10 +3707,28 @@ const TRANSCRIPT_LANGUAGE_OPTIONS = [
   { value: "gu", label: "Gujarati" },
 ] as const;
 const DEFAULT_SLIDE_ZOOM = 1.15;
-const ENLARGE_MIN = 0.5;
-const ENLARGE_MAX = 5;
-const ENLARGE_STEP = 0.05;
 const DEFAULT_ENLARGE = 1;
+const ENLARGE_STOPS = [
+  0.75, 0.9, 1, 1.25, 1.5, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+] as const;
+const ENLARGE_MIN = ENLARGE_STOPS[0];
+const ENLARGE_MAX = ENLARGE_STOPS[ENLARGE_STOPS.length - 1];
+const ENLARGE_MENU_OPTIONS: ControlPanelMenuOption[] = [
+  { value: "0.75", label: "0.75x" },
+  { value: "0.90", label: "0.90x" },
+  { value: "1.00", label: "1x", meta: "Default" },
+  { value: "1.25", label: "1.25x" },
+  { value: "1.50", label: "1.5x" },
+  { value: "2.00", label: "2x" },
+  { value: "3.00", label: "3x" },
+  { value: "4.00", label: "4x" },
+  { value: "5.00", label: "5x" },
+  { value: "6.00", label: "6x" },
+  { value: "7.00", label: "7x" },
+  { value: "8.00", label: "8x" },
+  { value: "9.00", label: "9x" },
+  { value: "10.00", label: "10x" },
+];
 const ACTIVE_TRANSCRIPT_LINE_STOPS = [4, 5, 6, 7, 8, 9];
 const DEFAULT_ACTIVE_TRANSCRIPT_LINE_COUNT = 6;
 const TRANSCRIPT_FONT_SCALE_STOPS = [1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7];
@@ -4145,6 +3921,23 @@ function readStoredSlideZoom(storageKey: string): number {
   return DEFAULT_SLIDE_ZOOM;
 }
 
+function normalizeSlideEnlarge(value: number): number {
+  if (Number.isNaN(value) || value <= 0) {
+    return DEFAULT_ENLARGE;
+  }
+
+  const clampedValue = Math.max(ENLARGE_MIN, Math.min(value, ENLARGE_MAX));
+  return ENLARGE_STOPS.reduce((closest, stop) => {
+    const closestDistance = Math.abs(closest - clampedValue);
+    const stopDistance = Math.abs(stop - clampedValue);
+    return stopDistance < closestDistance ? stop : closest;
+  }, DEFAULT_ENLARGE as number);
+}
+
+function parseSlideEnlarge(value: string | number): number {
+  return normalizeSlideEnlarge(Number(value));
+}
+
 function getEnlargeSessionKey(
   channelId: string,
   deckId: string,
@@ -4171,13 +3964,13 @@ function readSlideEnlarge(
   try {
     const sessionVal = sessionStorage.getItem(sessionKey);
     if (sessionVal != null) {
-      const v = Number(sessionVal);
-      if (!Number.isNaN(v) && v > 0) return v;
+      const v = parseSlideEnlarge(sessionVal);
+      if (v > 0) return v;
     }
     const localVal = localStorage.getItem(persistKey);
     if (localVal != null) {
-      const v = Number(localVal);
-      if (!Number.isNaN(v) && v > 0) return v;
+      const v = parseSlideEnlarge(localVal);
+      if (v > 0) return v;
     }
   } catch {
     // Ignore storage access issues.
@@ -4192,13 +3985,10 @@ function writeSlideEnlarge(
   value: number,
 ): void {
   try {
+    const normalizedValue = normalizeSlideEnlarge(value);
     sessionStorage.setItem(
       getEnlargeSessionKey(channelId, deckId, slideId),
-      String(value),
-    );
-    localStorage.setItem(
-      getEnlargePersistKey(channelId, deckId, slideId),
-      String(value),
+      String(normalizedValue),
     );
   } catch {
     // Ignore storage access issues.
@@ -4216,7 +4006,7 @@ function persistAllEnlargeValues(
     try {
       const val = sessionStorage.getItem(sessionKey);
       if (val != null) {
-        localStorage.setItem(persistKey, val);
+        localStorage.setItem(persistKey, String(parseSlideEnlarge(val)));
       }
     } catch {
       // Ignore storage access issues.
@@ -5743,11 +5533,7 @@ export function PresentationLayout({
         setSlideZoom(nextZoom);
       } else if (msg.action === "set-enlarge") {
         const slideId = msg.slideId;
-        const raw = Number(msg.enlarge);
-        const value =
-          !Number.isNaN(raw) && raw >= ENLARGE_MIN && raw <= ENLARGE_MAX
-            ? Math.round(raw * 100) / 100
-            : DEFAULT_ENLARGE;
+        const value = normalizeSlideEnlarge(Number(msg.enlarge));
         setEnlargeMap((prev) => ({ ...prev, [slideId]: value }));
         writeSlideEnlarge(controlChannelId, deck.id, slideId, value);
       } else if (msg.action === "set-layout") {
@@ -7452,10 +7238,158 @@ export function ControlPanelMenuSelect({
   disabled?: boolean;
 }): React.ReactElement {
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const listboxId = useId();
   const selectedOption =
     options.find((option) => option.value === value) ?? null;
+  const selectedIndex = options.findIndex((option) => option.value === value);
+
+  const findEnabledIndex = useCallback(
+    (startIndex: number, direction: 1 | -1): number => {
+      if (options.length === 0) {
+        return -1;
+      }
+
+      for (let offset = 0; offset < options.length; offset += 1) {
+        const index =
+          (startIndex + offset * direction + options.length) % options.length;
+        if (!options[index]?.disabled) {
+          return index;
+        }
+      }
+
+      return -1;
+    },
+    [options],
+  );
+
+  const focusOption = useCallback((index: number) => {
+    setActiveIndex(index);
+    window.requestAnimationFrame(() => {
+      optionRefs.current[index]?.focus();
+    });
+  }, []);
+
+  const selectOption = useCallback(
+    (option: ControlPanelMenuOption) => {
+      if (option.disabled) {
+        return;
+      }
+
+      onChange(option.value);
+      setOpen(false);
+      window.requestAnimationFrame(() => triggerRef.current?.focus());
+    },
+    [onChange],
+  );
+
+  const handleMenuKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+      if (disabled) {
+        return;
+      }
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        const nextIndex = findEnabledIndex(
+          selectedIndex >= 0 ? selectedIndex + 1 : 0,
+          1,
+        );
+        if (nextIndex >= 0) {
+          setOpen(true);
+          focusOption(nextIndex);
+        }
+        return;
+      }
+
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        const nextIndex = findEnabledIndex(
+          selectedIndex >= 0 ? selectedIndex - 1 : options.length - 1,
+          -1,
+        );
+        if (nextIndex >= 0) {
+          setOpen(true);
+          focusOption(nextIndex);
+        }
+        return;
+      }
+
+      if (event.key === "Home" || event.key === "End") {
+        event.preventDefault();
+        const nextIndex = findEnabledIndex(
+          event.key === "Home" ? 0 : options.length - 1,
+          event.key === "Home" ? 1 : -1,
+        );
+        if (nextIndex >= 0) {
+          setOpen(true);
+          focusOption(nextIndex);
+        }
+      }
+    },
+    [disabled, findEnabledIndex, focusOption, options.length, selectedIndex],
+  );
+
+  const handleOptionKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+        triggerRef.current?.focus();
+        return;
+      }
+
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        const nextIndex = findEnabledIndex(
+          index + (event.key === "ArrowDown" ? 1 : -1),
+          event.key === "ArrowDown" ? 1 : -1,
+        );
+        if (nextIndex >= 0) {
+          focusOption(nextIndex);
+        }
+        return;
+      }
+
+      if (event.key === "Home" || event.key === "End") {
+        event.preventDefault();
+        const nextIndex = findEnabledIndex(
+          event.key === "Home" ? 0 : options.length - 1,
+          event.key === "Home" ? 1 : -1,
+        );
+        if (nextIndex >= 0) {
+          focusOption(nextIndex);
+        }
+        return;
+      }
+
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        const option = options[index];
+        if (option) {
+          selectOption(option);
+        }
+      }
+    },
+    [findEnabledIndex, focusOption, options, selectOption],
+  );
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const nextIndex = findEnabledIndex(
+      selectedIndex >= 0 ? selectedIndex : 0,
+      1,
+    );
+    if (nextIndex >= 0) {
+      focusOption(nextIndex);
+    }
+  }, [findEnabledIndex, focusOption, open, selectedIndex]);
 
   useEffect(() => {
     if (!open) {
@@ -7488,9 +7422,11 @@ export function ControlPanelMenuSelect({
       className={`pc-menu-select pc-menu-select-${variant}${open ? " open" : ""}`}
     >
       <button
+        ref={triggerRef}
         type="button"
         className="pc-menu-trigger"
         onClick={() => setOpen((current) => !current)}
+        onKeyDown={handleMenuKeyDown}
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -7510,20 +7446,31 @@ export function ControlPanelMenuSelect({
         </span>
       </button>
       {open ? (
-        <div id={listboxId} role="listbox" className="pc-menu-panel">
-          {options.map((option) => {
+        <div
+          id={listboxId}
+          role="listbox"
+          className="pc-menu-panel"
+          aria-activedescendant={
+            activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
+          }
+        >
+          {options.map((option, index) => {
             const active = option.value === value;
             return (
               <button
                 key={option.value}
+                id={`${listboxId}-option-${index}`}
+                ref={(element) => {
+                  optionRefs.current[index] = element;
+                }}
                 type="button"
                 role="option"
                 aria-selected={active}
                 className={`pc-menu-option${active ? " active" : ""}`}
                 disabled={option.disabled}
+                onKeyDown={(event) => handleOptionKeyDown(event, index)}
                 onClick={() => {
-                  onChange(option.value);
-                  setOpen(false);
+                  selectOption(option);
                 }}
               >
                 <span className="pc-menu-option-copy">
@@ -8624,22 +8571,17 @@ export function PresentationControlPanel({
               <div className="pc-sidebar-control-group">
                 <span className="pc-section-label">Slide Enlarge</span>
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <input
-                    type="number"
-                    className="pc-field-input"
-                    style={{ flex: 1 }}
-                    value={activeState.enlarge}
-                    min={ENLARGE_MIN}
-                    max={ENLARGE_MAX}
-                    step={ENLARGE_STEP}
-                    onChange={(e) => {
-                      const raw = parseFloat(e.target.value);
-                      if (Number.isNaN(raw)) return;
-                      const nextEnlarge =
-                        Math.round(
-                          Math.max(ENLARGE_MIN, Math.min(ENLARGE_MAX, raw)) *
-                            100,
-                        ) / 100;
+                  <ControlPanelMenuSelect
+                    value={activeState.enlarge.toFixed(2)}
+                    options={ENLARGE_MENU_OPTIONS.map((option) => ({
+                      ...option,
+                      meta:
+                        option.value === activeState.enlarge.toFixed(2)
+                          ? "Live"
+                          : option.meta,
+                    }))}
+                    onChange={(enlargeValue) => {
+                      const nextEnlarge = parseSlideEnlarge(enlargeValue);
                       const slideId =
                         orderedSlides[activeState.slideIndex]?.id ?? "";
                       setSurfaceStates((current) => ({
@@ -8664,6 +8606,7 @@ export function PresentationControlPanel({
                       });
                     }}
                     aria-label="Slide enlarge"
+                    variant="compact"
                   />
                   <button
                     className="pc-btn"
@@ -9103,7 +9046,7 @@ export function PresentationControlPanel({
                     selectSurface("shorts");
                     onOpenShorts();
                   }}
-                  data-tip="9:16"
+                  data-tip="9:16 Shorts"
                   aria-label="Open 9:16 slide window"
                 >
                   {Icons.shorts}
@@ -9116,10 +9059,10 @@ export function PresentationControlPanel({
                     selectSurface("feed");
                     onOpenFeed();
                   }}
-                  data-tip="4:5"
-                  aria-label="Open 4:5 slide window"
+                  data-tip="4:5 Feed"
+                  aria-label="Open 4:5 feed window"
                 >
-                  {Icons.shorts}
+                  {Icons.feed}
                 </button>
               ) : null}
 
@@ -9453,14 +9396,18 @@ export function PresentationControlPanel({
                 }}
               >
                 <div className="pc-settings-dialog">
-                  <button
-                    className="pc-settings-close"
-                    onClick={() => setSettingsOpen(false)}
-                    aria-label="Close settings"
-                  >
-                    ×
-                  </button>
-                  {headerBarSlot}
+                  <header className="pc-settings-dialog-header">
+                    <h2 className="pc-settings-dialog-title">Settings</h2>
+                    <button
+                      className="pc-settings-close"
+                      onClick={() => setSettingsOpen(false)}
+                      aria-label="Close settings"
+                      type="button"
+                    >
+                      ×
+                    </button>
+                  </header>
+                  <div className="pc-settings-dialog-body">{headerBarSlot}</div>
                 </div>
               </div>
             )}
