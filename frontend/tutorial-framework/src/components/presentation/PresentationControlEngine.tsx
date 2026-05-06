@@ -117,6 +117,12 @@ export interface PresentationBranding {
   siteUrl?: string;
   /** Rotating phrases typed after the URL, e.g. ["examples","interactive mode","course outline"] */
   siteUrlPhrases?: string[];
+  captureFooter?: {
+    visible?: boolean;
+    showSubscribe?: boolean;
+    showFollow?: boolean;
+    customText?: string;
+  };
 }
 
 interface PresentationStepContextValue {
@@ -165,6 +171,32 @@ function getPresenterSlideTitle(
 function getCaptureFooterHandle(branding?: PresentationBranding): string {
   const handle = branding?.twitterHandle?.trim();
   return handle || "@localm_tuts";
+}
+
+function getCaptureFooterSettings(branding?: PresentationBranding): {
+  visible: boolean;
+  showSubscribe: boolean;
+  showFollow: boolean;
+  customText: string;
+} {
+  return {
+    visible: branding?.captureFooter?.visible ?? true,
+    showSubscribe: branding?.captureFooter?.showSubscribe ?? true,
+    showFollow: branding?.captureFooter?.showFollow ?? true,
+    customText: branding?.captureFooter?.customText?.trim() ?? "",
+  };
+}
+
+function shouldShowCaptureFooterCustomText(settings: {
+  showSubscribe: boolean;
+  showFollow: boolean;
+  customText: string;
+}): boolean {
+  return (
+    !settings.showSubscribe &&
+    !settings.showFollow &&
+    settings.customText.trim().length > 0
+  );
 }
 
 function getCaptureFooterLabel(
@@ -5185,6 +5217,7 @@ export function PresentationLayout({
   courseTitle,
   deck,
   onHome,
+  branding,
   controlChannelId = DEFAULT_CONTROL_CHANNEL,
   controlWindowName = DEFAULT_CONTROL_WINDOW_NAME,
   hashPrefix,
@@ -5244,6 +5277,11 @@ export function PresentationLayout({
   );
   const slideCount = orderedSlides.length;
   const elapsed = useSlideTimer(slideIndex);
+  const captureFooterSettings = getCaptureFooterSettings(branding);
+  const captureFooterHandle = getCaptureFooterHandle(branding);
+  const showCustomFooterText = shouldShowCaptureFooterCustomText(
+    captureFooterSettings,
+  );
 
   /* ── Derived slide data ── */
   const currentSlide = orderedSlides[slideIndex];
@@ -6093,102 +6131,144 @@ export function PresentationLayout({
                 </div>
               </div>
 
-              <div className="pe-pip-footer">
-                <div className="pe-pip-footer-row subscribe">
-                  <span className="pe-pip-subscribe-icon">{Icons.bell}</span>
-                  <span className="pe-pip-subscribe-text">
-                    Want more? Subscribe and press the bell
-                  </span>
-                </div>
-                <div className="pe-pip-footer-row" style={{ gap: "0.4em" }}>
-                  <span className="pe-pip-footer-row3-text">
-                    Catch me live for Q&amp;As on
-                  </span>
-                  <span className="pe-pip-footer-x-icon">{Icons.twitter}</span>
-                  <span className="pe-pip-footer-row3-text">Spaces</span>
-                  <span className="pe-pip-footer-x-capsule">@localm_tuts</span>
-                </div>
-                <div className="pe-pip-footer-qr-row">
-                  <div className="pe-pip-footer-qr-item">
-                    <img
-                      src="/brand/qr-nilayparikh-links.png"
-                      alt="nilayparikh.com/links"
-                    />
-                    <span className="pe-pip-footer-qr-label">
-                      nilayparikh.com/links
-                    </span>
+              {captureFooterSettings.visible ? (
+                <div className="pe-pip-footer">
+                  {captureFooterSettings.showSubscribe ? (
+                    <div className="pe-pip-footer-row subscribe">
+                      <span className="pe-pip-subscribe-icon">
+                        {Icons.bell}
+                      </span>
+                      <span className="pe-pip-subscribe-text">
+                        Want more? Subscribe and press the bell
+                      </span>
+                    </div>
+                  ) : null}
+                  {captureFooterSettings.showFollow ? (
+                    <div className="pe-pip-footer-row" style={{ gap: "0.4em" }}>
+                      <span className="pe-pip-footer-row3-text">
+                        Catch me live for Q&amp;As on
+                      </span>
+                      <span className="pe-pip-footer-x-icon">
+                        {Icons.twitter}
+                      </span>
+                      <span className="pe-pip-footer-row3-text">Spaces</span>
+                      <span className="pe-pip-footer-x-capsule">
+                        {captureFooterHandle}
+                      </span>
+                    </div>
+                  ) : null}
+                  {showCustomFooterText ? (
+                    <div
+                      className="pe-pip-footer-row"
+                      style={{ justifyContent: "center" }}
+                    >
+                      <span className="pe-pip-footer-row3-text">
+                        {captureFooterSettings.customText}
+                      </span>
+                    </div>
+                  ) : null}
+                  <div className="pe-pip-footer-qr-row">
+                    <div className="pe-pip-footer-qr-item">
+                      <img
+                        src="/brand/qr-nilayparikh-links.png"
+                        alt="nilayparikh.com/links"
+                      />
+                      <span className="pe-pip-footer-qr-label">
+                        nilayparikh.com/links
+                      </span>
+                    </div>
+                    <div className="pe-pip-footer-qr-item">
+                      <img
+                        src="/brand/qr-tuts-localm.png"
+                        alt="tuts.localm.dev"
+                      />
+                      <span className="pe-pip-footer-qr-label">
+                        tuts.localm.dev
+                      </span>
+                    </div>
+                    <div className="pe-pip-footer-qr-item">
+                      <img
+                        src="/brand/qr-blogs-nilayparikh.png"
+                        alt="blog.nilayparikh.com"
+                      />
+                      <span className="pe-pip-footer-qr-label">
+                        blog.nilayparikh.com
+                      </span>
+                    </div>
                   </div>
-                  <div className="pe-pip-footer-qr-item">
-                    <img
-                      src="/brand/qr-tuts-localm.png"
-                      alt="tuts.localm.dev"
-                    />
-                    <span className="pe-pip-footer-qr-label">
-                      tuts.localm.dev
-                    </span>
-                  </div>
-                  <div className="pe-pip-footer-qr-item">
-                    <img
-                      src="/brand/qr-blogs-nilayparikh.png"
-                      alt="blog.nilayparikh.com"
-                    />
-                    <span className="pe-pip-footer-qr-label">
-                      blog.nilayparikh.com
-                    </span>
-                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           )}
         </div>
 
         {/* ── Footer ── */}
-        <div className="pe-footer">
-          <div className="pe-footer-row1">
-            <span
-              style={{
-                color: "var(--tf-color-danger, #ef4444)",
-                display: "inline-flex",
-                alignItems: "center",
-                transformOrigin: "50% 10%",
-                animation: "pe-shorts-bell-ring 4.8s ease-in-out infinite",
-              }}
-            >
-              {Icons.bell}
-            </span>
-            <span className="pe-footer-subscribe-label">
-              Want more? Subscribe and press the bell
-            </span>
-          </div>
-          <div className="pe-footer-row3">
-            <span className="pe-footer-row3-text">
-              Catch me live for Q&amp;As on
-            </span>
-            <span className="pe-footer-x-icon">{Icons.twitter}</span>
-            <span className="pe-footer-row3-text">Spaces</span>
-            <span className="pe-footer-x-capsule">@localm_tuts</span>
-          </div>
-          <div className="pe-footer-qr-row">
-            <div className="pe-footer-qr-item">
-              <img
-                src="/brand/qr-nilayparikh-links.png"
-                alt="nilayparikh.com/links"
-              />
-              <span className="pe-footer-qr-label">nilayparikh.com/links</span>
+        {captureFooterSettings.visible ? (
+          <div className="pe-footer">
+            {captureFooterSettings.showSubscribe ? (
+              <div className="pe-footer-row1">
+                <span
+                  style={{
+                    color: "var(--tf-color-danger, #ef4444)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    transformOrigin: "50% 10%",
+                    animation: "pe-shorts-bell-ring 4.8s ease-in-out infinite",
+                  }}
+                >
+                  {Icons.bell}
+                </span>
+                <span className="pe-footer-subscribe-label">
+                  Want more? Subscribe and press the bell
+                </span>
+              </div>
+            ) : null}
+            {captureFooterSettings.showFollow ? (
+              <div className="pe-footer-row3">
+                <span className="pe-footer-row3-text">
+                  Catch me live for Q&amp;As on
+                </span>
+                <span className="pe-footer-x-icon">{Icons.twitter}</span>
+                <span className="pe-footer-row3-text">Spaces</span>
+                <span className="pe-footer-x-capsule">
+                  {captureFooterHandle}
+                </span>
+              </div>
+            ) : null}
+            {showCustomFooterText ? (
+              <div
+                className="pe-footer-row3"
+                style={{ justifyContent: "center" }}
+              >
+                <span className="pe-footer-row3-text">
+                  {captureFooterSettings.customText}
+                </span>
+              </div>
+            ) : null}
+            <div className="pe-footer-qr-row">
+              <div className="pe-footer-qr-item">
+                <img
+                  src="/brand/qr-nilayparikh-links.png"
+                  alt="nilayparikh.com/links"
+                />
+                <span className="pe-footer-qr-label">
+                  nilayparikh.com/links
+                </span>
+              </div>
+              <div className="pe-footer-qr-item">
+                <img src="/brand/qr-tuts-localm.png" alt="tuts.localm.dev" />
+                <span className="pe-footer-qr-label">tuts.localm.dev</span>
+              </div>
+              <div className="pe-footer-qr-item">
+                <img
+                  src="/brand/qr-blogs-nilayparikh.png"
+                  alt="blog.nilayparikh.com"
+                />
+                <span className="pe-footer-qr-label">blog.nilayparikh.com</span>
+              </div>
             </div>
-            <div className="pe-footer-qr-item">
-              <img src="/brand/qr-tuts-localm.png" alt="tuts.localm.dev" />
-              <span className="pe-footer-qr-label">tuts.localm.dev</span>
-            </div>
-            <div className="pe-footer-qr-item">
-              <img
-                src="/brand/qr-blogs-nilayparikh.png"
-                alt="blog.nilayparikh.com"
-              />
-              <span className="pe-footer-qr-label">blog.nilayparikh.com</span>
-            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </>
   );
@@ -6248,6 +6328,10 @@ export function ShortsLayout({
   const elapsed = useSlideTimer(slideIndex);
   const captureFooterHandle = getCaptureFooterHandle(branding);
   const captureFooterLabel = getCaptureFooterLabel(deck, "shorts");
+  const captureFooterSettings = getCaptureFooterSettings(branding);
+  const showShortsCustomFooterText = shouldShowCaptureFooterCustomText(
+    captureFooterSettings,
+  );
 
   const currentSlide = orderedSlides[slideIndex];
   const currentSteps = currentSlide?.steps ?? [];
@@ -6675,17 +6759,37 @@ export function ShortsLayout({
           </div>
 
           {/* ── Footer ── */}
-          <div className="pe-shorts-footer">
-            <span className="pe-shorts-subscribe-icon">{Icons.bell}</span>
-            <span className="pe-shorts-subscribe-text">
-              {captureFooterLabel}
-            </span>
-            <span className="pe-shorts-footer-dot">·</span>
-            <span className="pe-shorts-footer-x-icon">{Icons.twitter}</span>
-            <span className="pe-shorts-footer-x-capsule">
-              {captureFooterHandle}
-            </span>
-          </div>
+          {captureFooterSettings.visible ? (
+            <div className="pe-shorts-footer">
+              {captureFooterSettings.showSubscribe ? (
+                <>
+                  <span className="pe-shorts-subscribe-icon">{Icons.bell}</span>
+                  <span className="pe-shorts-subscribe-text">
+                    {captureFooterLabel}
+                  </span>
+                </>
+              ) : null}
+              {captureFooterSettings.showSubscribe &&
+              captureFooterSettings.showFollow ? (
+                <span className="pe-shorts-footer-dot">·</span>
+              ) : null}
+              {captureFooterSettings.showFollow ? (
+                <>
+                  <span className="pe-shorts-footer-x-icon">
+                    {Icons.twitter}
+                  </span>
+                  <span className="pe-shorts-footer-x-capsule">
+                    {captureFooterHandle}
+                  </span>
+                </>
+              ) : null}
+              {showShortsCustomFooterText ? (
+                <span className="pe-shorts-subscribe-text">
+                  {captureFooterSettings.customText}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
     </>
@@ -6756,6 +6860,10 @@ export function ShortsFeedLayout({
       : { title: "", subtitle: "" };
   const captureFooterHandle = getCaptureFooterHandle(branding);
   const captureFooterLabel = getCaptureFooterLabel(deck, "feed");
+  const captureFooterSettings = getCaptureFooterSettings(branding);
+  const showFeedCustomFooterText = shouldShowCaptureFooterCustomText(
+    captureFooterSettings,
+  );
   const feedPrimaryTitle = blankSlideState.title.trim() || shortTitle;
   const feedSecondaryTitle = blankSlideState.title.trim()
     ? blankSlideState.subtitle.trim()
@@ -7160,15 +7268,35 @@ export function ShortsFeedLayout({
           </div>
 
           {/* ── Footer ── */}
-          <div className="pe-feed-footer">
-            <span className="pe-feed-subscribe-icon">{Icons.bell}</span>
-            <span className="pe-feed-subscribe-text">{captureFooterLabel}</span>
-            <span className="pe-feed-footer-dot">·</span>
-            <span className="pe-feed-footer-x-icon">{Icons.twitter}</span>
-            <span className="pe-feed-footer-x-capsule">
-              {captureFooterHandle}
-            </span>
-          </div>
+          {captureFooterSettings.visible ? (
+            <div className="pe-feed-footer">
+              {captureFooterSettings.showSubscribe ? (
+                <>
+                  <span className="pe-feed-subscribe-icon">{Icons.bell}</span>
+                  <span className="pe-feed-subscribe-text">
+                    {captureFooterLabel}
+                  </span>
+                </>
+              ) : null}
+              {captureFooterSettings.showSubscribe &&
+              captureFooterSettings.showFollow ? (
+                <span className="pe-feed-footer-dot">·</span>
+              ) : null}
+              {captureFooterSettings.showFollow ? (
+                <>
+                  <span className="pe-feed-footer-x-icon">{Icons.twitter}</span>
+                  <span className="pe-feed-footer-x-capsule">
+                    {captureFooterHandle}
+                  </span>
+                </>
+              ) : null}
+              {showFeedCustomFooterText ? (
+                <span className="pe-feed-subscribe-text">
+                  {captureFooterSettings.customText}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
     </>
