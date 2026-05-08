@@ -42,7 +42,7 @@
     "react-dom": "^19.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.7.0",
-    "vite": "^7.1.5"
+    "vite": "^7.3.2"
   },
   "keywords": [
     "tutorial",
@@ -52,5 +52,32 @@
     "localm",
     "github-pages"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "overrides": {
+    "lodash": "4.18.1",
+    "brace-expansion": "1.1.13",
+    "yaml": "2.8.3",
+    "postcss": "8.5.10",
+    "anymatch": {
+      "picomatch": "2.3.2"
+    },
+    "jest-util": {
+      "picomatch": "2.3.2"
+    },
+    "jest-haste-map": {
+      "picomatch": "2.3.2"
+    },
+    "babel-plugin-styled-components": {
+      "picomatch": "2.3.2"
+    },
+    "tinyglobby": {
+      "picomatch": "4.0.4"
+    },
+    "fdir": {
+      "picomatch": "4.0.4"
+    },
+    "micromatch": {
+      "picomatch": "2.3.2"
+    }
+  }
 }
