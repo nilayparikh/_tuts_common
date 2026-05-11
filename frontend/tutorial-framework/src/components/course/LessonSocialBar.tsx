@@ -23,6 +23,8 @@ export interface LessonSocialBarProps {
   instructorName?: string;
   /** Src for instructor avatar image */
   instructorImageSrc?: string;
+  /** Absolute page URL for server-rendered share links */
+  pageUrl?: string;
   /** Hide the follow buttons — useful for bottom-of-page share-only usage */
   hideFollow?: boolean;
 }
@@ -57,11 +59,11 @@ const s: Record<string, React.CSSProperties> = {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    width: "1.625rem",
-    height: "1.625rem",
-    borderRadius: "var(--tf-radius-md)",
-    background: "var(--tf-bg-elevated)",
-    border: "1px solid var(--tf-border-default)",
+    width: "2rem",
+    height: "2rem",
+    borderRadius: "9999px",
+    background: "var(--tf-bg-overlay)",
+    border: "1px solid var(--tf-border-strong)",
     color: "var(--tf-text-secondary)",
     cursor: "pointer",
     textDecoration: "none",
@@ -209,14 +211,15 @@ export function LessonSocialBar({
   shareHashtags = [],
   instructorName,
   instructorImageSrc,
+  pageUrl: initialPageUrl,
   hideFollow = false,
 }: LessonSocialBarProps): React.ReactElement {
   const [copied, setCopied] = useState(false);
-  const [pageUrl, setPageUrl] = useState("");
+  const [pageUrl, setPageUrl] = useState(initialPageUrl ?? "");
 
   React.useEffect(() => {
     setPageUrl(window.location.href);
-  }, []);
+  }, [initialPageUrl]);
 
   const encodedUrl = encodeURIComponent(pageUrl);
   const encodedTitle = encodeURIComponent(shareTitle);
@@ -279,7 +282,7 @@ export function LessonSocialBar({
           }}
         >
           {XIcon}
-          <span>Follow{twitterHandle ? ` ${twitterHandle}` : ""}</span>
+          <span>Follow</span>
         </a>
       )}
       {!hideFollow && linkedinNewsletterUrl && (
@@ -332,12 +335,12 @@ export function LessonSocialBar({
         onMouseEnter={(e) => {
           e.currentTarget.style.color = "var(--tf-text-primary)";
           e.currentTarget.style.borderColor = "var(--tf-border-strong)";
-          e.currentTarget.style.background = "var(--tf-bg-surface)";
+          e.currentTarget.style.background = "var(--tf-bg-highest)";
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.color = "var(--tf-text-secondary)";
-          e.currentTarget.style.borderColor = "var(--tf-border-default)";
-          e.currentTarget.style.background = "var(--tf-bg-elevated)";
+          e.currentTarget.style.borderColor = "var(--tf-border-strong)";
+          e.currentTarget.style.background = "var(--tf-bg-overlay)";
         }}
       >
         {XIcon}
@@ -351,12 +354,12 @@ export function LessonSocialBar({
         onMouseEnter={(e) => {
           e.currentTarget.style.color = "var(--tf-text-primary)";
           e.currentTarget.style.borderColor = "var(--tf-border-strong)";
-          e.currentTarget.style.background = "var(--tf-bg-surface)";
+          e.currentTarget.style.background = "var(--tf-bg-highest)";
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.color = "var(--tf-text-secondary)";
-          e.currentTarget.style.borderColor = "var(--tf-border-default)";
-          e.currentTarget.style.background = "var(--tf-bg-elevated)";
+          e.currentTarget.style.borderColor = "var(--tf-border-strong)";
+          e.currentTarget.style.background = "var(--tf-bg-overlay)";
         }}
       >
         {LinkedInIcon}
@@ -368,12 +371,12 @@ export function LessonSocialBar({
         onMouseEnter={(e) => {
           e.currentTarget.style.color = "var(--tf-text-primary)";
           e.currentTarget.style.borderColor = "var(--tf-border-strong)";
-          e.currentTarget.style.background = "var(--tf-bg-surface)";
+          e.currentTarget.style.background = "var(--tf-bg-highest)";
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.color = "var(--tf-text-secondary)";
-          e.currentTarget.style.borderColor = "var(--tf-border-default)";
-          e.currentTarget.style.background = "var(--tf-bg-elevated)";
+          e.currentTarget.style.borderColor = "var(--tf-border-strong)";
+          e.currentTarget.style.background = "var(--tf-bg-overlay)";
         }}
       >
         {EmailIcon}
@@ -395,14 +398,14 @@ export function LessonSocialBar({
           if (!copied) {
             e.currentTarget.style.color = "var(--tf-text-primary)";
             e.currentTarget.style.borderColor = "var(--tf-border-strong)";
-            e.currentTarget.style.background = "var(--tf-bg-surface)";
+            e.currentTarget.style.background = "var(--tf-bg-highest)";
           }
         }}
         onMouseLeave={(e) => {
           if (!copied) {
             e.currentTarget.style.color = "var(--tf-text-secondary)";
-            e.currentTarget.style.borderColor = "var(--tf-border-default)";
-            e.currentTarget.style.background = "var(--tf-bg-elevated)";
+            e.currentTarget.style.borderColor = "var(--tf-border-strong)";
+            e.currentTarget.style.background = "var(--tf-bg-overlay)";
           }
         }}
       >

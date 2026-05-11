@@ -41,7 +41,12 @@ function CircleOutlineIcon({ number }: { number: number }): React.ReactElement {
   return (
     <svg width="26" height="26" viewBox="0 0 26 26">
       {/* Filled background for better contrast */}
-      <circle cx="13" cy="13" r="13" fill="rgba(99,102,241,0.18)" />
+      <circle
+        cx="13"
+        cy="13"
+        r="13"
+        style={{ fill: "var(--tf-color-primary-container-high)" }}
+      />
       <circle
         cx="13"
         cy="13"
@@ -117,7 +122,11 @@ export function StepByStepGuide({
             width="20"
             height="20"
             viewBox="0 0 24 24"
-            fill="var(--tf-color-primary-light)"
+            fill="currentColor"
+            style={{
+              color: "var(--tf-color-primary-light)",
+              flexShrink: 0,
+            }}
           >
             <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM7 17h7v-2H7v2zm10-4H7v-2h10v2z" />
           </svg>
