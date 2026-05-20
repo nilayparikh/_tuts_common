@@ -8,7 +8,7 @@ import { getPartTypePresentation } from "./partTypePresentation";
 export interface LessonListProps {
   /** Ordered list of course parts */
   parts: CoursePart[];
-  /** Base path for part links (e.g. "" for root or "/tutorials/a2a") */
+  /** Base path for part links (e.g. "" for root or "/tutorials/agent-to-agent-protocol") */
   basePath?: string;
 }
 

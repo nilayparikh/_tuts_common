@@ -387,7 +387,7 @@ Rich "below-the-video" description panel with title, subtitle, tags, and body co
 <DescriptionBox
   title="Lesson Title"
   subtitle="Brief description"
-  tags={["python", "a2a"]}
+  tags={["python", "agent-to-agent-protocol"]}
   meta="5 mins"
 >
   <p>Detailed description content goes here.</p>
@@ -505,7 +505,7 @@ generic "External Resource" `InfoBox`. **Client Component** — uses `onMouseEnt
 ```tsx
 // Source code for a lesson
 <GitHubRepoCard
-  url="https://github.com/nilayparikh/tuts-agentic-ai-examples/tree/main/a2a/lessons/05"
+  url="https://github.com/nilayparikh/tuts-agentic-ai-examples/tree/main/agent-to-agent-protocol/lessons/05"
   description="Complete source code for this lesson."
 />
 

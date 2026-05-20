@@ -113,7 +113,7 @@ export interface PresentationBranding {
   linkedinHandle?: string;
   youtubeHandle?: string;
   copyright?: string;
-  /** URL to promote in footer with typing animation, e.g. "tuts.localm.dev/a2a" */
+  /** URL to promote in footer with typing animation, e.g. "tuts.localm.dev/agent-to-agent-protocol" */
   siteUrl?: string;
   /** Rotating phrases typed after the URL, e.g. ["examples","interactive mode","course outline"] */
   siteUrlPhrases?: string[];
@@ -5238,7 +5238,7 @@ export function PresentationLayout({
 
   /* ── Parse initial slide from hash ── */
   const getIndexFromHash = useCallback((): number => {
-    const hash = window.location.hash; // e.g. #/01/3 or #/a2a/why-a2a/3
+    const hash = window.location.hash; // e.g. #/01/3 or #/agent-to-agent-protocol/why-a2a/3
     const m = hash.match(/\/(\d+)$/);
     return m ? parseInt(m[1], 10) : 0;
   }, []);

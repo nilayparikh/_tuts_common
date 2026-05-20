@@ -74,7 +74,7 @@ function repoPathFromUrl(url: string): string {
  *
  * @example
  * <GitHubRepoCard
- *   url="https://github.com/nilayparikh/tuts-agentic-ai-examples/tree/main/a2a/lessons/05"
+ *   url="https://github.com/nilayparikh/tuts-agentic-ai-examples/tree/main/agent-to-agent-protocol/lessons/05"
  *   description="Complete source code for this lesson."
  * />
  */
