@@ -932,37 +932,7 @@ export const PRESENTATION_ENGINE_CSS = `
   .pe-footer-x-capsule-icon {
     display: none;
   }
-  .pe-footer-qr-row {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 32px;
-    margin-top: 8px;
-  }
-  .pe-footer-qr-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-  }
-  .pe-footer-qr-item img {
-    width: clamp(88px, 10vw, 130px);
-    height: clamp(88px, 10vw, 130px);
-    border-radius: 8px;
-    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
-  }
-  .pe-footer-qr-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: clamp(9px, 1vw, 12px);
-    max-width: clamp(88px, 10vw, 130px);
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: 600;
-    color: var(--tf-text-muted, #8892a8);
-    letter-spacing: 0.02em;
-  }
+
   .pe-footer-left {
     display: flex;
     align-items: center;
@@ -2541,38 +2511,7 @@ export const PRESENTATION_ENGINE_CSS = `
   .pe-pip-footer-x-capsule-icon {
     display: none;
   }
-  .pe-pip-footer-qr-row {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-evenly;
-    gap: clamp(0.8rem, 2vh, 1.5rem);
-    margin-top: auto;
-    width: 100%;
-  }
-  .pe-pip-footer-qr-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-  }
-  .pe-pip-footer-qr-item img {
-    width: clamp(80px, 12vh, 130px);
-    height: clamp(80px, 12vh, 130px);
-    border-radius: 6px;
-    border: 1px solid var(--tf-border-default, rgba(202,211,230,0.14));
-  }
-  .pe-pip-footer-qr-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: clamp(0.45rem, 0.9vh, 0.65rem);
-    max-width: clamp(80px, 12vh, 130px);
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: 600;
-    color: var(--tf-text-muted, #8892a8);
-    letter-spacing: 0.02em;
-  }
+
   .pe-pip-promo {
     display: flex;
     align-items: center;
@@ -6167,35 +6106,7 @@ export function PresentationLayout({
                       </span>
                     </div>
                   ) : null}
-                  <div className="pe-pip-footer-qr-row">
-                    <div className="pe-pip-footer-qr-item">
-                      <img
-                        src="/brand/qr-nilayparikh-links.png"
-                        alt="nilayparikh.com/links"
-                      />
-                      <span className="pe-pip-footer-qr-label">
-                        nilayparikh.com/links
-                      </span>
-                    </div>
-                    <div className="pe-pip-footer-qr-item">
-                      <img
-                        src="/brand/qr-tuts-localm.png"
-                        alt="tuts.localm.dev"
-                      />
-                      <span className="pe-pip-footer-qr-label">
-                        tuts.localm.dev
-                      </span>
-                    </div>
-                    <div className="pe-pip-footer-qr-item">
-                      <img
-                        src="/brand/qr-blogs-nilayparikh.png"
-                        alt="blog.nilayparikh.com"
-                      />
-                      <span className="pe-pip-footer-qr-label">
-                        blog.nilayparikh.com
-                      </span>
-                    </div>
-                  </div>
+
                 </div>
               ) : null}
             </div>
@@ -6245,28 +6156,7 @@ export function PresentationLayout({
                 </span>
               </div>
             ) : null}
-            <div className="pe-footer-qr-row">
-              <div className="pe-footer-qr-item">
-                <img
-                  src="/brand/qr-nilayparikh-links.png"
-                  alt="nilayparikh.com/links"
-                />
-                <span className="pe-footer-qr-label">
-                  nilayparikh.com/links
-                </span>
-              </div>
-              <div className="pe-footer-qr-item">
-                <img src="/brand/qr-tuts-localm.png" alt="tuts.localm.dev" />
-                <span className="pe-footer-qr-label">tuts.localm.dev</span>
-              </div>
-              <div className="pe-footer-qr-item">
-                <img
-                  src="/brand/qr-blogs-nilayparikh.png"
-                  alt="blog.nilayparikh.com"
-                />
-                <span className="pe-footer-qr-label">blog.nilayparikh.com</span>
-              </div>
-            </div>
+
           </div>
         ) : null}
       </div>
